@@ -1,40 +1,108 @@
-/* app.wxss — 全局样式：适老化大字号、柔和海洋色 */
+/* app.wxss — 全局样式：适老化设计 token
+ *
+ * 配色已按 WCAG 2.2 AA 核算（详见 docs/适老化评审与优化记录.md）：
+ *   主色 #24648F  白字 6.37:1
+ *   正文 #2C3E50  白底 10.98:1
+ *   次要 #445A6A  白底 6.26:1 / 最深海面 4.63:1
+ *   危险 #C0392B  白底 5.44:1
+ */
 page {
-  background: #E8F4FB;
+  /* ---- 色彩 ---- */
+  --c-primary: #24648F;        /* 主色：按钮底、强调文字 */
+  --c-primary-deep: #1D5C8C;   /* 按压态 */
+  --c-primary-soft: #EAF2F8;   /* 主色浅底（chip、幽灵按钮底） */
+  --c-bg: #E8F4FB;             /* 页面底色 */
+  --c-card: #FFFFFF;           /* 卡片底色 */
+  --c-soft: #F2F9FD;           /* 更浅的功能底 */
+
+  --c-text: #2C3E50;           /* 正文/标题 */
+  --c-text-2: #445A6A;         /* 次要文字 */
+  --c-on-primary: #FFFFFF;     /* 主色上的文字 */
+
+  --c-danger: #C0392B;         /* 危险操作（化成云） */
+  --c-danger-soft: #FBEDEC;
+  --c-countdown: #B3261E;      /* 录音倒计时（6.15:1） */
+
+  /* ---- 字号（最小 30rpx，正文 36rpx+）---- */
+  --fs-xs: 30rpx;   /* 全站下限：辅助信息 */
+  --fs-sm: 32rpx;   /* 次要文字 */
+  --fs-md: 36rpx;   /* 正文 */
+  --fs-lg: 40rpx;   /* 小标题 */
+  --fs-xl: 44rpx;   /* 页面标题 */
+  --fs-xxl: 52rpx;  /* 录音中的转写文字 */
+
+  /* ---- 触控（WCAG 2.2 Target Size：≥ 88rpx ≈ 44px）---- */
+  --tap-min: 88rpx;
+  --tap-comfortable: 96rpx;
+
+  /* ---- 间距（8rpx 基线）---- */
+  --sp-1: 8rpx;
+  --sp-2: 16rpx;
+  --sp-3: 24rpx;
+  --sp-4: 32rpx;
+  --sp-5: 40rpx;
+
+  --radius-md: 20rpx;
+  --radius-lg: 32rpx;
+  --radius-xl: 48rpx;
+
+  background: var(--c-bg);
   font-family: -apple-system, 'PingFang SC', 'Helvetica Neue', sans-serif;
-  font-size: 34rpx; /* 适老：正文偏大 */
-  color: #2C3E50;
+  font-size: var(--fs-md);
+  color: var(--c-text);
+  line-height: 1.7;
 }
 
+/* ============ 按钮 ============ */
 .btn-primary {
-  background: #4A9BD1;
-  color: #fff;
+  background: var(--c-primary);
+  color: var(--c-on-primary);
   border-radius: 44rpx;
-  font-size: 36rpx;
-  height: 96rpx;
-  line-height: 96rpx;
+  font-size: var(--fs-lg);
+  height: 112rpx;
+  line-height: 112rpx;
   font-weight: 500;
+  letter-spacing: 2rpx;
 }
 .btn-primary::after { border: none; }
+.btn-primary.btn-hover {
+  background: var(--c-primary-deep);
+  transform: scale(0.97);
+}
+
 .btn-ghost {
-  background: #F2F9FD;
-  color: #4A9BD1;
+  background: var(--c-primary-soft);
+  color: var(--c-primary);
   border-radius: 44rpx;
-  font-size: 34rpx;
-  height: 88rpx;
-  line-height: 88rpx;
+  font-size: var(--fs-md);
+  height: 104rpx;
+  line-height: 104rpx;
+  font-weight: 500;
 }
 .btn-ghost::after { border: none; }
-
-.card {
-  background: #fff;
-  border-radius: 32rpx;
-  padding: 36rpx;
-  box-shadow: 0 6rpx 24rpx rgba(74, 155, 209, 0.10);
+.btn-ghost.btn-hover {
+  background: #DCE9F2;
+  transform: scale(0.97);
 }
 
-.text-secondary { color: #7A93A6; font-size: 28rpx; }
-.text-large { font-size: 40rpx; line-height: 1.7; }
+/* 危险操作：文字明确写"化成云/不要了"，不用"确定/取消" */
+.btn-danger-ghost {
+  background: var(--c-danger-soft);
+  color: var(--c-danger);
+}
+.btn-danger-ghost.btn-hover { background: #F5DDDA; transform: scale(0.97); }
 
-/* 冰山底部安全区适配 */
-.safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
+/* ============ 卡片 ============ */
+.card {
+  background: var(--c-card);
+  border-radius: var(--radius-lg);
+  padding: var(--sp-4);
+  box-shadow: 0 6rpx 24rpx rgba(36, 100, 143, 0.10);
+}
+
+.text-secondary { color: var(--c-text-2); font-size: var(--fs-sm); }
+.text-large { font-size: var(--fs-lg); line-height: 1.7; }
+.flex1 { flex: 1; }
+
+/* 底部安全区：叠加固定内边距，避免全面屏手势条压住按钮 */
+.safe-bottom { padding-bottom: calc(env(safe-area-inset-bottom) + 24rpx); }
