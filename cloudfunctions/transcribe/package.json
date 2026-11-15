@@ -1,0 +1,13 @@
+{
+  "name": "transcribe",
+  "version": "1.0.0",
+  "description": "兜底整段语音转写（Realtime 协议，实时速率）",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3",
+    "ws": "^8.18.0"
+  },
+  "config": {
+    "timeout": 120
+  }
+}

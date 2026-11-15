@@ -1,14 +1,37 @@
-# Windows
-[Dd]esktop.ini
-Thumbs.db
-$RECYCLE.BIN/
-
 # macOS
 .DS_Store
 .fseventsd
 .Spotlight-V100
 .TemporaryItems
 .Trashes
+._*
 
-# Node.js
+# Windows
+[Dd]esktop.ini
+Thumbs.db
+$RECYCLE.BIN/
+
+# Node.js — 云函数依赖不入库（部署时按需 npm install 或本地全量上传）
 node_modules/
+npm-debug.log*
+yarn-error.log*
+
+# 微信小程序本地私有配置（含个人本地设置，不应共享）
+project.private.config.json
+
+# 编辑器 / IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# 环境与密钥 — 严禁入库
+.env
+.env.*
+*.pem
+*.key
+
+# 临时产物
+/tmp/
+dist/
+*.log

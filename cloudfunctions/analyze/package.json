@@ -1,0 +1,12 @@
+{
+  "name": "analyze",
+  "version": "1.0.0",
+  "description": "回忆分析：时间推断与海域建议",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  },
+  "config": {
+    "timeout": 60
+  }
+}
