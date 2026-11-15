@@ -1,8 +1,9 @@
 // utils/asr.js — 百炼实时语音转写（流式，边说边出字）
 // 接口：qwen-audio-3.0-realtime-plus（已用本 key 实测调通，2026-11-15）
 // 协议（Realtime 风格）：
-//   session.update（开转写）→ input_audio_buffer.append（base64 PCM 帧）
-//   → input_audio_buffer.commit → delta 事件逐字回传
+//   连上后直接 input_audio_buffer.append（base64 PCM 帧）→ commit → delta 事件逐字回传
+//   ⚠️ 不要发 session.update：发空的 input_audio_transcription:{} 会覆盖服务端默认
+//   转写配置，导致收不到任何转写事件（实测踩坑，详见下方 onOpen 注释）
 //   transcript 在 delta 的 stash 字段（渐进完整句），最终 text+stash 合成
 // key 不写入代码，由 login 云函数运行时下发（见 app.js）
 

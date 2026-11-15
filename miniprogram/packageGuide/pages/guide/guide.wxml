@@ -1,17 +1,31 @@
-<!--packageGuide/pages/guide/guide.wxml-->
+<!--packageGuide/pages/guide/guide.wxml — 首次引导
+    适老化：文字大、对比足、"上一步/下一步"都给，进度看得清；
+    "跳过"不再是几乎看不见的浅色小字。
+-->
 <view class="page">
+  <view class="g-step">第 {{step + 1}} 步 / 共 {{steps.length}} 步</view>
+
   <image class="g-img" src="{{steps[step].img}}" mode="aspectFit" />
+
   <view class="g-text">
     <text class="g-title">{{steps[step].title}}</text>
     <text class="g-desc">{{steps[step].desc}}</text>
   </view>
-  <view class="g-dots">
-    <view class="dot {{step >= index ? 'dot-on' : ''}}" wx:for="{{steps}}" wx:key="img"></view>
+
+  <view class="g-dots" aria-hidden="true">
+    <view class="dot {{step === index ? 'dot-on' : (step > index ? 'dot-done' : '')}}"
+      wx:for="{{steps}}" wx:key="img"></view>
   </view>
+
   <view class="g-btns safe-bottom">
-    <text class="g-skip" bindtap="skip">跳过</text>
-    <button class="btn-primary g-next" bindtap="next">
-      {{step < 3 ? '下一步' : '开始'}}
-    </button>
+    <view class="g-row">
+      <button class="btn-ghost g-prev" wx:if="{{step > 0}}"
+        hover-class="btn-hover" hover-stay-time="80" bindtap="prev">上一步</button>
+      <button class="btn-primary g-next {{step > 0 ? '' : 'g-next-full'}}"
+        hover-class="btn-hover" hover-stay-time="80" bindtap="next">
+        {{step < steps.length - 1 ? '下一步' : '开始使用'}}
+      </button>
+    </view>
+    <view class="g-skip" hover-class="btn-hover" hover-stay-time="80" bindtap="skip">跳过，直接开始</view>
   </view>
 </view>

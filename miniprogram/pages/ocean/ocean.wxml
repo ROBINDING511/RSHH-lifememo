@@ -1,65 +1,134 @@
-<!--pages/ocean/ocean.wxml — 人生海洋主界面-->
+<!--pages/ocean/ocean.wxml — 人生海洋主界面
+    适老化要点：
+    - 顶部让开状态栏与微信胶囊（右上角不放任何可点元素）
+    - 所有可点目标 ≥ 88rpx，主操作放底部拇指区
+    - 录音主入口 = 底部大按钮「点一下开始说 / 说完了点这里」，无需长时间按住
+    - 长按鲸鱼杭航 = 等效的第二个入口（保留情感化交互）
+    - 录音中的文字用原生 view 渲染，跟随微信字体大小设置放大（Canvas 文字不会放大）
+-->
 <view class="page">
   <canvas id="oceanCanvas" type="2d" class="ocean-canvas"
-    bindtouchstart="onTouchStart" bindtouchmove="onTouchMove" bindtouchend="onTouchEnd"></canvas>
+    bindtouchstart="onTouchStart" bindtouchmove="onTouchMove"
+    bindtouchend="onTouchEnd" bindtouchcancel="onTouchEnd"></canvas>
 
-  <!-- 顶部工具（极简：时间轴 / 回收站） -->
-  <view class="top-bar" wx:if="{{!recording && !preview}}">
-    <view class="top-btn" bindtap="goTimeline">
-      <image src="/images/pixel/flag-blue.png" class="top-icon" />
-      <text>时间轴</text>
+  <!-- ============ 顶部：仅状态信息，右上角留白给微信胶囊 ============ -->
+  <view class="top-zone" wx:if="{{viewLevel === 'zone' && !recording && !preview}}"
+    style="top: {{capsuleBottom + 16}}px;">
+    <view class="back-btn" hover-class="btn-hover" hover-stay-time="80" bindtap="backToGlobal">
+      <text class="back-arrow">‹</text>
+      <text>海洋全景</text>
     </view>
-    <view class="top-btn" bindtap="goRecycle">
-      <image src="/images/misc/cloud.png" class="top-icon" />
-      <text>云朵</text>
-    </view>
-  </view>
-
-  <!-- 海域缩放态返回 -->
-  <view class="zone-header" wx:if="{{viewLevel === 'zone' && !recording && !preview}}">
-    <view class="back-btn" bindtap="backToGlobal">‹ 海洋全景</view>
     <text class="zone-name">{{currentZone}}</text>
   </view>
 
-  <!-- 空态提示（第一次进来） -->
-  <view class="empty-hint" wx:if="{{icebergCount === 0 && !recording && !preview}}">
-    <text class="hint-title">长按小鲸鱼杭航，说说话</text>
-    <text class="hint-sub">您说的每一句话，都会变成一座冰山</text>
+  <!-- ============ 草稿找回（说过的话绝不丢） ============ -->
+  <!-- 仅全景视图显示，避免和海域返回栏抢同一个顶部位置 -->
+  <view class="draft-bar" wx:if="{{drafts.length && viewLevel === 'global' && !recording && !preview}}"
+    style="top: {{capsuleBottom + 16}}px;">
+    <view class="draft-text">有 {{drafts.length}} 段话没存好</view>
+    <view class="draft-btn" hover-class="btn-hover" hover-stay-time="80" bindtap="recoverDraft">找回来</view>
   </view>
 
-  <!-- 录音中（微信式：松开即结束） -->
-  <view class="record-mask" wx:if="{{recording}}">
+  <!-- ============ 空态提示 ============ -->
+  <view class="empty-hint" wx:if="{{icebergCount === 0 && !recording && !preview && !drafts.length}}">
+    <text class="hint-title">想说什么，就说给杭航听</text>
+    <text class="hint-sub">按住下面的蓝色按钮，或者长按小鲸鱼</text>
+    <text class="hint-sub2">您说的每一句话，都会变成一座冰山</text>
+    <view class="hint-arrow"></view>
+  </view>
+
+  <!-- ============ 底部操作区（拇指区） ============ -->
+  <!-- 待机：时间轴 / 云朵 + 录音主按钮 -->
+  <view class="dock safe-bottom" wx:if="{{!recording && !analyzing && !preview}}">
+    <view class="dock-row">
+      <view class="dock-pill" hover-class="btn-hover" hover-stay-time="80" bindtap="goTimeline">
+        <image src="/images/pixel/flag-blue.png" class="dock-icon" mode="aspectFit" />
+        <text>时间轴</text>
+      </view>
+      <view class="dock-pill" hover-class="btn-hover" hover-stay-time="80" bindtap="goRecycle">
+        <image src="/images/misc/cloud.png" class="dock-icon" mode="aspectFit" />
+        <text>云朵</text>
+      </view>
+    </view>
+    <view class="record-btn" hover-class="record-hover" hover-stay-time="80"
+      bindtap="toggleRecord">
+      <image class="record-whale" src="/images/misc/recording-whale.png" mode="aspectFit" />
+      <view class="record-label">
+        <text class="record-main">点这里说话</text>
+        <text class="record-sub">说完再点一下"说完了"就好</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- ============ 录音中（原生渲染，可随微信字体放大） ============ -->
+  <!-- 长按模式：遮罩穿透触摸，松手事件才能传回 canvas 结束录音
+       点按模式：遮罩拦截触摸，避免误碰海面造成缩放/误入详情 -->
+  <view class="record-mask {{recordMode === 'hold' ? 'mask-through' : 'mask-block'}}"
+    wx:if="{{recording}}">
+    <view class="rec-status">
+      <view class="rec-dot"></view>
+      <text class="rec-state">杭航正在听您说…</text>
+    </view>
+
     <view class="transcript-box">
-      <scroll-view scroll-y class="transcript-scroll">
-        <text class="transcript">{{transcript || '…正在听'}}</text>
+      <scroll-view scroll-y class="transcript-scroll" scroll-into-view="t-end">
+        <text class="transcript">{{transcript || '正在听，您慢慢说…'}}</text>
+        <text id="t-end"></text>
       </scroll-view>
     </view>
-    <view class="record-tip">
-      <text wx:if="{{countdown > 0}}" class="countdown">{{countdown}} 秒后结束</text>
-      <text wx:else class="tip-text">松开手，就说完啦</text>
+
+    <view class="rec-timer">
+      <text class="timer-main">已说 {{elapsed}} 秒</text>
+      <text class="timer-limit {{countdown > 0 ? 'timer-warn' : ''}}">
+        {{countdown > 0 ? '还剩 ' + countdown + ' 秒' : '最长可说 60 秒'}}
+      </text>
+    </view>
+
+    <!-- 长按鲸鱼：手指正占着屏幕，松手即结束，不放按钮 -->
+    <view class="rec-hold-hint" wx:if="{{recordMode === 'hold'}}">
+      <text>松开手，就说完啦</text>
+    </view>
+
+    <!-- 点按模式：明确给两个大按钮 -->
+    <view class="rec-actions safe-bottom" wx:else>
+      <view class="rec-cancel" hover-class="btn-hover" hover-stay-time="80" bindtap="cancelRecording">不录了</view>
+      <view class="rec-done" hover-class="btn-hover" hover-stay-time="80" bindtap="finishRecording">说完了</view>
     </view>
   </view>
 
-  <!-- 分析中 -->
+  <!-- ============ 分析中 ============ -->
   <view class="analyze-mask" wx:if="{{analyzing}}">
     <image class="loading-whale" src="/images/animation/whale-loading-1.png" mode="aspectFit" />
-    <text class="tip-text">杭航正在听懂这段回忆…</text>
+    <text class="analyze-text">杭航正在听懂这段回忆…</text>
+    <text class="analyze-sub">大概要几秒钟，别急</text>
   </view>
 
-  <!-- 发布卡片（参考朋友圈：确认文字→加照片→发布） -->
+  <!-- ============ 发布卡片 ============ -->
   <view class="preview-mask" wx:if="{{preview}}">
     <view class="preview-card safe-bottom">
       <view class="preview-head">
         <text class="preview-title">这段回忆</text>
+        <text class="preview-hint">看一遍，有错字可以直接改</text>
       </view>
+
       <textarea class="preview-text" value="{{preview.text}}" maxlength="2000"
-        auto-height bindinput="onPreviewInput" placeholder="说错了字，可以在这里改一改"></textarea>
+        auto-height cursor-spacing="120" show-confirm-bar="{{false}}"
+        bindinput="onPreviewInput"
+        placeholder="没听清的话，也可以在这里打字补上"></textarea>
+
+      <!-- 原声：先听一遍再决定 -->
+      <view class="voice-check" wx:if="{{preview.wavPath}}"
+        hover-class="btn-hover" hover-stay-time="80" bindtap="playPreviewVoice">
+        <view class="vc-btn {{previewVoicePlaying ? 'vc-on' : ''}}"></view>
+        <text class="vc-text">{{previewVoicePlaying ? '正在播放，点这里停' : '听听我自己的声音'}}</text>
+      </view>
 
       <view class="option-group" wx:if="{{preview.timeOptions.length}}">
         <text class="option-label">大概是这个时候</text>
         <view class="chips">
           <view wx:for="{{preview.timeOptions}}" wx:key="*this"
             class="chip {{preview.timeIndex === index ? 'chip-on' : ''}}"
+            hover-class="chip-hover" hover-stay-time="80"
             data-i="{{index}}" bindtap="pickTime">{{item}}</view>
         </view>
       </view>
@@ -69,21 +138,36 @@
         <view class="chips">
           <view wx:for="{{preview.zoneOptions}}" wx:key="*this"
             class="chip {{preview.zoneIndex === index ? 'chip-on' : ''}}"
+            hover-class="chip-hover" hover-stay-time="80"
             data-i="{{index}}" bindtap="pickZone">{{item}}</view>
         </view>
       </view>
 
-      <view class="photo-grid">
-        <view class="photo-cell" wx:for="{{preview.photos}}" wx:key="*this">
-          <image src="{{item}}" mode="aspectFill" class="photo-img" data-i="{{index}}" bindtap="removePhoto" />
-          <text class="photo-del">×</text>
+      <view class="photo-group">
+        <text class="option-label">配上照片（点图片看大图，点右上角 × 删掉）</text>
+        <view class="photo-grid">
+          <view class="photo-cell" wx:for="{{preview.photos}}" wx:key="*this">
+            <image src="{{item}}" mode="aspectFill" class="photo-img"
+              data-i="{{index}}" bindtap="previewDraftPhoto" />
+            <view class="photo-del" hover-class="del-hover" hover-stay-time="80"
+              data-i="{{index}}" catchtap="removePhoto">
+              <text class="photo-del-x">×</text>
+            </view>
+          </view>
+          <view class="photo-add" wx:if="{{preview.photos.length < 9}}"
+            hover-class="btn-hover" hover-stay-time="80" bindtap="addPhoto">
+            <text class="photo-add-plus">＋</text>
+            <text class="photo-add-text">加照片</text>
+          </view>
         </view>
-        <view class="photo-add" wx:if="{{preview.photos.length < 9}}" bindtap="addPhoto">＋</view>
       </view>
 
       <view class="preview-actions">
-        <button class="btn-ghost flex1" bindtap="discardPreview">不要了</button>
-        <button class="btn-primary flex1" bindtap="publish">变成冰山</button>
+        <button class="btn-ghost btn-danger-ghost flex1" hover-class="btn-hover"
+          hover-stay-time="80" bindtap="discardPreview">不要了</button>
+        <button class="btn-primary flex1" hover-class="btn-hover"
+          hover-stay-time="80" loading="{{publishing}}" disabled="{{publishing}}"
+          bindtap="publish">变成冰山</button>
       </view>
     </view>
   </view>

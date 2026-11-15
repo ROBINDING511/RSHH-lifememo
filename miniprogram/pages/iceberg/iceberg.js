@@ -1,5 +1,8 @@
 // pages/iceberg/iceberg.js — 冰山详情：一段回忆
-// 首次进入看回忆内容；之后可为冰山放一个标记（icon）
+// 适老化改造：
+//  - 加载失败不再"toast 后自动退回"，而是给出明确按钮（重新打开/回到海洋）
+//  - 删除文案用大白话，按钮写"化成云/再看看"，不写"确定/取消"
+//  - 删除后 toast 告知去哪找回
 const api = require('../../utils/api')
 
 const ICONS = [
@@ -21,6 +24,7 @@ Page({
     icons: ICONS,
     iconFile: '',
     showIconMenu: false,
+    loadFailed: false,
     viewCount: 0,
     playing: false
   },
@@ -49,7 +53,7 @@ Page({
   },
 
   async load () {
-    wx.showLoading({ title: '…' })
+    wx.showLoading({ title: '正在打开…', mask: true })
     try {
       const res = await wx.cloud.database().collection('icebergs').doc(this.id).get()
       const b = res.data
@@ -64,16 +68,17 @@ Page({
       b.photos = (b.photos || []).map((p) => urlMap[p] || p)
       b.audioURL = b.audioFileID ? (urlMap[b.audioFileID] || b.audioFileID) : ''
       const icon = ICONS.find((i) => i.key === b.icon)
-      this.setData({ b, iconFile: icon ? icon.file : '' })
+      this.setData({ b, iconFile: icon ? icon.file : '', loadFailed: false })
       wx.setNavigationBarTitle({ title: b.zoneName || '一座冰山' })
     } catch (e) {
       console.error('冰山加载失败', e)
-      wx.showToast({ title: '这座冰山看不到了', icon: 'none' })
-      setTimeout(() => wx.navigateBack(), 1200)
+      this.setData({ loadFailed: true })
     } finally {
       wx.hideLoading()
     }
   },
+
+  goBack () { wx.navigateBack() },
 
   // 播放妈妈的原声（再点一次暂停）
   playVoice () {
@@ -89,7 +94,7 @@ Page({
       this.audio.onEnded(() => this.setData({ playing: false }))
       this.audio.onError(() => {
         this.setData({ playing: false })
-        wx.showToast({ title: '声音放不出来，换个网络试试', icon: 'none' })
+        wx.showToast({ title: '声音放不出来，换个网络试试', icon: 'none', duration: 2600 })
       })
     }
     this.audio.src = b.audioURL
@@ -105,7 +110,6 @@ Page({
   },
 
   // ---- 标记（icon）----
-  // 设计：第二次进入这座冰山时，主动弹出标记选择
   onShowIconMenu () { this.setData({ showIconMenu: true }) },
 
   async pickIcon (e) {
@@ -114,7 +118,7 @@ Page({
     try {
       await api.updateIceberg(this.id, { icon: icon.key })
       this.setData({ iconFile: icon.file, showIconMenu: false, 'b.icon': icon.key })
-      wx.showToast({ title: '标记已放上冰山', icon: 'none' })
+      wx.showToast({ title: '标记放好了', icon: 'none' })
     } catch (err) {
       console.error(err)
       wx.showToast({ title: '没放上去，再试试', icon: 'none' })
@@ -128,16 +132,25 @@ Page({
     const r = await new Promise((resolve) => {
       wx.showModal({
         title: '让这座冰山化成云吗？',
-        content: '它会飘到云朵里，不会真的消失，随时可以落回海面。',
+        content: '它会飘到"云朵"里，不会真的消失。想它了，随时可以让它落回海面。',
         confirmText: '化成云',
         cancelText: '再看看',
+        confirmColor: '#C0392B',
+        cancelColor: '#24648F',
         success: resolve
       })
     })
     if (!r.confirm) return
     if (wx.vibrateShort) wx.vibrateShort({ type: 'light' })
-    await api.removeIceberg(this.id)
-    wx.showToast({ title: '冰山化成了云', icon: 'none', duration: 1800 })
-    setTimeout(() => wx.navigateBack(), 900)
+    wx.showLoading({ title: '正在化成云…', mask: true })
+    try {
+      await api.removeIceberg(this.id)
+      wx.hideLoading()
+      wx.showToast({ title: '化好了，在"云朵"里能找到', icon: 'none', duration: 2400 })
+      setTimeout(() => wx.navigateBack(), 1200)
+    } catch (e) {
+      wx.hideLoading()
+      wx.showToast({ title: '网络不太好，再试一次', icon: 'none' })
+    }
   }
 })

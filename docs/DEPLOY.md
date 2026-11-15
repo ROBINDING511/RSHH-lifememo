@@ -52,7 +52,12 @@ DASHSCOPE_MODEL = qwen4-max-preview
 ```
 DASHSCOPE_API_KEY = sk-sp-你的TokenPlanKey
 ```
-> ⚠️ transcribe 函数超时需设为 120 秒（默认 3 秒不够）：云开发控制台 → 云函数 → transcribe → 函数配置 → 超时时间 → 120。
+> ⚠️ **超时设置**：云开发控制台 → 云函数 → transcribe → 函数配置 → 超时时间。
+> - 代码已改为**按平台真实剩余时间自适应**（`context.getRemainingTimeInMillis()`），
+>   超时设多少都不会被平台在收尾前强杀；建议仍设 **120 秒**以支持最长 55s 音频从容转写。
+> - 实测坑：微信开发者工具的 `cli cloud functions deploy` **只上传代码，不应用 `config.json`
+>   里的 `timeout`**（部署后云端超时不变）。所以超时**必须在控制台手动设**，`config.json`
+>   仅作为版本控制里的意图记录，不要指望它自动生效。
 
 > ⚠️ key 只存在于环境变量里，源代码中没有任何密钥。泄露时在控制台一键换掉即可。
 

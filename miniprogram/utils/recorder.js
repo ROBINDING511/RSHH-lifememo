@@ -1,6 +1,11 @@
 // utils/recorder.js — 录音器：一路 PCM 帧双路复用
 //   1) 帧实时喂给 ASR 流式识别（边说边出字）
 //   2) 帧本地攒起来，结束时拼 WAV 存档（妈妈的原声）
+//
+// 适老化改造：
+//   - onTick：每秒回传"已说几秒"，界面常驻显示，不让妈妈猜还剩多久
+//   - MAX_SECONDS 到点自动停，自动保存（原来会丢）
+//   - 帧缓存常驻，任何异常路径都能先落地成本地 WAV
 const MAX_SECONDS = 60 // 与微信语音一致
 
 function createRecorder () {
@@ -10,9 +15,11 @@ function createRecorder () {
     startAt: 0,
     chunks: [], // PCM 帧缓存
     onFrame: null, // (arrayBuffer, elapsedMs) => void
+    onTick: null, // (elapsedSeconds) => void 每秒回调
     onCountdown: null, // (leftSeconds) => void 剩余<=10s时回调
     onStop: null, // (wavPath, durationMs) => void
     timer: null,
+    tickTimer: null,
     cdTimer: null
   }
 
@@ -28,6 +35,7 @@ function createRecorder () {
   rm.onStop(() => {
     state.recording = false
     clearInterval(state.cdTimer)
+    clearInterval(state.tickTimer)
     if (state.timer) clearTimeout(state.timer)
     const durationMs = Date.now() - state.startAt
     const wavPath = buildWavFile(state.chunks)
@@ -37,13 +45,21 @@ function createRecorder () {
 
   rm.onError((e) => {
     state.recording = false
-    if (state.onStop) state.onStop(null, 0, e)
+    clearInterval(state.cdTimer)
+    clearInterval(state.tickTimer)
+    if (state.timer) clearTimeout(state.timer)
+    // 出错也先把已录到的帧落地，绝不白说一场
+    const durationMs = Date.now() - state.startAt
+    const wavPath = buildWavFile(state.chunks)
+    state.chunks = []
+    if (state.onStop) state.onStop(wavPath, durationMs, e)
   })
 
   return {
     // 返回 Promise，授权失败会 reject
     async start (hooks) {
       state.onFrame = hooks.onFrame || null
+      state.onTick = hooks.onTick || null
       state.onCountdown = hooks.onCountdown || null
       state.onStop = hooks.onStop || null
       state.chunks = []
@@ -58,19 +74,26 @@ function createRecorder () {
       }
       rm.start(setting)
 
+      // 每秒回传已说时长（常驻显示）
+      state.tickTimer = setInterval(() => {
+        if (!state.recording || !state.onTick) return
+        state.onTick(Math.floor((Date.now() - state.startAt) / 1000))
+      }, 1000)
+
       // 最后 10 秒倒计时提醒
-      const cdStart = (MAX_SECONDS - 10) * 1000
       state.cdTimer = setInterval(() => {
         const left = Math.ceil((MAX_SECONDS * 1000 - (Date.now() - state.startAt)) / 1000)
         if (left <= 10 && left > 0 && state.onCountdown) state.onCountdown(left)
       }, 500)
-      // 超时兜底
+
+      // 超时兜底：到点自动 stop（走 onStop → 自动进入发布卡，内容不丢）
       state.timer = setTimeout(() => this.stop(), MAX_SECONDS * 1000 + 300)
     },
 
     stop () {
       if (state.timer) clearTimeout(state.timer)
       clearInterval(state.cdTimer)
+      clearInterval(state.tickTimer)
       rm.stop()
     },
 
@@ -91,7 +114,7 @@ function buildWavFile (chunks) {
   view.setUint32(4, 36 + dataLen, true)
   writeStr(8, 'WAVE')
   writeStr(12, 'fmt ')
-  view.setUint32(16, 16, true)
+  view.setUint16(16, 16, true)
   view.setUint16(20, 1, true) // PCM
   view.setUint16(22, 1, true) // 单声道
   view.setUint32(24, sampleRate, true)
