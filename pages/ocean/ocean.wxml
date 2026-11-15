@@ -1,0 +1,90 @@
+<!--pages/ocean/ocean.wxml — 人生海洋主界面-->
+<view class="page">
+  <canvas id="oceanCanvas" type="2d" class="ocean-canvas"
+    bindtouchstart="onTouchStart" bindtouchmove="onTouchMove" bindtouchend="onTouchEnd"></canvas>
+
+  <!-- 顶部工具（极简：时间轴 / 回收站） -->
+  <view class="top-bar" wx:if="{{!recording && !preview}}">
+    <view class="top-btn" bindtap="goTimeline">
+      <image src="/images/pixel/flag-blue.png" class="top-icon" />
+      <text>时间轴</text>
+    </view>
+    <view class="top-btn" bindtap="goRecycle">
+      <image src="/images/misc/cloud.png" class="top-icon" />
+      <text>云朵</text>
+    </view>
+  </view>
+
+  <!-- 海域缩放态返回 -->
+  <view class="zone-header" wx:if="{{viewLevel === 'zone' && !recording && !preview}}">
+    <view class="back-btn" bindtap="backToGlobal">‹ 海洋全景</view>
+    <text class="zone-name">{{currentZone}}</text>
+  </view>
+
+  <!-- 空态提示（第一次进来） -->
+  <view class="empty-hint" wx:if="{{icebergCount === 0 && !recording && !preview}}">
+    <text class="hint-title">长按小鲸鱼杭航，说说话</text>
+    <text class="hint-sub">您说的每一句话，都会变成一座冰山</text>
+  </view>
+
+  <!-- 录音中（微信式：松开即结束） -->
+  <view class="record-mask" wx:if="{{recording}}">
+    <view class="transcript-box">
+      <scroll-view scroll-y class="transcript-scroll">
+        <text class="transcript">{{transcript || '…正在听'}}</text>
+      </scroll-view>
+    </view>
+    <view class="record-tip">
+      <text wx:if="{{countdown > 0}}" class="countdown">{{countdown}} 秒后结束</text>
+      <text wx:else class="tip-text">松开手，就说完啦</text>
+    </view>
+  </view>
+
+  <!-- 分析中 -->
+  <view class="analyze-mask" wx:if="{{analyzing}}">
+    <image class="loading-whale" src="/images/animation/whale-loading-1.png" mode="aspectFit" />
+    <text class="tip-text">杭航正在听懂这段回忆…</text>
+  </view>
+
+  <!-- 发布卡片（参考朋友圈：确认文字→加照片→发布） -->
+  <view class="preview-mask" wx:if="{{preview}}">
+    <view class="preview-card safe-bottom">
+      <view class="preview-head">
+        <text class="preview-title">这段回忆</text>
+      </view>
+      <textarea class="preview-text" value="{{preview.text}}" maxlength="2000"
+        auto-height bindinput="onPreviewInput" placeholder="说错了字，可以在这里改一改"></textarea>
+
+      <view class="option-group" wx:if="{{preview.timeOptions.length}}">
+        <text class="option-label">大概是这个时候</text>
+        <view class="chips">
+          <view wx:for="{{preview.timeOptions}}" wx:key="*this"
+            class="chip {{preview.timeIndex === index ? 'chip-on' : ''}}"
+            data-i="{{index}}" bindtap="pickTime">{{item}}</view>
+        </view>
+      </view>
+
+      <view class="option-group" wx:if="{{preview.zoneOptions.length}}">
+        <text class="option-label">放进哪片海</text>
+        <view class="chips">
+          <view wx:for="{{preview.zoneOptions}}" wx:key="*this"
+            class="chip {{preview.zoneIndex === index ? 'chip-on' : ''}}"
+            data-i="{{index}}" bindtap="pickZone">{{item}}</view>
+        </view>
+      </view>
+
+      <view class="photo-grid">
+        <view class="photo-cell" wx:for="{{preview.photos}}" wx:key="*this">
+          <image src="{{item}}" mode="aspectFill" class="photo-img" data-i="{{index}}" bindtap="removePhoto" />
+          <text class="photo-del">×</text>
+        </view>
+        <view class="photo-add" wx:if="{{preview.photos.length < 9}}" bindtap="addPhoto">＋</view>
+      </view>
+
+      <view class="preview-actions">
+        <button class="btn-ghost flex1" bindtap="discardPreview">不要了</button>
+        <button class="btn-primary flex1" bindtap="publish">变成冰山</button>
+      </view>
+    </view>
+  </view>
+</view>

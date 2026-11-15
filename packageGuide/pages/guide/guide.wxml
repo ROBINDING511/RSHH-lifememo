@@ -1,0 +1,17 @@
+<!--packageGuide/pages/guide/guide.wxml-->
+<view class="page">
+  <image class="g-img" src="{{steps[step].img}}" mode="aspectFit" />
+  <view class="g-text">
+    <text class="g-title">{{steps[step].title}}</text>
+    <text class="g-desc">{{steps[step].desc}}</text>
+  </view>
+  <view class="g-dots">
+    <view class="dot {{step >= index ? 'dot-on' : ''}}" wx:for="{{steps}}" wx:key="img"></view>
+  </view>
+  <view class="g-btns safe-bottom">
+    <text class="g-skip" bindtap="skip">跳过</text>
+    <button class="btn-primary g-next" bindtap="next">
+      {{step < 3 ? '下一步' : '开始'}}
+    </button>
+  </view>
+</view>

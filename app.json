@@ -1,0 +1,30 @@
+{
+  "pages": [
+    "pages/ocean/ocean",
+    "pages/iceberg/iceberg",
+    "pages/timeline/timeline",
+    "pages/recycle/recycle"
+  ],
+  "subpackages": [
+    {
+      "root": "packageGuide",
+      "pages": [
+        "pages/guide/guide"
+      ]
+    }
+  ],
+  "window": {
+    "navigationBarBackgroundColor": "#E8F4FB",
+    "navigationBarTextStyle": "black",
+    "navigationBarTitleText": "人生海海",
+    "backgroundColor": "#E8F4FB"
+  },
+  "permission": {
+    "scope.record": {
+      "desc": "长按杭航说话，把您的话变成海上的冰山"
+    }
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json",
+  "lazyCodeLoading": "requiredComponents"
+}

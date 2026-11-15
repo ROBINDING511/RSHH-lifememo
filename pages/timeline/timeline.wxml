@@ -1,0 +1,31 @@
+<!--pages/timeline/timeline.wxml — 时间轴-->
+<view class="page">
+  <view class="tl-head">
+    <text class="tl-title">人生的时间轴</text>
+    <text class="tl-sub">一共 {{total}} 座冰山</text>
+  </view>
+
+  <scroll-view scroll-y class="tl-scroll">
+    <view class="tl-year" wx:for="{{years}}" wx:key="year" wx:for-item="y">
+      <view class="year-badge">
+        <text>{{y.year}}</text>
+      </view>
+      <view class="year-line">
+        <view class="tl-item" wx:for="{{y.items}}" wx:key="id"
+          data-id="{{item.id}}" bindtap="goDetail">
+          <view class="item-dot {{item.icon ? '' : 'dot-plain'}}">
+            <image wx:if="{{item.icon}}" class="item-icon" src="/images/pixel/{{item.icon}}.png" mode="aspectFit" />
+          </view>
+          <view class="item-card">
+            <text class="item-title">{{item.title}}</text>
+            <text class="item-meta">{{item.label}} · {{item.zoneName}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+    <view wx:if="{{!years.length}}" class="tl-empty">
+      <image class="empty-img" src="/images/misc/empty-state.png" mode="aspectFit" />
+      <text class="text-secondary">还没有冰山，回海洋里长按杭航说说话吧</text>
+    </view>
+  </scroll-view>
+</view>

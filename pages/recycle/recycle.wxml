@@ -1,0 +1,26 @@
+<!--pages/recycle/recycle.wxml — 云朵回收站-->
+<view class="page">
+  <view class="head">
+    <text class="title">云朵里的回忆</text>
+    <text class="sub">化成云的冰山都在这里，永远不会消失</text>
+  </view>
+
+  <view wx:if="{{!items.length}}" class="empty">
+    <image class="empty-img" src="/images/misc/cloud.png" mode="aspectFit" />
+    <text class="text-secondary">天上没有云，海上冰山都在</text>
+  </view>
+
+  <scroll-view scroll-y class="list">
+    <view class="cloud-card {{raining === item._id ? 'raining' : ''}}"
+      wx:for="{{items}}" wx:key="_id">
+      <image class="cloud-img" src="/images/misc/cloud.png" mode="aspectFit" />
+      <view class="cloud-info">
+        <text class="cloud-title">{{item.title}}</text>
+        <text class="cloud-meta">{{item.zoneName}}海域 · {{item.memoryTime}}</text>
+      </view>
+      <button class="rain-btn" data-id="{{item._id}}" bindtap="rain">
+        {{raining === item._id ? '下雨中…' : '落回海面'}}
+      </button>
+    </view>
+  </scroll-view>
+</view>

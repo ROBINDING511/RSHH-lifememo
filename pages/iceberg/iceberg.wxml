@@ -1,0 +1,48 @@
+<!--pages/iceberg/iceberg.wxml — 冰山详情-->
+<view class="page" wx:if="{{b}}">
+  <view class="berg-head card">
+    <view class="berg-head-row">
+      <image class="berg-icon" wx:if="{{iconFile}}" src="{{iconFile}}" mode="aspectFit" />
+      <view class="berg-titles">
+        <text class="berg-title">{{b.title}}</text>
+        <text class="berg-meta">{{b.memoryTime}} · {{b.zoneName}}海域</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="berg-body card">
+    <text class="berg-text">{{b.text}}</text>
+    <view class="voice-row" wx:if="{{b.audioFileID}}" bindtap="playVoice">
+      <view class="voice-btn {{playing ? 'voice-on' : ''}}">
+        <image class="voice-whale" src="/images/misc/recording-whale.png" mode="aspectFit" />
+      </view>
+      <text class="voice-tip">{{playing ? '正在播放…' : '听听当时的声音'}}</text>
+    </view>
+  </view>
+
+  <view class="berg-photos card" wx:if="{{b.photos.length}}">
+    <view class="photo-cell" wx:for="{{b.photos}}" wx:key="*this">
+      <image class="photo-img" src="{{item}}" mode="aspectFill"
+        data-src="{{item}}" bindtap="previewPhoto" />
+    </view>
+  </view>
+
+  <view class="actions safe-bottom">
+    <button class="btn-ghost flex1" bindtap="onShowIconMenu">放个标记</button>
+    <button class="btn-ghost flex1 melt" bindtap="meltIceberg">化成云</button>
+  </view>
+
+  <!-- 标记选择（第二次进入默认展开） -->
+  <view class="icon-mask" wx:if="{{showIconMenu}}" bindtap="closeIconMenu">
+    <view class="icon-sheet safe-bottom" catchtap="">
+      <text class="sheet-title">选一个小标记，放上冰山</text>
+      <view class="icon-grid">
+        <view class="icon-cell" wx:for="{{icons}}" wx:key="key"
+          data-i="{{index}}" bindtap="pickIcon">
+          <image class="icon-img" src="{{item.file}}" mode="aspectFit" />
+          <text class="icon-name">{{item.name}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>

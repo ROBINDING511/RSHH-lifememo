@@ -1,0 +1,40 @@
+/* app.wxss — 全局样式：适老化大字号、柔和海洋色 */
+page {
+  background: #E8F4FB;
+  font-family: -apple-system, 'PingFang SC', 'Helvetica Neue', sans-serif;
+  font-size: 34rpx; /* 适老：正文偏大 */
+  color: #2C3E50;
+}
+
+.btn-primary {
+  background: #4A9BD1;
+  color: #fff;
+  border-radius: 44rpx;
+  font-size: 36rpx;
+  height: 96rpx;
+  line-height: 96rpx;
+  font-weight: 500;
+}
+.btn-primary::after { border: none; }
+.btn-ghost {
+  background: #F2F9FD;
+  color: #4A9BD1;
+  border-radius: 44rpx;
+  font-size: 34rpx;
+  height: 88rpx;
+  line-height: 88rpx;
+}
+.btn-ghost::after { border: none; }
+
+.card {
+  background: #fff;
+  border-radius: 32rpx;
+  padding: 36rpx;
+  box-shadow: 0 6rpx 24rpx rgba(74, 155, 209, 0.10);
+}
+
+.text-secondary { color: #7A93A6; font-size: 28rpx; }
+.text-large { font-size: 40rpx; line-height: 1.7; }
+
+/* 冰山底部安全区适配 */
+.safe-bottom { padding-bottom: env(safe-area-inset-bottom); }

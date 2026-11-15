@@ -1,0 +1,6 @@
+{
+  "desc": "仅收录首页，保护家庭回忆隐私",
+  "rules": [
+    { "action": "allow", "page": "pages/ocean/ocean" }
+  ]
+}
