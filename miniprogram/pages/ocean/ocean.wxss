@@ -149,7 +149,13 @@
   margin: 24rpx 0;
 }
 .timer-main { color: #fff; font-size: var(--fs-lg); font-weight: 500; }
-.timer-limit { color: #B8D4E8; font-size: var(--fs-sm); margin-top: 6rpx; }
+.timer-limit {
+  color: #B8D4E8; font-size: var(--fs-sm); margin-top: 6rpx;
+  /* 父级 align-items:center 会让子项收缩到内容宽，长文案不折行反而溢出；
+     显式给宽度 + box-sizing 才能真正换行。文案要跟随微信字体放大，故留边距居中 */
+  width: 100%; box-sizing: border-box;
+  padding: 0 48rpx; text-align: center; line-height: 1.5;
+}
 .timer-warn { color: #FFD9D5; font-weight: 500; }
 
 .rec-actions {

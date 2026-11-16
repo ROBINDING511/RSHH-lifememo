@@ -83,7 +83,7 @@
     <view class="rec-timer">
       <text class="timer-main">已说 {{elapsed}} 秒</text>
       <text class="timer-limit {{countdown > 0 ? 'timer-warn' : ''}}">
-        {{countdown > 0 ? '还剩 ' + countdown + ' 秒' : '最长可说 60 秒'}}
+        {{countdown > 0 ? '还剩 ' + countdown + ' 秒' : '说满 ' + maxSeconds + ' 秒会先存好，可以接着说'}}
       </text>
     </view>
 

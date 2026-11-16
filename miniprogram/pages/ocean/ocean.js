@@ -33,6 +33,7 @@ Page({
     asrHint: '',         // ''=实时识别正常 | 'connecting'=连接中 | 'offline'=没连上（松手后自动整理）
     elapsed: 0,
     countdown: 0,
+    maxSeconds: MAX_SECONDS, // 界面文案据此显示，避免与 recorder 常量脱节说谎
     // 发布卡片
     preview: null, // { wavPath, text, audioOnly, previewVoicePlaying, ... }
     previewVoicePlaying: false,
@@ -471,7 +472,7 @@ Page({
       onFrame: (buf) => this.asr && this.asr.sendFrame(buf),
       onTick: (s) => this.setData({ elapsed: s }),
       onCountdown: (left) => this.setData({ countdown: left }),
-      onStop: async (wavPath, durationMs, err) => {
+      onStop: async (wavPath, durationMs, err, meta) => {
         this.setData({ recording: false, countdown: 0, elapsed: 0, recordMode: '' })
         this.whale.frozen = false
         // 松手瞬间先把界面上已有的字定住（节流可能还压着最后一小段）
@@ -522,7 +523,60 @@ Page({
           finalText = await this.fallbackTranscribe(wavPath)
         }
         this.setData({ transcript: finalText })
+
+        // 说满上限：不是把话头硬切掉，而是先把这段稳稳存下来，再问要不要接着说。
+        // 长回忆因此被拆成多座冰山，每段都能单独改字、单独发布，一个字都不丢。
+        if (meta && meta.hitLimit) {
+          return this.offerContinue(wavPath, finalText)
+        }
+
         this.openPreview(wavPath, finalText || this.data.transcript)
+      }
+    })
+  },
+
+  // 说满一分钟：这段先入草稿保底，再给两个明确出口
+  offerContinue (wavPath, text) {
+    const saved = draft.save({
+      wavPath: wavPath || '',
+      text: text || '',
+      reason: '说满一分钟的一段'
+    })
+    this.setData({ drafts: draft.list(), transcript: '' })
+    if (wx.vibrateShort) wx.vibrateShort({ type: 'medium' })
+
+    // 音频和文字都没有（拼 WAV 失败 + 没识别出字）：没东西可看，别弹空卡片
+    if (!saved) {
+      wx.showToast({ title: '这段没录上，再说一次', icon: 'none', duration: 2600 })
+      return
+    }
+
+    // 草稿快满了就提醒先处理，别等到挤掉旧的才发现（上限见 utils/draft.js）
+    const left = draft.remaining()
+    const tail = left <= 3
+      ? `\n\n另外，还有 ${this.data.drafts.length} 段话存着没发布，快满了，记得回头点顶部"找回来"处理掉。`
+      : ''
+
+    wx.showModal({
+      title: '说满一分钟啦',
+      content: '刚才这段已经帮您存好了，一个字都没丢。想接着说，点"接着说"；想先看看、改改字，点"看看这段"。' + tail,
+      // 微信 showModal 的按钮文案最多 4 个字符，超出会被截断
+      confirmText: '接着说',
+      cancelText: '看看这段',
+      confirmColor: '#24648F',
+      success: (r) => {
+        if (r.confirm) {
+          // 接着说：上一段留在草稿里（顶部"找回来"随时能取），这段从头开始
+          this.startRecording('tap')
+        } else {
+          // 看看这段：从草稿索引取出交给发布卡（音频文件保留，发布卡还要用它放原声）
+          draft.remove(saved.at)
+          this.setData({ drafts: draft.list() })
+          this.openPreview(saved.wavPath, saved.text)
+        }
+      },
+      fail: () => {
+        // 弹窗失败也不丢内容：草稿已落地，回海洋页能看到"找回来"
       }
     })
   },
@@ -733,7 +787,10 @@ Page({
         title: (p.rawText && body.startsWith(p.rawText)) ? '' : body.split('\n')[0].slice(0, 12)
       })
       this.stopPreviewVoice()
-      this.setData({ preview: null, publishing: false })
+      // 音频已上传云存储（详情页回听走 audioFileID，不再依赖本地文件），
+      // 本地 WAV 此时是冗余的；"接着说"会让多段录音成为常态，不回收会累积几十 MB
+      draft.forgetPath(p.wavPath)
+      this.setData({ preview: null, publishing: false, drafts: draft.list() })
       wx.hideLoading()
       wx.showToast({ title: '一座新的冰山入海了', icon: 'none', duration: 2400 })
       this.refreshData()
