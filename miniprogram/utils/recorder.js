@@ -6,14 +6,10 @@
 //   - onTick：每秒回传"已说几秒"，界面常驻显示，不让妈妈猜还剩多久
 //   - MAX_SECONDS 到点自动停，自动保存（原来会丢）
 //   - 帧缓存常驻，任何异常路径都能先落地成本地 WAV
-//   - 说满上限时通过 onStop 第四参 { hitLimit:true } 告知上层，
-//     上层据此问"要不要接着说下一段"，而不是把话头硬切掉
-const MAX_SECONDS = 60 // 单段上限，与微信语音一致；长回忆由「接着说」拆成多段
-// 判定"这次停止是说满触发的"的容差。
-// 注意：wx 自身 duration 在整 60s 就自动停，早于下面 +300ms 的兜底 timer，
-// 所以 limitHit 标记经常来不及打上，必须保留时长兜底判断；
-// 但要加「非用户主动停」这个前提，否则妈妈在 59.8s 手点"说完了"会被误判成说满。
-const LIMIT_TOLERANCE_MS = 300
+//   - onCountdown：最后 COUNTDOWN_SECONDS 秒每秒回传"还剩几秒"，
+//     界面变红倒计时，和微信语音一致 —— 到点硬切前给足预警，不会话说一半被打断得莫名其妙
+const MAX_SECONDS = 60 // 单段上限，与微信语音一致
+const COUNTDOWN_SECONDS = 10 // 提前 10 秒开始倒计时提醒，与微信语音一致
 
 function createRecorder () {
   const rm = wx.getRecorderManager()
@@ -23,13 +19,12 @@ function createRecorder () {
     chunks: [], // PCM 帧缓存
     onFrame: null, // (arrayBuffer, elapsedMs) => void
     onTick: null, // (elapsedSeconds) => void 每秒回调
-    onCountdown: null, // (leftSeconds) => void 剩余<=10s时回调
-    onStop: null, // (wavPath, durationMs, err, meta) => void
+    onCountdown: null, // (leftSeconds) => void 剩余<=COUNTDOWN_SECONDS 时每秒回调
+    onStop: null, // (wavPath, durationMs, err) => void
     timer: null,
     tickTimer: null,
     cdTimer: null,
-    limitHit: false, // 本次停止是否由「说满上限」触发
-    userStopped: false // 本次停止是否由用户主动触发（点"说完了"/不录了/切后台）
+    lastLeft: -1 // 去重：同一个秒数只回调一次，避免重复 setData
   }
 
   rm.onFrameRecorded((res) => {
@@ -47,14 +42,9 @@ function createRecorder () {
     clearInterval(state.tickTimer)
     if (state.timer) clearTimeout(state.timer)
     const durationMs = Date.now() - state.startAt
-    // 说满判定：本地 timer 打标，或（wx duration 先到点、标记没来得及打）时长够长且不是用户主动停
-    const hitLimit = state.limitHit ||
-      (!state.userStopped && durationMs >= MAX_SECONDS * 1000 - LIMIT_TOLERANCE_MS)
-    state.limitHit = false
-    state.userStopped = false
     const wavPath = buildWavFile(state.chunks)
     state.chunks = []
-    if (state.onStop) state.onStop(wavPath, durationMs, null, { hitLimit })
+    if (state.onStop) state.onStop(wavPath, durationMs)
   })
 
   rm.onError((e) => {
@@ -64,11 +54,9 @@ function createRecorder () {
     if (state.timer) clearTimeout(state.timer)
     // 出错也先把已录到的帧落地，绝不白说一场
     const durationMs = Date.now() - state.startAt
-    state.limitHit = false
-    state.userStopped = false
     const wavPath = buildWavFile(state.chunks)
     state.chunks = []
-    if (state.onStop) state.onStop(wavPath, durationMs, e, { hitLimit: false })
+    if (state.onStop) state.onStop(wavPath, durationMs, e)
   })
 
   return {
@@ -80,8 +68,7 @@ function createRecorder () {
       state.onStop = hooks.onStop || null
       state.chunks = []
       state.startAt = Date.now()
-      state.limitHit = false
-      state.userStopped = false
+      state.lastLeft = -1
 
       const setting = {
         duration: MAX_SECONDS * 1000, // 到点自动停，像微信语音
@@ -98,27 +85,23 @@ function createRecorder () {
         state.onTick(Math.floor((Date.now() - state.startAt) / 1000))
       }, 1000)
 
-      // 最后 10 秒倒计时提醒
+      // 最后 10 秒倒计时提醒。
+      // 用 250ms 轮询 + lastLeft 去重：既保证秒数跳变及时（不会慢半拍），
+      // 又不会像原来 500ms 无去重那样对同一秒重复回调、重复 setData。
       state.cdTimer = setInterval(() => {
         const left = Math.ceil((MAX_SECONDS * 1000 - (Date.now() - state.startAt)) / 1000)
-        if (left <= 10 && left > 0 && state.onCountdown) state.onCountdown(left)
-      }, 500)
+        if (left > COUNTDOWN_SECONDS || left <= 0) return
+        if (left === state.lastLeft) return
+        state.lastLeft = left
+        if (state.onCountdown) state.onCountdown(left)
+      }, 250)
 
       // 超时兜底：到点自动 stop（走 onStop → 自动进入发布卡，内容不丢）
-      // 打标 limitHit：上层据此问「要不要接着说下一段」，而不是把话头硬切掉
-      // stop(false)：这次不是用户按的，别把它误记成"用户主动停"
-      state.timer = setTimeout(() => {
-        state.limitHit = true
-        this.stop(false)
-      }, MAX_SECONDS * 1000 + 300)
+      // wx 自身 duration 在整 60s 就会停，早于这里的 +300ms，故本 timer 只是保险
+      state.timer = setTimeout(() => this.stop(), MAX_SECONDS * 1000 + 300)
     },
 
-    /**
-     * @param {boolean} byUser 是否用户主动停（点"说完了"/不录了/切后台）。
-     *   用于把"说满上限"和"妈妈自己在 59 秒点结束"区分开 —— 后者不该弹"接着说"。
-     */
-    stop (byUser = true) {
-      if (byUser !== false) state.userStopped = true
+    stop () {
       if (state.timer) clearTimeout(state.timer)
       clearInterval(state.cdTimer)
       clearInterval(state.tickTimer)
@@ -170,4 +153,4 @@ function buildWavFile (chunks) {
   }
 }
 
-module.exports = { createRecorder, MAX_SECONDS }
+module.exports = { createRecorder, MAX_SECONDS, COUNTDOWN_SECONDS }

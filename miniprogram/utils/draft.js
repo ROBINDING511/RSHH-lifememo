@@ -1,11 +1,12 @@
 // utils/draft.js — 未完成录音的本地兜底
-// 原则：妈妈说的话绝不因为断网/来电/切后台/报错/说满上限而丢掉。
+// 原则：妈妈说的话绝不因为断网/来电/切后台/报错而丢掉。
 // 录音文件已在 USER_DATA_PATH（utils/recorder.js 的 buildWavFile），
 // 这里只登记索引，回到海洋页时提示"有一段话没存好，点这里找回"。
 //
-// 上限说明（2026-11-16 调整）：说满一分钟会自动存一段草稿，长回忆连着说
-// 多段是正常用法，原来 MAX=5 太小，第 6 段一来就把第 1 段**静默挤掉**了。
-// 一段 60s WAV ≈ 1.9MB，20 段 ≈ 38MB，远低于 USER_DATA_PATH 的 200MB 上限。
+// 上限说明：原来 MAX=5，且超限用 `all.length = MAX` 直接截断 —— 第 6 段一来
+// 就把第 1 段**静默挤掉**（无提示、音频文件还留在磁盘成孤儿）。
+// 提到 20 并改为「挤出时回收文件 + 告警」：一段 60s WAV ≈ 1.9MB，
+// 20 段 ≈ 38MB，远低于 USER_DATA_PATH 的 200MB 上限，代价可接受。
 const KEY = 'pending_drafts'
 const MAX = 20
 
@@ -40,7 +41,7 @@ function save (draft) {
 }
 
 // 仅从索引中移除，**不删音频文件**。
-// 调用方（recoverDraft / offerContinue）都是"取出来交给发布卡继续用这个 wavPath"，
+// 调用方 recoverDraft 是"取出来交给发布卡继续用这个 wavPath"，
 // 此时删文件会让发布卡的原声指向一个不存在的路径，妈妈的原声就没了。
 // 真正要回收磁盘请用 forgetPath()。
 function remove (at) {
@@ -61,7 +62,4 @@ function forgetPath (wavPath) {
   unlinkQuietly(wavPath)
 }
 
-// 还剩几个空位：上层在「接着说」流程里据此提醒妈妈先处理已存的段落
-function remaining () { return Math.max(0, MAX - list().length) }
-
-module.exports = { list, save, remove, forgetPath, remaining, MAX }
+module.exports = { list, save, remove, forgetPath, MAX }

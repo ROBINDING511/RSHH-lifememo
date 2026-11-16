@@ -82,9 +82,12 @@
 
     <view class="rec-timer">
       <text class="timer-main">已说 {{elapsed}} 秒</text>
-      <text class="timer-limit {{countdown > 0 ? 'timer-warn' : ''}}">
-        {{countdown > 0 ? '还剩 ' + countdown + ' 秒' : '说满 ' + maxSeconds + ' 秒会先存好，可以接着说'}}
-      </text>
+      <!-- 最后 10 秒：换成大号红色倒计时，一眼就能看到还剩多久，和微信语音一致 -->
+      <view class="countdown-box" wx:if="{{countdown > 0}}">
+        <text class="countdown-num">{{countdown}}</text>
+        <text class="countdown-label">秒后自动结束</text>
+      </view>
+      <text class="timer-limit" wx:else>最长可说 {{maxSeconds}} 秒</text>
     </view>
 
     <!-- 长按鲸鱼：手指正占着屏幕，松手即结束，不放按钮 -->

@@ -156,7 +156,19 @@
   width: 100%; box-sizing: border-box;
   padding: 0 48rpx; text-align: center; line-height: 1.5;
 }
-.timer-warn { color: #FFD9D5; font-weight: 500; }
+
+/* 最后 10 秒的大号倒计时：数字远大于常规字号，老人扫一眼就知道还剩多久。
+   #FFD9D5 在遮罩底色上对比度 9.07:1，已通过 a11y_check（勿改深，会掉到红线以下） */
+.countdown-box {
+  display: flex; align-items: baseline; gap: 10rpx;
+  margin-top: 10rpx; text-align: center;
+}
+.countdown-num {
+  color: #FFD9D5; font-size: 76rpx; font-weight: 600; line-height: 1;
+}
+.countdown-label {
+  color: #FFD9D5; font-size: var(--fs-sm); font-weight: 500;
+}
 
 .rec-actions {
   display: flex; gap: 24rpx; padding: 0 32rpx 16rpx;
