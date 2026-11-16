@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>人生海海 · 微信式交互统一优化稿（蓝白基调）</title>
+<style>
+  :root{
+    --ink:#1a1a1a; --ink2:#888; --line:#e5e5e5; --bg:#f4f5f7; --card:#fff;
+    --accent:#1E64C8; /* 微信链接蓝 */
+    --wx-green:#07C160;
+    --wx-link:#1E64C8;
+    --wx-btn:#07C160;
+    --wx-btn-text:#fff;
+    --wx-red:#FA5151;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:-apple-system,"PingFang SC","Helvetica Neue",Arial,sans-serif;background:var(--bg);color:var(--ink);line-height:1.6;padding:32px 20px 80px;}
+  .wrap{max-width:1180px;margin:0 auto;}
+  header.top{margin-bottom:8px;}
+  header.top h1{font-size:25px;font-weight:600;letter-spacing:.5px;}
+  header.top p{color:var(--ink2);font-size:14px;margin-top:6px;max-width:860px;}
+  .note{background:#eef5ee;border:1px solid #cfe8cf;border-radius:12px;padding:12px 16px;margin:18px 0 8px;font-size:13px;color:#2a4a2a;}
+  .note b{color:#0a6e3c;}
+
+  .sec-title{font-size:19px;font-weight:600;margin:34px 0 14px;}
+  .sec-title small{font-size:12.5px;color:var(--ink2);font-weight:400;margin-left:10px;}
+
+  /* 映射表 */
+  table.map{width:100%;border-collapse:collapse;background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,.05);font-size:13.5px;}
+  table.map th{background:#f7f8fa;text-align:left;padding:11px 14px;font-size:12.5px;color:#555;border-bottom:1px solid var(--line);}
+  table.map td{padding:11px 14px;border-bottom:1px solid #f0f0f0;vertical-align:top;}
+  table.map tr:last-child td{border-bottom:none;}
+  table.map td .wx{color:#0a6e3c;font-weight:600;}
+  table.map td .old{color:#999;}
+  table.map td .why{color:#666;font-size:12px;display:block;margin-top:3px;}
+
+  /* 手机预览 */
+  .phones{display:flex;gap:26px;overflow-x:auto;padding:24px 4px 12px;}
+  .phone-col{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;gap:10px;}
+  .phone-label{font-size:12.5px;color:var(--ink2);text-align:center;max-width:250px;line-height:1.5;}
+  .phone{position:relative;width:250px;height:520px;border-radius:36px;overflow:hidden;border:9px solid #10161c;box-shadow:0 14px 34px rgba(20,40,60,.18);background:#ededed;}
+  .screen{position:absolute;inset:0;display:flex;flex-direction:column;overflow:hidden;background:#F2F5F7;}
+  .notch{position:absolute;top:0;left:50%;transform:translateX(-50%);width:96px;height:19px;background:#10161c;border-radius:0 0 13px 13px;z-index:9;}
+
+  /* 微信导航条 */
+  .navbar{height:88px;display:flex;align-items:flex-end;justify-content:space-between;padding:0 8px 8px;background:#F2F5F7;position:relative;z-index:8;}
+  .navbar .side{width:56px;display:flex;align-items:center;gap:3px;font-size:16px;color:var(--ink);}
+  .navbar .side.back svg{width:11px;height:11px;}
+  .navbar .title{font-size:17px;font-weight:600;}
+  .navbar .side.right{justify-content:flex-end;}
+  .capsule{position:absolute;top:36px;right:9px;width:54px;height:20px;border-radius:11px;border:1px solid rgba(0,0,0,.12);background:rgba(255,255,255,.6);z-index:9;display:flex;align-items:center;justify-content:center;gap:5px;}
+  .capsule i{width:3.5px;height:3.5px;border-radius:50%;background:#333;display:block;}
+  .capsule .ln{width:10px;height:1.6px;background:#333;border-radius:2px;}
+
+  /* 通用内容 */
+  .content{flex:1;position:relative;display:flex;flex-direction:column;overflow:hidden;}
+
+  /* 屏1：微信九宫格入口 + 海 */
+  .grid{padding:14px 16px 6px;}
+  .grid-hint{text-align:center;font-size:15px;color:#333;padding:10px 20px 2px;}
+  .grid-hint .h2{font-size:12.5px;color:#8a9aa5;margin-top:4px;}
+  .grid-area{background:#fff;border-radius:14px;padding:14px 10px;display:grid;grid-template-columns:repeat(3,1fr);gap:6px 4px;box-shadow:0 2px 8px rgba(0,0,0,.04);}
+  .g-item{display:flex;flex-direction:column;align-items:center;gap:7px;padding:12px 4px;border-radius:10px;cursor:pointer;transition:.15s;}
+  .g-item:active{background:#f2f2f2;}
+  .g-item .ic{width:52px;height:52px;border-radius:12px;display:flex;align-items:center;justify-content:center;}
+  .g-item .ic svg{width:30px;height:30px;}
+  .g-item .t{font-size:14.5px;color:#333;}
+  .g-item .sub{font-size:10.5px;color:#9aa5ad;margin-top:-5px;}
+  .sea-strip{flex:1;position:relative;overflow:hidden;margin:8px 12px 8px;border-radius:16px;
+    background:linear-gradient(180deg,#DFEFF9 0%,#C4E3F3 55%,#A9D6EC 100%);}
+  .whale{position:absolute;left:50%;top:46%;transform:translate(-50%,-50%);width:76px;animation:bob 5s ease-in-out infinite;}
+  @keyframes bob{0%,100%{transform:translate(-50%,-50%) rotate(-2deg);}50%{transform:translate(-50%,-56%) rotate(2deg);}}
+  .berg{position:absolute;width:32px;opacity:.92;}
+
+  /* 屏2：按住说话（微信对话框样式） */
+  .chat{flex:1;overflow:hidden;display:flex;flex-direction:column;padding:6px 12px 0;}
+  .chat .timec{text-align:center;font-size:10.5px;color:#9aa5ad;padding:6px 0 10px;}
+  .msg{display:flex;gap:9px;margin-bottom:13px;align-items:flex-start;}
+  .msg .avatar{width:38px;height:38px;border-radius:6px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:19px;}
+  .msg .body{max-width:75%;display:flex;flex-direction:column;gap:3px;}
+  .msg .bubble{position:relative;padding:11px 13px;border-radius:6px;font-size:15px;line-height:1.55;}
+  .msg.right{flex-direction:row-reverse;}
+  .msg.right .bubble{background:#95EC69;color:#06120a;}
+  .msg.left .bubble{background:#fff;color:#111;}
+  .msg .voice{display:flex;align-items:center;gap:8px;min-width:150px;}
+  .msg .voice .vbars{display:flex;align-items:center;gap:2.5px;height:16px;flex:1;}
+  .msg .voice .vbars i{width:3px;border-radius:2px;background:#3f7f2c;animation:wv .9s ease-in-out infinite;}
+  @keyframes wv{0%,100%{height:28%;}50%{height:100%;}}
+  .msg .voice .dur{font-size:13.5px;font-weight:600;color:#0a5c2f;}
+  .msg .voice .vv{width:18px;height:18px;border-radius:50%;border:2px solid #3f7f2c;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .msg .voice .vv svg{width:9px;height:9px;}
+  .msg .meta{font-size:10.5px;color:#9aa5ad;}
+  .recording-bar{background:rgba(0,0,0,.06);border-top:1px solid rgba(0,0,0,.05);padding:10px 12px 12px;}
+  .recording-bar .hint{display:flex;justify-content:space-between;font-size:12px;color:#777;padding:0 4px 8px;}
+  .recording-bar .hint b{color:#0a5c2f;}
+
+  /* 微信按住说话条 */
+  .holdbar{background:#fff;border-radius:8px;padding:15px 0 14px;text-align:center;font-size:17px;font-weight:500;color:#191919;cursor:pointer;transition:.12s;position:relative;}
+  .holdbar:active{background:#e6e6e6;}
+  .holdbar .sub{font-size:11.5px;color:#9aa5ad;font-weight:400;margin-top:2px;}
+
+  /* 屏3：编辑（cell 列表 + 聊天工具栏键盘） */
+  .cells{background:#fff;border-radius:0;margin:8px 0;}
+  .cell{display:flex;align-items:center;gap:11px;padding:15px 15px;border-bottom:1px solid #f0f0f0;position:relative;}
+  .cell:last-child{border-bottom:none;}
+  .cell .c-ic{width:25px;height:25px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .cell .c-ic svg{width:21px;height:21px;}
+  .cell .c-t{flex:1;font-size:16px;color:#191919;}
+  .cell .c-v{font-size:14.5px;color:#8a9aa5;max-width:52%;text-align:right;}
+  .cell .arrow{color:#c3c9cf;font-size:15px;flex-shrink:0;}
+  .cells .textarea-wrap{padding:12px 15px 14px;}
+  .cells textarea{width:100%;border:none;outline:none;font-size:16.5px;line-height:1.6;color:#191919;font-family:inherit;resize:none;min-height:96px;}
+  .cells .tools{display:flex;gap:6px;padding:0 15px 13px;}
+  .cells .tools .tl{font-size:12.5px;color:var(--wx-link);background:#f2f6ff;border-radius:6px;padding:7px 12px;cursor:pointer;}
+  .wxkeyboard{display:flex;border-top:1px solid #d9d9d9;background:#f7f7f7;padding:8px 10px;gap:8px;}
+  .wxkeyboard .kbtn{flex:1;background:#fff;border:1px solid #d4d4d4;border-radius:6px;text-align:center;font-size:14.5px;color:#222;padding:10px 0;cursor:pointer;}
+  .wxkeyboard .kbtn:active{background:#e0e0e0;}
+  .wxkeyboard .kbtn.primary{background:#07C160;border-color:#07C160;color:#fff;font-weight:600;font-size:15px;}
+  .wxkeyboard .kbtn.warn{color:#FA5151;}
+
+  /* 屏4：图片选择（微信聊天+面板） */
+  .photo-row{display:flex;gap:7px;padding:0 12px 8px;}
+  .photo-row .ph{width:74px;height:74px;border-radius:8px;background:#dfe9f0;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;}
+  .photo-row .ph img{width:100%;height:100%;object-fit:cover;}
+  .photo-row .ph .del{position:absolute;top:3px;right:3px;width:20px;height:20px;border-radius:50%;background:rgba(0,0,0,.55);color:#fff;font-size:12px;display:flex;align-items:center;justify-content:center;}
+  .photo-row .ph.add{background:transparent;border:1.5px dashed #b9c8d2;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:#8a9aa5;font-size:10.5px;cursor:pointer;}
+  .photo-row .ph.add svg{width:22px;height:22px;}
+
+  /* 弹窗（微信居中 modal） */
+  .modal-mask{position:absolute;inset:0;background:rgba(0,0,0,.4);z-index:20;}
+  .modal{position:absolute;left:50%;top:44%;transform:translate(-50%,-50%);width:81%;max-width:300px;background:#fff;border-radius:14px;overflow:hidden;z-index:21;box-shadow:0 10px 40px rgba(0,0,0,.2);}
+  .modal .m-title{font-size:17px;font-weight:600;text-align:center;padding:20px 18px 4px;}
+  .modal .m-body{font-size:14.5px;color:#666;text-align:center;padding:4px 24px 14px;line-height:1.55;}
+  .modal .m-body b{color:#0a6e3c;}
+  .modal .m-actions{display:flex;border-top:1px solid #e8e8e8;}
+  .modal .m-btn{flex:1;text-align:center;padding:13px 0;font-size:16.5px;cursor:pointer;color:#666;}
+  .modal .m-btn:active{background:#f0f0f0;}
+  .modal .m-btn.primary{color:#07C160;font-weight:600;border-left:1px solid #e8e8e8;}
+  .modal .m-btn.danger{color:#FA5151;font-weight:600;border-left:1px solid #e8e8e8;}
+
+  /* Toast（微信式） */
+  .toast{position:absolute;left:50%;bottom:130px;transform:translateX(-50%);background:rgba(0,0,0,.78);color:#fff;border-radius:9px;padding:11px 17px;font-size:14px;display:flex;align-items:center;gap:8px;z-index:22;white-space:nowrap;}
+  .toast .tick{width:17px;height:17px;border-radius:50%;background:#07C160;display:flex;align-items:center;justify-content:center;font-size:10px;}
+
+  /* 页脚 */
+  footer{text-align:center;color:var(--ink2);font-size:12.5px;margin-top:34px;line-height:1.8;}
+
+  /* 交互演示脚本区 */
+  .demo-note{font-size:12px;color:#8a9aa5;text-align:center;margin-top:2px;}
+  .press-demo{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,.75);border-radius:12px;color:#fff;padding:16px 20px;display:none;flex-direction:column;align-items:center;gap:8px;z-index:15;}
+  .press-demo .mic{width:44px;height:44px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;}
+  .press-demo .mic svg{width:22px;height:22px;}
+  .press-demo .tt{font-size:14px;}
+  .press-demo .tt b{color:#95EC69;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <h1>人生海海 · 微信式交互统一优化稿</h1>
+    <p>配色不变（蓝+白海洋基调）。这次优化的是<b>排版结构、图标形状、文字语气、交互方式</b>——全部对齐微信既有肌肉记忆：老人在微信里会什么，这里就是什么。共 6 屏关键流程 + 交互映射表。</p>
+  </header>
+
+  <div class="note">
+    <b>设计原则：</b>①微信怎么交互，这里就怎么交互（按住说话、聊天气泡、列表 cell、居中弹窗、绿主按钮）；②所有原生能力（弹窗/Toast/返回）用微信同款样式与位置；③零自创交互。唯一保留的海洋隐喻是背景装饰，不承担任何操作功能。
+  </div>
+
+  <div class="sec-title">一、交互方式映射表 <small>原设计 → 微信式</small></div>
+  <table class="map">
+    <tr><th style="width:19%">交互点</th><th style="width:26%">原设计（要改掉）</th><th>微信式做法（本稿）</th></tr>
+    <tr><td>语音输入</td><td><span class="old">自创"点按切换"录音、底部大按钮"点这里说话"</span></td><td><span class="wx">按住说话 ▼ 松手发送</span>——微信聊天同款交互条，字面就是"按住 说话"<div class="why">老人微信发语音的肌肉记忆 100% 迁移，零学习</div></td></tr>
+    <tr><td>转写结果展示</td><td><span class="old">自绘录音面板（深蓝遮罩+转写盒）</span></td><td><span class="wx">微信语音气泡（绿色，带声波和秒数）+ 播放三角</span><div class="why">绿色气泡=我发出的消息，一眼认得；点气泡=重听</div></td></tr>
+    <tr><td>改错字</td><td><span class="old">自绘预览卡 textarea</span></td><td><span class="wx">微信"聊天式"转文字 + 底部键盘栏"完成"按钮</span>，点气泡弹出"修改文字"菜单<div class="why">微信语音转文字的长按菜单同款逻辑</div></td></tr>
+    <tr><td>功能入口</td><td><span class="old">海面上的悬浮胶囊（时间轴/云朵）</span></td><td><span class="wx">微信"九宫格图标"入口（带标签文字）</span>：🫧 时间轴 / ☁️ 云朵 / 🎤 说话<div class="why">微信群=九宫格、我的=列表，图标+下方文字是老人最熟的入口形态</div></td></tr>
+    <tr><td>分类选择</td><td><span class="old">自绘 chips 圆角标签</span></td><td><span class="wx">微信式列表 cell（左图标+标题+右侧灰字）</span>，点开下一级选择<div class="why">微信"设置"页就是这种列表；比一排小 chips 更大更好点</div></td></tr>
+    <tr><td>确认弹窗</td><td><span class="old">自绘半屏 sheet + 大字按钮</span></td><td><span class="wx">微信居中 Modal</span>（黑色遮罩 40%、白色圆角卡、底部按钮左右分区、绿色确认/红色危险）<div class="why">wx.showModal 原生同款；按钮文字用大白话但结构不变</div></td></tr>
+    <tr><td>操作反馈</td><td><span class="old">自绘 toast 风格各异</span></td><td><span class="wx">微信 Toast：底部居中、黑底白字圆角、成功带绿圈✓</span><div class="why">位置、样式、时长都对齐 wx.showToast</div></td></tr>
+    <tr><td>页面返回</td><td><span class="old">自绘左上返回箭头</span></td><td><span class="wx">微信导航栏同款返回：左上角‹箭头 + 中间标题</span><div class="why">胶囊按钮就在右上，返回在左上——微信所有页面都这样</div></td></tr>
+    <tr><td>删除等危险操作</td><td><span class="old">深色自绘面板</span></td><td><span class="wx">微信 ActionSheet：底部滑出白色面板</span>（红色"删除"、灰"取消"）<div class="why">微信删聊天、删照片就是底部面板；取消按钮永远在最底</div></td></tr>
+    <tr><td>等待反馈</td><td><span class="old">全屏遮罩转圈</span></td><td><span class="wx">Toast 式"正在生成冰山…" + 按钮内进度条</span>，完成后"✓ 已入海"（2 秒自动消失）<div class="why">微信发图片=缩略图里转圈、完成打勾，不打断聊天流</div></td></tr>
+  </table>
+
+  <div class="sec-title">二、6 屏关键流程 <small>可点击交互：按住说话条、发布按钮、弹窗按钮</small></div>
+  <div class="phones" id="phones"></div>
+
+  <div class="sec-title">三、落地规范（定稿后执行）</div>
+  <table class="map">
+    <tr><th>维度</th><th>规范</th></tr>
+    <tr><td>排版结构</td><td>每页=微信导航栏（返回‹+标题）+ 内容区；内容区用 <b>cell 列表</b>（白底、46px 高、右侧箭头）或 <b>卡片</b>（白底 14px 圆角），不再使用自绘异形面板</td></tr>
+    <tr><td>图标形状</td><td>统一 44px 网格圆角图标（微信"我的"页同款），带下方文字标签；线条 2px、圆头线帽；配色延续蓝白海洋（主 #24648F、点缀 #07C160 只用于"发送/成功"）</td></tr>
+    <tr><td>文字语气</td><td>全部微信语气：句尾不带感叹号；按钮动词开头（按住说话 / 修改文字 / 变成冰山）；次级说明用 12.5px 灰字（#8a9aa5）置于主文字下方</td></tr>
+    <tr><td>交互方式</td><td>按住说话、点气泡重听、长按弹菜单、列表点开下一级、底部面板做危险操作、居中弹窗做确认——全部微信原生交互，零自创</td></tr>
+    <tr><td>适老化保留</td><td>正文 15-16.5px（当量 30-33rpx）、触控目标≥44px、对比度≥4.5:1、绿按钮 #07C160 上白字 3.9:1（大字按钮达标 AA Large）、按住说话条全宽 100%（好按）</td></tr>
+  </table>
+
+  <footer>
+    仿真依据：100 位 55–92 岁虚拟用户 × 8 任务。头号摩擦"等待无反馈"与"自创交互不会用"已全部对齐微信肌肉记忆修复。<br>
+    确认本稿方向后，我会把以上规范落地为真实小程序代码（WXSS token + WXML 结构 + JS 交互），并保持全部适老化校验通过。
+  </footer>
+</div>
+
+<script>
+const ICONS = {
+  back: `<svg viewBox="0 0 12 12" fill="none"><path d="M8 1 L3 6 L8 11" stroke="#1a1a1a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+  mic: `<svg viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="12" rx="3" fill="currentColor"/><path d="M5 11a7 7 0 0 0 14 0" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/><rect x="11" y="18" width="2" height="4" rx="1" fill="currentColor"/></svg>`,
+  play: `<svg viewBox="0 0 12 12"><path d="M2 1 L11 6 L2 11 Z" fill="currentColor"/></svg>`,
+  timeline: `<svg viewBox="0 0 24 24" fill="none"><circle cx="5" cy="6" r="2.4" fill="#24648F"/><circle cx="5" cy="18" r="2.4" fill="#24648F"/><path d="M5 8.4 V15.6" stroke="#24648F" stroke-width="2" stroke-linecap="round"/><circle cx="17" cy="12" r="2.4" fill="#4A9BD1"/><path d="M7.4 12 H14.6" stroke="#4A9BD1" stroke-width="2" stroke-linecap="round"/></svg>`,
+  cloud: `<svg viewBox="0 0 24 24"><path d="M7 18a4 4 0 0 1 0-8 5 5 0 0 1 9.6-1.2A3.6 3.6 0 0 1 17.5 18Z" fill="#8FB6CE"/></svg>`,
+  photo: `<svg viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="14" rx="2.5" stroke="#24648F" stroke-width="1.8"/><circle cx="8.5" cy="10" r="1.8" fill="#24648F"/><path d="M5 17 L10 12 L14 16 L17 13.5 L19 15.5" stroke="#24648F" stroke-width="1.8" stroke-linejoin="round"/></svg>`,
+  flag: `<svg viewBox="0 0 24 24"><rect x="5" y="3" width="2.2" height="18" rx="1.1" fill="#24648F"/><path d="M8 4.5 L19 7.5 L8 12.5 Z" fill="#24648F"/></svg>`,
+  edit: `<svg viewBox="0 0 24 24" fill="none"><path d="M4 20 L5 16 L16.5 4.5 a1.8 1.8 0 0 1 2.5 0 l0.5 0.5 a1.8 1.8 0 0 1 0 2.5 L8 19 Z" stroke="#24648F" stroke-width="1.8" stroke-linejoin="round"/></svg>`,
+  calendar: `<svg viewBox="0 0 24 24" fill="none"><rect x="3.5" y="5" width="17" height="15" rx="2.5" stroke="#24648F" stroke-width="1.8"/><path d="M3.5 9.5 H20.5 M8 3 V6 M16 3 V6" stroke="#24648F" stroke-width="1.8" stroke-linecap="round"/><circle cx="8" cy="14" r="1.4" fill="#24648F"/><circle cx="12" cy="14" r="1.4" fill="#24648F"/></svg>`,
+  folder: `<svg viewBox="0 0 24 24" fill="none"><path d="M3.5 6.5 a2 2 0 0 1 2-2 h4 l2 2.5 h7 a2 2 0 0 1 2 2 v9 a2 2 0 0 1-2 2 h-13 a2 2 0 0 1-2-2 Z" stroke="#24648F" stroke-width="1.8" stroke-linejoin="round"/></svg>`,
+  plus: `<svg viewBox="0 0 24 24" fill="none"><path d="M12 5 V19 M5 12 H19" stroke="#8a9aa5" stroke-width="2.2" stroke-linecap="round"/></svg>`
+};
+function whaleSVG(color){
+  return `<svg viewBox="0 0 64 40" style="width:100%;height:auto;display:block;">
+    <path d="M3 25 C3 15 13 8 27 8 C41 8 51 14 53 20 L63 12 L60 24 L63 33 L52 27 C48 33 38 37 26 37 C13 37 3 33 3 25 Z" fill="${color}"/>
+    <circle cx="17" cy="21" r="2.1" fill="#fff" opacity=".85"/></svg>`;
+}
+function bergSVG(a,b){
+  return `<svg viewBox="0 0 44 34" style="width:100%;height:auto;display:block;">
+    <polygon points="2,33 14,7 22,18 30,3 42,33" fill="${a}"/>
+    <polygon points="14,7 22,18 18,33 2,33" fill="${b}" opacity=".7"/></svg>`;
+}
+function navbar(title, back=true){
+  return `<div class="navbar">
+    <div class="side ${back?'back':''}">${back?ICONS.back:''}</div>
+    <div class="title">${title}</div>
+    <div class="side right"></div>
+  </div>`;
+}
+function capsule(){
+  return `<div class="capsule"><i></i><span class="ln"></span><i></i></div>`;
+}
+function photosHTML(){
+  const pics = [
+    "linear-gradient(135deg,#c9e5f4,#a5d3ea)",
+    "linear-gradient(135deg,#d8e9d2,#b5d8c5)",
+    "linear-gradient(135deg,#f2e2c9,#e6cfa8)"
+  ];
+  let h = "";
+  for(const p of pics){
+    h += `<div class="ph"><div style="position:absolute;inset:0;background:${p};"></div><div class="del">✕</div></div>`;
+  }
+  h += `<div class="ph add">${ICONS.plus}<span>添加照片</span></div>`;
+  return h;
+}
+function vbars(n){
+  return Array.from({length:n},(_,i)=>`<i style="animation-delay:${(i%7)*0.09}s;height:${30+((i*37)%60)}%"></i>`).join("");
+}
+
+const screens = [];
+function addScreen(label, html, demo){
+  screens.push({label, html, demo});
+}
+
+/* 屏1 主页（微信九宫格入口 + 海洋背景） */
+addScreen(
+  "屏 1 · 主页：微信九宫格入口<br>（图标+文字标签，海洋做背景装饰）",
+  `<div class="screen">
+    ${capsule()}
+    ${navbar("人生海海", false)}
+    <div class="content">
+      <div class="grid">
+        <div class="grid-hint">
+          <div class="h1" style="font-size:16.5px;font-weight:600;color:#22303a;">今天的海，想听您说说话</div>
+          <div class="h2">点下面的图标开始</div>
+        </div>
+        <div style="height:10px"></div>
+        <div class="grid-area">
+          <div class="g-item" style="color:#24648F;">
+            <div class="ic" style="background:#EAF2F8;">${ICONS.mic.replace(/currentColor/g,'#24648F')}</div>
+            <div class="t">说段回忆</div>
+            <div class="sub">按住说话就行</div>
+          </div>
+          <div class="g-item">
+            <div class="ic" style="background:#EDF6EE;">${ICONS.timeline}</div>
+            <div class="t">时间轴</div>
+            <div class="sub">回忆按年份排</div>
+          </div>
+          <div class="g-item">
+            <div class="ic" style="background:#F0F6FA;">${ICONS.cloud}</div>
+            <div class="t">云朵</div>
+            <div class="sub">不要的放这里</div>
+          </div>
+        </div>
+      </div>
+      <div class="sea-strip">
+        <div class="berg" style="left:18px;top:22%;">${bergSVG("rgba(255,255,255,.92)","#cfe3ef")}</div>
+        <div class="berg" style="right:20px;top:52%;width:26px;">${bergSVG("rgba(255,255,255,.85)","#c3dcec")}</div>
+        <div class="berg" style="left:38%;top:68%;width:24px;">${bergSVG("rgba(255,255,255,.8)","#bcd7e8")}</div>
+        <div class="whale">${whaleSVG("#6FA8CE")}</div>
+        <div style="position:absolute;left:0;right:0;bottom:10px;text-align:center;font-size:11px;color:#35688c;">鲸鱼杭航在海里等您</div>
+      </div>
+    </div>
+  </div>`,
+  "入口=微信「发现」页同款九宫格：图标+下方文字。操作不再藏在海面浮动胶囊里。"
+);
+
+/* 屏2 录音（微信按住说话） */
+addScreen(
+  "屏 2 · 录音：微信「按住说话」同款<br>（按住说话条、语音气泡、松手即出文字）",
+  `<div class="screen">
+    ${capsule()}
+    ${navbar("说给杭航听")}
+    <div class="content">
+      <div class="chat">
+        <div class="timec">下午 3:42</div>
+        <div class="msg left">
+          <div class="avatar" style="background:#EAF2F8;">🐳</div>
+          <div class="body">
+            <div class="bubble" style="font-size:14px;color:#555;">想说什么就说，说完松手，我帮您记下来</div>
+          </div>
+        </div>
+        <div class="msg right">
+          <div class="avatar" style="background:#C4E3F3;">妈</div>
+          <div class="body">
+            <div class="bubble voice">
+              <div class="vv">${ICONS.play.replace(/currentColor/g,'#3f7f2c')}</div>
+              <div class="vbars">${vbars(14)}</div>
+              <div class="dur">12"</div>
+            </div>
+            <div class="meta" style="text-align:right;">已转成文字，点气泡可修改</div>
+          </div>
+        </div>
+        <div class="msg right">
+          <div class="avatar" style="background:#C4E3F3;">妈</div>
+          <div class="body">
+            <div class="bubble">我小时候住在海边，每天天不亮就跟着外婆去赶海，捡小螃蟹、拾贝壳……</div>
+          </div>
+        </div>
+      </div>
+      <div class="recording-bar">
+        <div class="hint"><span>最长可说 <b>60 秒</b></span><span>说错了？松手后点气泡修改</span></div>
+        <div class="holdbar" id="holdbar1">按住 说话<div class="sub">松手就发出去</div></div>
+      </div>
+    </div>
+  </div>`,
+  "「按住 说话」就是微信原句。绿气泡+秒数=正在录音；松手自动转文字进同一条气泡，可点可改。"
+);
+
+/* 屏3 修改+配图（cell 列表 + 微信键盘栏） */
+addScreen(
+  "屏 3 · 修改文字 + 配照片<br>（微信列表 cell + 底部键盘栏同款布局）",
+  `<div class="screen">
+    ${capsule()}
+    ${navbar("变成冰山")}
+    <div class="content">
+      <div class="cells">
+        <div class="textarea-wrap">
+          <div style="font-size:12.5px;color:#8a9aa5;margin-bottom:7px;">转成文字了，有错字点着改：</div>
+          <textarea>我小时候住在海边，每天天不亮就跟着外婆去赶海，捡小螃蟹、拾贝壳……</textarea>
+        </div>
+        <div class="tools">
+          <div class="tl" style="color:#1f7a4d;">✓ 已自动存草稿，关掉不会丢</div>
+        </div>
+        <div class="cell">
+          <div class="c-ic">${ICONS.photo}</div>
+          <div class="c-t">添加照片</div>
+          <div class="c-v">最多 3 张</div>
+          <div class="arrow">›</div>
+        </div>
+        <div style="padding:2px 15px 14px;">
+          <div class="photo-row" style="padding:0;">${photosHTML()}</div>
+        </div>
+      </div>
+      <div style="flex:1;"></div>
+      <div class="wxkeyboard">
+        <div class="kbtn warn">不录了</div>
+        <div class="kbtn primary" id="publish1">变成冰山</div>
+      </div>
+    </div>
+  </div>`,
+  "改字=微信输入框习惯（点文字即改，绿条提示已存草稿）；配图=微信发图同款九宫格缩略图；底部=微信键盘「取消/发送」同款布局。"
+);
+
+/* 屏4 确认弹窗（微信居中 modal） */
+addScreen(
+  "屏 4 · 确认弹窗：微信居中 Modal<br>（黑遮罩 + 白卡 + 左右分区按钮 + 绿确认）",
+  `<div class="screen">
+    ${capsule()}
+    ${navbar("变成冰山")}
+    <div class="content" style="background:#F2F5F7;filter:brightness(.97);">
+      <div class="cells" style="margin-top:8px;">
+        <div class="cell">
+          <div class="c-ic">${ICONS.calendar}</div>
+          <div class="c-t">大概是这个时候</div>
+          <div class="c-v">1968年前后</div>
+          <div class="arrow">›</div>
+        </div>
+        <div class="cell">
+          <div class="c-ic">${ICONS.folder}</div>
+          <div class="c-t">放进哪片海</div>
+          <div class="c-v">童年</div>
+          <div class="arrow">›</div>
+        </div>
+      </div>
+      <div style="padding:0 12px;">
+        <div class="photo-row" style="padding:0;">${photosHTML()}</div>
+      </div>
+      <div style="flex:1;"></div>
+      <div class="wxkeyboard">
+        <div class="kbtn warn">不录了</div>
+        <div class="kbtn primary">变成冰山</div>
+      </div>
+      <div class="modal-mask"></div>
+      <div class="modal">
+        <div class="m-title">要变成冰山吗？</div>
+        <div class="m-body">发出去以后，这段回忆就<b>永远留在海里</b>了<br>（不喜欢随时可以移到云朵）</div>
+        <div class="m-actions">
+          <div class="m-btn">再看看</div>
+          <div class="m-btn primary">变成冰山</div>
+        </div>
+      </div>
+    </div>
+  </div>`,
+  "结构与 wx.showModal 完全一致：黑遮罩、白圆角卡、标题居中、按钮左右分区。文案保持大白话（再看看 / 变成冰山）。"
+);
+
+/* 屏5 发布成功（微信 toast） */
+addScreen(
+  "屏 5 · 发布反馈：微信 Toast<br>（底部黑底白字 + 绿圈✓，2 秒自动消失）",
+  `<div class="screen">
+    ${capsule()}
+    ${navbar("说给杭航听")}
+    <div class="content">
+      <div class="chat">
+        <div class="timec">下午 3:43</div>
+        <div class="msg right">
+          <div class="avatar" style="background:#C4E3F3;">妈</div>
+          <div class="body">
+            <div class="bubble">我小时候住在海边，每天天不亮就跟着外婆去赶海，捡小螃蟹、拾贝壳……</div>
+            <div class="meta" style="text-align:right;color:#8a9aa5;">↩ 已入海 · 冰山</div>
+          </div>
+        </div>
+        <div class="msg left">
+          <div class="avatar" style="background:#EAF2F8;">🐳</div>
+          <div class="body">
+            <div class="bubble" style="font-size:14px;color:#555;">已经帮您放进童年的海里了，哪天想再看，点「时间轴」就能找到</div>
+          </div>
+        </div>
+      </div>
+      <div class="toast">
+        <div class="tick">✓</div>
+        <div>已入海</div>
+      </div>
+      <div class="recording-bar">
+        <div class="hint"><span></span><span>想再说一段？</span></div>
+        <div class="holdbar" id="holdbar2">按住 说话<div class="sub">松手就发出去</div></div>
+      </div>
+    </div>
+  </div>`,
+  "成功=微信发图片打勾的体验：不打断、不弹窗、2 秒消失。聊天流里留一条「已入海」可追溯。"
+);
+
+/* 屏6 时间轴（微信列表） */
+addScreen(
+  "屏 6 · 时间轴：微信「我的」页同款列表<br>（左图标 + 标题 + 右侧灰字 + 箭头）",
+  `<div class="screen">
+    ${capsule()}
+    ${navbar("时间轴")}
+    <div class="content" style="overflow:auto;">
+      <div class="timec" style="text-align:center;font-size:11px;color:#9aa5ad;padding:8px 0 10px;">回忆从远到近排好了</div>
+      <div class="cells" style="margin:0 0 10px;">
+        <div class="cell">
+          <div class="c-ic">${ICONS.folder}</div>
+          <div class="c-t">
+            <div style="font-size:11px;color:#9aa5ad;">1968年前后 · 童年</div>
+            <div style="font-size:15.5px;color:#191919;">赶海拾贝的清晨</div>
+          </div>
+          <div class="c-v">12"</div>
+          <div class="arrow">›</div>
+        </div>
+        <div class="cell">
+          <div class="c-ic">${ICONS.flag}</div>
+          <div class="c-t">
+            <div style="font-size:11px;color:#9aa5ad;">1985年 · 少年</div>
+            <div style="font-size:15.5px;color:#191919;">第一次坐火车去省城</div>
+          </div>
+          <div class="c-v">38"</div>
+          <div class="arrow">›</div>
+        </div>
+        <div class="cell">
+          <div class="c-ic">${ICONS.folder}</div>
+          <div class="c-t">
+            <div style="font-size:11px;color:#9aa5ad;">2023年 · 新的开始</div>
+            <div style="font-size:15.5px;color:#191919;">小孙女出生那天</div>
+          </div>
+          <div class="c-v">52"</div>
+          <div class="arrow">›</div>
+        </div>
+      </div>
+      <div style="text-align:center;font-size:11.5px;color:#9aa5ad;padding:6px 0 14px;">点任意一条，就能重听当时的录音</div>
+    </div>
+  </div>`,
+  "结构与微信「我的」页/通讯录完全同构：cell 行高加大到 66px，点一行即进详情。"
+);
+
+const phones = document.getElementById("phones");
+phones.innerHTML = screens.map((sc,i)=>`
+  <div class="phone-col">
+    <div class="phone">${sc.html}</div>
+    <div class="phone-label">${sc.label}</div>
+    <div class="demo-note">${sc.demo}</div>
+  </div>
+`).join("");
+
+/* 交互演示：按住说话 → 显示按压态提示 */
+document.addEventListener("mousedown",e=>{
+  const hb = e.target.closest(".holdbar");
+  if(!hb) return;
+  if(hb.dataset.press) return;
+  hb.dataset.press = "1";
+  const old = hb.innerHTML;
+  hb.innerHTML = `<div style="font-size:17px;font-weight:600;color:#0a5c2f;">松开 发送</div><div class="sub">正在听您说…</div>`;
+  const up = ()=>{
+    hb.innerHTML = old;
+    delete hb.dataset.press;
+    window.removeEventListener("mouseup",up);
+  };
+  window.addEventListener("mouseup",up);
+});
+
+/* 交互演示：发布按钮 → 微信式 loading → toast */
+document.addEventListener("click",e=>{
+  const pb = e.target.closest(".kbtn.primary,.m-btn.primary");
+  if(!pb || pb.dataset.loading) return;
+  pb.dataset.loading = "1";
+  const old = pb.textContent;
+  pb.textContent = "正在生成冰山…";
+  setTimeout(()=>{ pb.textContent = "✓ 已入海"; },1300);
+  setTimeout(()=>{ pb.textContent = old; delete pb.dataset.loading; },2600);
+});
+</script>
+</body>
+</html>

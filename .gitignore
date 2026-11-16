@@ -35,3 +35,7 @@ project.private.config.json
 /tmp/
 dist/
 *.log
+
+# 小程序自动化脚本本地状态（版本号计数，各机器独立，不入库）
+.mp-version
+scripts/*.log

@@ -68,6 +68,9 @@
     <view class="rec-status">
       <view class="rec-dot"></view>
       <text class="rec-state">杭航正在听您说…</text>
+      <!-- 实时识别状态：失败可见，不再静默降级让用户误以为在流式 -->
+      <text class="asr-hint" wx:if="{{asrHint === 'connecting'}}">正在连线，字马上就来</text>
+      <text class="asr-hint asr-hint-warn" wx:elif="{{asrHint === 'offline'}}">字暂时不出来，别急，说完松手会自动整理好</text>
     </view>
 
     <view class="transcript-box">

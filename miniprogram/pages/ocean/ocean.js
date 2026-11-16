@@ -30,6 +30,7 @@ Page({
     recording: false,
     recordMode: '',      // 'tap' 点按 | 'hold' 长按鲸鱼
     transcript: '',
+    asrHint: '',         // ''=实时识别正常 | 'connecting'=连接中 | 'offline'=没连上（松手后自动整理）
     elapsed: 0,
     countdown: 0,
     // 发布卡片
@@ -76,6 +77,8 @@ Page({
     this.initCanvas()
     this.refreshData()
     this.setData({ drafts: draft.list() })
+    // 预热实时识别连接：妈妈点录音时不用再等建连，开口即出字
+    this.preheatAsr()
   },
 
   onHide () {
@@ -83,13 +86,78 @@ Page({
     if (this.data.recording) this.saveDraftAndStop()
     this.stopRender()
     this.stopPreviewVoice()
+    // 后台会杀 socket，回前台 onShow 会重新预热，这里主动释放避免僵尸连接
+    this.releaseAsr()
   },
 
   onUnload () {
     this.stopRender()
-    this.asr && this.asr.close()
+    this.releaseAsr()
     this.stopPreviewVoice()
   },
+
+  // ==================== 实时识别：预热与复用 ====================
+  // 预热一条 ASR 连接放着。真机上 socket 会被系统回收，所以预热失败不报错、
+  // 只标记 asrHint='connecting'，等真正点录音时再确保连上。
+  async preheatAsr () {
+    if (this.asr && (this.asr.isReady || this.asr.state === 'connecting')) return
+    const app = getApp()
+    if (!app.globalData.asrConfig) await app.silentLogin().catch(() => {})
+    const cfg = api.getAsrConfig()
+    if (!cfg || !cfg.key) { this.setData({ asrHint: 'offline' }); return }
+    if (this.asr) { try { this.asr.close() } catch (e) {} }
+    const { AsrStream } = require('../../utils/asr')
+    this.asr = new AsrStream(cfg)
+    this.bindAsr(this.asr)
+    this.setData({ asrHint: 'connecting' })
+    try {
+      const ok = await this.asr.connect()
+      if (ok) { this.asr.startKeepAlive(); this.setData({ asrHint: '' }) }
+      else this.setData({ asrHint: 'offline' })
+    } catch (e) {
+      console.warn('[ocean] 预热连接失败，点录音时会重试:', e)
+      this.setData({ asrHint: 'offline' })
+    }
+  },
+
+  // 统一绑定 ASR 事件：partial/sentence 走节流上屏，error 让界面可见
+  bindAsr (asr) {
+    asr.on('partial', (text) => this.flushTranscript(text))
+    asr.on('sentence', (text) => this.flushTranscript(text, true))
+    asr.on('error', (e) => {
+      // 录音中报错才提示，且不打断录音（松手后走兜底）
+      if (this.data.recording) this.setData({ asrHint: 'offline' })
+      console.warn('[asr] error:', e && e.message)
+    })
+  },
+
+  // setData 节流：识别每 100ms 内最多刷一次屏，force=true 立即刷（定稿用）
+  flushTranscript (text, force) {
+    this._pendingText = text
+    if (force) { this.applyTranscript(); return }
+    const now = Date.now()
+    if (now - (this._lastTranscriptAt || 0) >= 100) {
+      this.applyTranscript()
+    } else if (!this._transcriptTimer) {
+      this._transcriptTimer = setTimeout(() => {
+        this._transcriptTimer = null
+        this.applyTranscript()
+      }, 100)
+    }
+  },
+
+  applyTranscript () {
+    this._lastTranscriptAt = Date.now()
+    if (this._pendingText != null) this.setData({ transcript: this._pendingText })
+  },
+
+  releaseAsr () {
+    if (this._transcriptTimer) { clearTimeout(this._transcriptTimer); this._transcriptTimer = null }
+    // 把还没刷到界面上的最后一点文字先落地，草稿才不会少字
+    if (this._pendingText != null) { this.setData({ transcript: this._pendingText }) }
+    if (this.asr) { try { this.asr.close() } catch (e) {} this.asr = null }
+  },
+
 
   // ==================== 数据 ====================
   async refreshData () {
@@ -360,8 +428,6 @@ Page({
       await app.silentLogin().catch(() => {})
     }
     const cfg = api.getAsrConfig()
-    // 识别服务没就绪也照样能录：松手后走云函数兜底转写
-    if (!cfg || !cfg.key) console.warn('ASR 配置缺失，将走兜底转写')
 
     // 权限
     try {
@@ -372,23 +438,35 @@ Page({
     }
     if (wx.vibrateShort) wx.vibrateShort({ type: 'medium' })
 
-    // ASR 流（连不上也不阻塞录音）
-    if (cfg && cfg.key) {
+    // ===== 实时识别：绝不让建连挡住开口 =====
+    // 预热成功 → 复用连接（省 300~400ms）；没有 → 边录边连，
+    // 这期间录到的帧由 asr.js 缓存，连上后一次性补发，一个字都不丢。
+    if (this.asr && this.asr.isReady) {
+      this.asr.reset()
+      // 录音期间停掉保活：别让静音保活帧混进真实语音
+      this.asr.stopKeepAlive()
+      this.setData({ asrHint: '' })
+    } else if (cfg && cfg.key) {
+      this.releaseAsr()
       const { AsrStream } = require('../../utils/asr')
       this.asr = new AsrStream(cfg)
-      this.asr.on('partial', (text) => this.setData({ transcript: text }))
-      this.asr.on('sentence', (text) => this.setData({ transcript: text }))
-      this.asr.on('error', () => { /* 静默：识别断了不影响录音 */ })
-      try {
-        await this.asr.connect()
-      } catch (e) {
-        console.error('ASR 连接失败，将走云函数兜底转写:', e)
-        this.asr.close()
-        this.asr = null
-      }
+      this.bindAsr(this.asr)
+      this.setData({ asrHint: 'connecting' })
+      // 不 await：连接与录音并行
+      this.asr.connect().then((ok) => {
+        if (this.data.recording) this.setData({ asrHint: ok ? '' : 'offline' })
+      }).catch(() => {
+        if (this.data.recording) this.setData({ asrHint: 'offline' })
+      })
+    } else {
+      // 连配置都没拿到（login 云函数没通）：照样能录，松手后走云函数兜底
+      console.warn('[ocean] ASR 配置缺失，将走兜底转写')
+      this.asr = null
+      this.setData({ asrHint: 'offline' })
     }
 
     this.setData({ recording: true, recordMode: mode, transcript: '', elapsed: 0, countdown: 0 })
+    this._pendingText = null
     this.recorder.start({
       onFrame: (buf) => this.asr && this.asr.sendFrame(buf),
       onTick: (s) => this.setData({ elapsed: s }),
@@ -396,6 +474,8 @@ Page({
       onStop: async (wavPath, durationMs, err) => {
         this.setData({ recording: false, countdown: 0, elapsed: 0, recordMode: '' })
         this.whale.frozen = false
+        // 松手瞬间先把界面上已有的字定住（节流可能还压着最后一小段）
+        this.applyTranscript()
 
         // 用户主动中止 / 切后台：仍然把已录到的音频+文字落地成草稿
         if (this.cancelRequested) {
@@ -422,15 +502,26 @@ Page({
           return
         }
 
-        let finalText = ''
+        // 界面上的字在录音期间已经实时显示了，这里只收最后一句的尾巴
+        let finalText = (this.data.transcript || '').trim()
         if (this.asr) {
-          finalText = await this.asr.finish()
-          this.asr.close()
-          this.asr = null
+          const live = this.asr.isReady
+          const t = await this.asr.finish(1500)
+          console.log('[ocean] ASR report:', JSON.stringify(this.asr.report()))
+          if (t && t.trim().length > finalText.length) finalText = t.trim()
+          if (!live && !finalText) console.warn('[ocean] 实时流未就绪，走云函数兜底')
+          if (live) {
+            // 连接留给下一轮复用：重新开保活，下轮开口零建连延迟
+            this.asr.startKeepAlive()
+          } else {
+            this.releaseAsr()
+            this.preheatAsr()
+          }
         }
         if ((!finalText || !finalText.trim()) && wavPath) {
           finalText = await this.fallbackTranscribe(wavPath)
         }
+        this.setData({ transcript: finalText })
         this.openPreview(wavPath, finalText || this.data.transcript)
       }
     })
