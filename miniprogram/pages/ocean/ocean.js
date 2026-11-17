@@ -444,8 +444,8 @@ Page({
     this.setData({
       preview: {
         wavPath, text: text || '', rawText: text || '', audioOnly: !hasText && !!wavPath,
-        timeOptions: ['说不清了'], timeIndex: 0,
-        zoneOptions: ['新的开始'], zoneIndex: 0,
+        timeOptions: ['童年', '上学时', '工作时', '结婚后', '近些年', '说不清了'], timeIndex: 5,
+        zoneOptions: ['童年', '结婚', '孩子', '工作', '晚年', '新的开始'], zoneIndex: 5,
         photos: [], previewVoicePlaying: false
       }
     })
@@ -476,8 +476,8 @@ Page({
     if (!p || p.wavPath !== wavPath) return
     const upd = { 'preview.rawText': finalText, 'preview.audioOnly': !finalText && !!wavPath }
     if (finalText) upd['preview.text'] = (r && r.title) ? `${r.title}\n${finalText}` : finalText
-    if (r && r.timeOptions && r.timeOptions.length) { upd['preview.timeOptions'] = r.timeOptions; upd['preview.timeIndex'] = 0 }
-    if (r && r.zoneOptions && r.zoneOptions.length) { upd['preview.zoneOptions'] = r.zoneOptions; upd['preview.zoneIndex'] = 0 }
+    if (r && r.timeOptions && r.timeOptions.length) { upd['preview.timeOptions'] = r.timeOptions.slice(0, 6); upd['preview.timeIndex'] = 0 }
+    if (r && r.zoneOptions && r.zoneOptions.length) { upd['preview.zoneOptions'] = r.zoneOptions.slice(0, 6); upd['preview.zoneIndex'] = 0 }
     this.setData(upd)
   },
 
@@ -490,8 +490,23 @@ Page({
     })
   },
 
-  pickTime (e) { this.setData({ 'preview.timeIndex': Number(e.currentTarget.dataset.i) }) },
-  pickZone (e) { this.setData({ 'preview.zoneIndex': Number(e.currentTarget.dataset.i) }) },
+  // 微信式：点 cell 弹 action sheet 选择（始终有真实预设可选）
+  pickTimeSheet () {
+    const p = this.data.preview
+    if (!p) return
+    wx.showActionSheet({
+      itemList: (p.timeOptions || []).slice(0, 6),
+      success: (r) => this.setData({ 'preview.timeIndex': r.tapIndex })
+    })
+  },
+  pickZoneSheet () {
+    const p = this.data.preview
+    if (!p) return
+    wx.showActionSheet({
+      itemList: (p.zoneOptions || []).slice(0, 6),
+      success: (r) => this.setData({ 'preview.zoneIndex': r.tapIndex })
+    })
+  },
 
   stopPreviewVoice () {
     if (this.previewAudio) {

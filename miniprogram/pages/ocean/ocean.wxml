@@ -122,59 +122,43 @@
   <!-- ============ 发布卡片 ============ -->
   <view class="preview-mask" wx:if="{{preview}}">
     <view class="preview-card safe-bottom">
-      <view class="preview-head">
-        <text class="preview-title">这段回忆</text>
-        <text class="preview-hint">看一遍，有错字可以直接改</text>
-      </view>
-
       <textarea class="preview-text" value="{{preview.text}}" maxlength="2000"
         auto-height cursor-spacing="120" show-confirm-bar="{{false}}"
         bindinput="onPreviewInput"
-        placeholder="没听清的话，也可以在这里打字补上"></textarea>
+        placeholder="这一刻的想法…（有错字可以直接改）"></textarea>
+
+      <!-- 照片：微信式九宫格，裸 + 添加，无多余解释文案 -->
+      <view class="photo-grid">
+        <view class="photo-cell" wx:for="{{preview.photos}}" wx:key="*this">
+          <image src="{{item}}" mode="aspectFill" class="photo-img"
+            data-i="{{index}}" bindtap="previewDraftPhoto" />
+          <view class="photo-del" hover-class="del-hover" hover-stay-time="80"
+            data-i="{{index}}" catchtap="removePhoto">
+            <text class="photo-del-x">×</text>
+          </view>
+        </view>
+        <view class="photo-add" wx:if="{{preview.photos.length < 9}}"
+          hover-class="btn-hover" hover-stay-time="80" bindtap="addPhoto">
+          <text class="photo-add-plus">＋</text>
+        </view>
+      </view>
+
+      <!-- 微信式 cell：什么时候 / 哪片海，点开选择（有真实预设可选） -->
+      <view class="meta-cell" hover-class="cell-hover" hover-stay-time="80" bindtap="pickTimeSheet">
+        <text class="meta-label">什么时候</text>
+        <text class="meta-value">{{preview.timeOptions[preview.timeIndex]}}</text>
+        <text class="meta-arrow">›</text>
+      </view>
+      <view class="meta-cell" hover-class="cell-hover" hover-stay-time="80" bindtap="pickZoneSheet">
+        <text class="meta-label">哪片海</text>
+        <text class="meta-value">{{preview.zoneOptions[preview.zoneIndex]}}</text>
+        <text class="meta-arrow">›</text>
+      </view>
 
       <view class="voice-check" wx:if="{{preview.wavPath}}"
         hover-class="btn-hover" hover-stay-time="80" bindtap="playPreviewVoice">
         <view class="vc-btn {{previewVoicePlaying ? 'vc-on' : ''}}"></view>
         <text class="vc-text">{{previewVoicePlaying ? '正在播放，点这里停' : '听听我自己的声音'}}</text>
-      </view>
-
-      <view class="option-group" wx:if="{{preview.timeOptions.length}}">
-        <text class="option-label">大概是这个时候</text>
-        <view class="chips">
-          <view wx:for="{{preview.timeOptions}}" wx:key="*this"
-            class="chip {{preview.timeIndex === index ? 'chip-on' : ''}}"
-            hover-class="chip-hover" hover-stay-time="80"
-            data-i="{{index}}" bindtap="pickTime">{{item}}</view>
-        </view>
-      </view>
-
-      <view class="option-group" wx:if="{{preview.zoneOptions.length}}">
-        <text class="option-label">放进哪片海</text>
-        <view class="chips">
-          <view wx:for="{{preview.zoneOptions}}" wx:key="*this"
-            class="chip {{preview.zoneIndex === index ? 'chip-on' : ''}}"
-            hover-class="chip-hover" hover-stay-time="80"
-            data-i="{{index}}" bindtap="pickZone">{{item}}</view>
-        </view>
-      </view>
-
-      <view class="photo-group">
-        <text class="option-label">配上照片（点图片看大图，点右上角 × 删掉）</text>
-        <view class="photo-grid">
-          <view class="photo-cell" wx:for="{{preview.photos}}" wx:key="*this">
-            <image src="{{item}}" mode="aspectFill" class="photo-img"
-              data-i="{{index}}" bindtap="previewDraftPhoto" />
-            <view class="photo-del" hover-class="del-hover" hover-stay-time="80"
-              data-i="{{index}}" catchtap="removePhoto">
-              <text class="photo-del-x">×</text>
-            </view>
-          </view>
-          <view class="photo-add" wx:if="{{preview.photos.length < 9}}"
-            hover-class="btn-hover" hover-stay-time="80" bindtap="addPhoto">
-            <text class="photo-add-plus">＋</text>
-            <text class="photo-add-text">加照片</text>
-          </view>
-        </view>
       </view>
 
       <view class="preview-actions">

@@ -107,10 +107,23 @@
 /* ============ 发布卡片（沿用定稿）============ */
 .preview-mask { position: absolute; left: 0; right: 0; top: 0; bottom: 0; z-index: 30; background: rgba(15,58,92,0.5); display: flex; align-items: flex-end; }
 .preview-card { width: 100%; background: #fff; border-radius: var(--radius-xl) var(--radius-xl) 0 0; padding: 40rpx 36rpx 40rpx; box-sizing: border-box; max-height: 88vh; overflow-y: auto; }
-.preview-head { margin-bottom: 20rpx; }
-.preview-title { display: block; font-size: var(--fs-xl); font-weight: 500; color: var(--c-text); }
-.preview-hint { display: block; font-size: var(--fs-sm); color: var(--c-text-2); margin-top: 8rpx; }
 .preview-text { width: 100%; min-height: 200rpx; font-size: var(--fs-lg); line-height: 1.7; color: var(--c-text); padding: 28rpx; box-sizing: border-box; background: var(--c-soft); border-radius: var(--radius-md); border: 2rpx solid #DCE9F2; }
+/* 照片九宫格：微信式，灰底裸 + ，无解释文案 */
+.photo-grid { display: flex; flex-wrap: wrap; gap: 16rpx; margin-top: 24rpx; }
+.photo-cell { position: relative; width: 200rpx; height: 200rpx; }
+.photo-img { width: 200rpx; height: 200rpx; border-radius: 8rpx; }
+.photo-del { position: absolute; top: -16rpx; right: -16rpx; width: 72rpx; height: 72rpx; border-radius: 50%; background: var(--c-danger); border: 4rpx solid #fff; display: flex; align-items: center; justify-content: center; box-sizing: border-box; }
+.photo-del.del-hover { background: #9E2B20; transform: scale(1.08); }
+.photo-del-x { color: #fff; font-size: 40rpx; line-height: 1; margin-top: -4rpx; }
+.photo-add { width: 200rpx; height: 200rpx; border-radius: 8rpx; background: #F2F3F5; display: flex; align-items: center; justify-content: center; box-sizing: border-box; }
+.photo-add.btn-hover { background: #E5E6E8; }
+.photo-add-plus { color: #9AA0A6; font-size: 72rpx; line-height: 1; font-weight: 300; }
+/* 微信式 meta cell：左标签 / 右值 / 箭头，点开 action sheet */
+.meta-cell { display: flex; align-items: center; min-height: 96rpx; padding: 0 8rpx; border-bottom: 2rpx solid rgba(31, 100, 120, 0.08); }
+.meta-cell.cell-hover { background: var(--c-soft); }
+.meta-label { flex: 0 0 160rpx; color: var(--c-text); font-size: var(--fs-md); }
+.meta-value { flex: 1; text-align: right; color: var(--c-text-2); font-size: var(--fs-md); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.meta-arrow { color: #B0B8BF; font-size: 40rpx; margin-left: 12rpx; line-height: 1; }
 .voice-check { display: flex; align-items: center; gap: 20rpx; min-height: 96rpx; margin-top: 20rpx; padding: 0 28rpx; background: var(--c-primary-soft); border-radius: var(--radius-md); }
 .voice-check.btn-hover { background: #DCE9F2; }
 .vc-btn { width: 56rpx; height: 56rpx; border-radius: 50%; background: var(--c-primary); position: relative; flex-shrink: 0; }
@@ -118,24 +131,6 @@
 .vc-on { background: var(--c-danger); }
 .vc-on::after { border: none; width: 18rpx; height: 22rpx; background: #fff; top: 50%; left: 50%; transform: translate(-50%,-50%); border-radius: 3rpx; }
 .vc-text { color: var(--c-primary); font-size: var(--fs-sm); font-weight: 500; }
-.option-group { margin-top: 32rpx; }
-.option-label { display: block; font-size: var(--fs-sm); color: var(--c-text-2); font-weight: 500; }
-.chips { display: flex; flex-wrap: wrap; gap: 16rpx; margin-top: 16rpx; }
-.chip { display: flex; align-items: center; justify-content: center; min-height: 88rpx; padding: 0 36rpx; background: var(--c-primary-soft); color: var(--c-primary); border: 2rpx solid transparent; border-radius: 44rpx; font-size: var(--fs-sm); font-weight: 500; box-sizing: border-box; }
-.chip.chip-hover { background: #DCE9F2; }
-.chip-on { background: var(--c-primary); color: #fff; border-color: var(--c-primary-deep); }
-.chip-on::before { content: '✓ '; font-weight: 500; }
-.photo-group { margin-top: 32rpx; }
-.photo-grid { display: flex; flex-wrap: wrap; gap: 20rpx; margin-top: 16rpx; }
-.photo-cell { position: relative; width: 200rpx; height: 200rpx; }
-.photo-img { width: 200rpx; height: 200rpx; border-radius: var(--radius-md); }
-.photo-del { position: absolute; top: -16rpx; right: -16rpx; width: 72rpx; height: 72rpx; border-radius: 50%; background: var(--c-danger); border: 4rpx solid #fff; display: flex; align-items: center; justify-content: center; box-sizing: border-box; }
-.photo-del.del-hover { background: #9E2B20; transform: scale(1.08); }
-.photo-del-x { color: #fff; font-size: 40rpx; line-height: 1; margin-top: -4rpx; }
-.photo-add { width: 200rpx; height: 200rpx; border-radius: var(--radius-md); background: var(--c-primary-soft); border: 2rpx dashed #A9C4D8; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4rpx; box-sizing: border-box; }
-.photo-add.btn-hover { background: #DCE9F2; }
-.photo-add-plus { color: var(--c-primary); font-size: 56rpx; line-height: 1; }
-.photo-add-text { color: var(--c-primary); font-size: var(--fs-xs); }
 .preview-actions { display: flex; gap: 24rpx; margin-top: 48rpx; }
 
 /* ============ 减少动态效果：全停，静态显示 ============ */
