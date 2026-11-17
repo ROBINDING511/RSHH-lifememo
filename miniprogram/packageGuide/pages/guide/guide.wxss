@@ -18,19 +18,18 @@
 
 .g-btns { margin-top: auto; width: 100%; display: flex; flex-direction: column; align-items: center; gap: 20rpx; padding-bottom: 24rpx; }
 .g-row { display: flex; gap: 24rpx; width: 100%; }
-.g-prev { flex: 0 0 240rpx; }
-.g-next { flex: 1; }
+.g-prev { flex: 1; height: 96rpx; line-height: 96rpx; background: linear-gradient(160deg, #D7E6E8, #C4DADD); color: var(--c-primary); }
+.g-next { flex: 1; height: 96rpx; line-height: 96rpx; }
 .g-next-full { width: 100%; }
 
 /* "跳过"要看得见、点得准 */
+/* 跳过 = 一句带下划线的话，不做按钮 */
 .g-skip {
-  min-height: 88rpx; padding: 0 40rpx;
-  display: flex; align-items: center; justify-content: center;
-  color: var(--c-primary); font-size: var(--fs-sm); font-weight: 500;
-  background: var(--c-card); border-radius: 44rpx;
-  border: 2rpx solid #BFD8D6; box-sizing: border-box;
+  padding: 8rpx 0;
+  color: var(--c-text-2); font-size: var(--fs-sm);
+  text-decoration: underline;
 }
-.g-skip.btn-hover { background: var(--c-primary-soft); }
+.g-skip.btn-hover { opacity: .65; }
 
 /* 年纪设置（生日/年龄/出生年 三选一） */
 .g-profile { width: 100%; margin-top: 24rpx; }
