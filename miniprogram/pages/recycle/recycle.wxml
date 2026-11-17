@@ -18,13 +18,15 @@
       bindtap="goOcean">回海洋看看</button>
   </view>
 
-  <scroll-view scroll-y class="list" wx:if="{{items.length}}">
+  <scroll-view scroll-y class="list" wx:if="{{items.length}}" enhanced show-scrollbar="{{false}}">
     <view class="cloud-card {{raining === item._id ? 'raining' : ''}}"
       wx:for="{{items}}" wx:key="_id">
-      <image class="cloud-img" src="/images/misc/cloud.png" mode="aspectFit" />
-      <view class="cloud-info">
-        <text class="cloud-title">{{item.title || '一段回忆'}}</text>
-        <text class="cloud-meta">{{item.zoneName}}海域{{item.memoryTime ? ' · ' + item.memoryTime : ''}}</text>
+      <view class="cloud-top">
+        <image class="cloud-img" src="/images/misc/cloud.png" mode="aspectFit" />
+        <view class="cloud-info">
+          <text class="cloud-title">{{item.title || '一段回忆'}}</text>
+          <text class="cloud-meta">{{item.zoneName}}之海{{item.memoryTime ? ' · ' + item.memoryTime : ''}}</text>
+        </view>
       </view>
       <button class="rain-btn" hover-class="rain-hover" hover-stay-time="80"
         data-id="{{item._id}}" bindtap="rain" disabled="{{raining === item._id}}">

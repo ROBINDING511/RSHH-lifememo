@@ -12,7 +12,7 @@
     <text class="tl-sub">一共 {{total}} 座冰山，点一下就能看</text>
   </view>
 
-  <scroll-view scroll-y class="tl-scroll">
+  <scroll-view scroll-y class="tl-scroll" enhanced show-scrollbar="{{false}}">
     <view class="tl-year" wx:for="{{years}}" wx:key="year" wx:for-item="y">
       <view class="year-badge">
         <text>{{y.year}}</text>
@@ -26,7 +26,7 @@
           </view>
           <view class="item-card">
             <text class="item-title">{{item.title}}</text>
-            <text class="item-meta">{{item.label}}{{item.label && item.zoneName ? ' · ' : ''}}{{item.zoneName}}海域</text>
+            <text class="item-meta">{{item.label}}{{item.label && item.zoneName ? ' · ' : ''}}{{item.zoneName}}之海</text>
           </view>
           <view class="item-arrow">›</view>
         </view>

@@ -11,7 +11,7 @@
       <image class="berg-icon" wx:if="{{iconFile}}" src="{{iconFile}}" mode="aspectFit" />
       <view class="berg-titles">
         <text class="berg-title">{{b.title}}</text>
-        <text class="berg-meta">{{b.memoryTime}} · {{b.zoneName}}海域</text>
+        <text class="berg-meta">{{b.memoryTime}} · {{b.zoneName}}之海</text>
       </view>
     </view>
   </view>
