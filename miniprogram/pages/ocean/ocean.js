@@ -51,6 +51,7 @@ Page({
     tintGradient: '',
     birthYear: null,
     whalePaused: false,
+    movableDisabled: false,   // 拖冰山时暂停海面平移
     // 录音（微信式按住说话 + 流式转写）
     recording: false,
     recordMode: '',      // 'hold' 按住（大按钮 / 鲸鱼）
@@ -254,11 +255,17 @@ Page({
       const g = regions.find((x) => x.key === stage.key) || regions[0]
       const layer = b.size === 'large' ? 'near' : b.size === 'small' ? 'far' : 'mid'
       const width = Math.round((layer === 'far' ? 25 : layer === 'mid' ? 41 : 56) * (SIZE_SCALE[b.size] || 1))
-      // 在该阶段海域内极坐标散点（四面八方）
-      const ang = (seed % 360) * Math.PI / 180
-      const rad = (((seed >> 3) % 100) / 100) * (g.r || 120) * 0.8
-      const left = g.cx + rad * Math.cos(ang) - width / 2
-      const top = g.cy + rad * Math.sin(ang) - width / 2
+      // 海域内位置：拖拽过的用保存的偏移，否则极坐标散点（四面八方）
+      let dx, dy
+      if (b.offX != null && b.offY != null) {
+        dx = b.offX * (g.r || 120); dy = b.offY * (g.r || 120)
+      } else {
+        const ang = (seed % 360) * Math.PI / 180
+        const rad = (((seed >> 3) % 100) / 100) * (g.r || 120) * 0.8
+        dx = rad * Math.cos(ang); dy = rad * Math.sin(ang)
+      }
+      const left = g.cx + dx - width / 2
+      const top = g.cy + dy - width / 2
       const swayDur = (8 + (seed % 40) / 10).toFixed(1)
       const swayDelay = (-(seed % 80) / 10).toFixed(1)
       const swayAnim = `sway ${swayDur}s ease-in-out ${swayDelay}s infinite`
@@ -307,6 +314,62 @@ Page({
   onBergTap (e) {
     const id = e.currentTarget.dataset.id
     if (id) wx.navigateTo({ url: `/pages/iceberg/iceberg?id=${id}` })
+  },
+
+  // 海面平移实时偏移（用于把触点换算成世界坐标）
+  onSeaChange (e) {
+    this._movX = e.detail.x
+    this._movY = e.detail.y
+  },
+  // 长按冰山进入拖拽（普通拖动仍是平移海面）
+  onBergDragStart (e) {
+    const id = e.currentTarget.dataset.id
+    this._dragId = id
+    this._dragIdx = Number(e.currentTarget.dataset.i)
+    this.setData({ movableDisabled: true })
+    if (wx.vibrateShort) wx.vibrateShort({ type: 'light' })
+    wx.showToast({ title: '拖到别的海，松手放下', icon: 'none', duration: 1600 })
+  },
+  onBergDragMove (e) {
+    if (!this._dragId || e.currentTarget.dataset.id !== this._dragId) return
+    const i = this._dragIdx
+    const b = this.data.bergs[i]
+    if (!b) return
+    const mx = this._movX != null ? this._movX : this.data.movX
+    const my = this._movY != null ? this._movY : this.data.movY
+    const wx_ = e.touches[0].clientX - mx
+    const wy_ = e.touches[0].clientY - my
+    this.setData({ [`bergs[${i}].left`]: wx_ - b.width / 2, [`bergs[${i}].top`]: wy_ - b.width / 2 })
+  },
+  async onBergDragEnd (e) {
+    if (!this._dragId) return
+    const id = this._dragId
+    const i = this._dragIdx
+    this._dragId = null
+    this.setData({ movableDisabled: false })
+    const b = this.data.bergs[i]
+    if (!b) return
+    const mx = this._movX != null ? this._movX : this.data.movX
+    const my = this._movY != null ? this._movY : this.data.movY
+    const t = (e.changedTouches && e.changedTouches[0]) || {}
+    const cx = (t.clientX != null ? t.clientX - mx : b.left + b.width / 2)
+    const cy = (t.clientY != null ? t.clientY - my : b.top + b.width / 2)
+    const regions = this._regions || life.getStages()
+    let best = null, bestD = Infinity
+    regions.forEach((g) => {
+      const d = Math.hypot(cx - g.cx, cy - g.cy)
+      if (d < bestD) { bestD = d; best = g }
+    })
+    if (!best || bestD > (best.r || 120) * 1.25) { this.refreshData(); return }  // 没落在任何海→回原位
+    const offX = Math.max(-0.85, Math.min(0.85, (cx - best.cx) / (best.r || 120)))
+    const offY = Math.max(-0.85, Math.min(0.85, (cy - best.cy) / (best.r || 120)))
+    try {
+      await api.updateIceberg(id, { zoneName: best.key, offX, offY })
+      wx.showToast({ title: '移到' + best.key + '之海', icon: 'none', duration: 1800 })
+    } catch (err) {
+      wx.showToast({ title: '没移过去，再试试', icon: 'none' })
+    }
+    this.refreshData()
   },
 
   // ==================== 录音（微信式按住说话 + 流式转写）====================

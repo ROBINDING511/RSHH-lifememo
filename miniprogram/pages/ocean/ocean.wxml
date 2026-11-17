@@ -18,8 +18,8 @@
     <!-- 整片海向四面八方扩展：2D 可拖世界，拖动如滚地球（海面纹理随世界滚过+各阶段海色晕染） -->
     <movable-area class="sea-area">
       <movable-view class="sea-world" direction="all" inertia damping="{{40}}" friction="{{2}}"
-        out-of-bounds="{{false}}" style="width:{{worldWidth}}px;height:{{worldHeight}}px"
-        x="{{movX}}" y="{{movY}}">
+        out-of-bounds="{{false}}" disabled="{{movableDisabled}}" bindchange="onSeaChange"
+        style="width:{{worldWidth}}px;height:{{worldHeight}}px" x="{{movX}}" y="{{movY}}">
         <image class="sea-texture" src="/images/ocean/sea_bg.jpg" mode="scaleToFill"
           style="width:{{worldWidth}}px;height:{{worldHeight}}px" />
         <view class="sea-tint" style="background:{{tintGradient}}"></view>
@@ -27,7 +27,9 @@
           style="left:{{item.cx}}px;top:{{item.cy}}px">{{item.name}}之海</text>
         <view wx:for="{{bergs}}" wx:key="id" class="berg"
           style="left:{{item.left}}px;top:{{item.top}}px;width:{{item.width}}px;opacity:{{item.opacity}};animation:{{item.anim}}"
-          data-id="{{item.id}}" bindtap="onBergTap" hover-class="berg-hover" hover-stay-time="80">
+          data-id="{{item.id}}" data-i="{{index}}" bindtap="onBergTap"
+          bindlongpress="onBergDragStart" bindtouchmove="onBergDragMove" bindtouchend="onBergDragEnd"
+          hover-class="berg-hover" hover-stay-time="80">
           <image class="berg-img" src="/images/ocean/berg.png" mode="widthFix" />
         </view>
         <!-- 自定义人生节点：小旗标记 -->
