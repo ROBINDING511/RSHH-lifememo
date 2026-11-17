@@ -23,13 +23,17 @@ CLI="${WXDEV_CLI:-/Applications/wechatwebdevtools.app/Contents/MacOS/cli}"
 CLOUD_ENV="${MP_CLOUD_ENV:-lifememo-d7gopzprfc266a543}"
 VERSION_FILE="$PROJECT_ROOT/.mp-version"
 
-# node：优先系统 PATH，回退到 WorkBuddy 托管版本
+# node：优先系统 PATH，回退到 WorkBuddy 托管版本（自动探测版本号，不再写死），
+# 再回退到 DSH 自带 node。原来写死 22.22.2，本机实际是 22.22.2-6 → watch 失效。
 if command -v node >/dev/null 2>&1; then
   NODE="$(command -v node)"
-elif [ -x "$HOME/.workbuddy/binaries/node/versions/22.22.2/bin/node" ]; then
-  NODE="$HOME/.workbuddy/binaries/node/versions/22.22.2/bin/node"
 else
   NODE=""
+  for cand in "$HOME/.workbuddy/binaries/node/versions"/*/bin/node \
+              "$HOME/.workbuddy/binaries/node/versions/current/bin/node" \
+              "$HOME/.dsh/dsh-runtimes/dsh-primary-runtime/dependencies/node/bin/node"; do
+    if [ -x "$cand" ]; then NODE="$cand"; break; fi
+  done
 fi
 
 # ── 输出配色 ───────────────────────────────────────────────────────
