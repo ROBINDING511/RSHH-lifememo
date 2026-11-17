@@ -7,7 +7,7 @@
 <view class="page wash-bg">
   <view class="head">
     <text class="title">云朵里的回忆</text>
-    <text class="sub">化成云的冰山都在这里，永远不会消失</text>
+    <text class="sub">化成云的冰山都在这里，5 天后会完全飘散</text>
   </view>
 
   <view wx:if="{{!items.length && !loading}}" class="empty">
@@ -25,7 +25,7 @@
         <image class="cloud-img" src="/images/misc/cloud.png" mode="aspectFit" />
         <view class="cloud-info">
           <text class="cloud-title">{{item.title || '一段回忆'}}</text>
-          <text class="cloud-meta">{{item.zoneName}}之海{{item.memoryTime ? ' · ' + item.memoryTime : ''}}</text>
+          <text class="cloud-meta">{{item.zoneName}}之海 · {{item.daysLeft}}天后飘散</text>
         </view>
       </view>
       <button class="rain-btn" hover-class="rain-hover" hover-stay-time="80"
@@ -34,7 +34,7 @@
       </button>
     </view>
     <view class="list-tip">
-      <text>点"落回海面"，这座冰山就会重新漂回海里</text>
+      <text>点"落回海面"，赶在飘散前把冰山留在海里</text>
     </view>
   </scroll-view>
 </view>

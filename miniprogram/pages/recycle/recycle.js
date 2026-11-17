@@ -1,7 +1,8 @@
 // pages/recycle/recycle.js — 云朵（回收站）
-// 删除的冰山化成云飘在这里，永远保留；云下雨，冰山回到海面
-// 适老化：恢复是安全操作（不会丢东西），不弹确认，点一下立即执行 + 明确反馈
+// 删除的冰山化成云飘在这里；云保留 5 天，到期完全飘散（永久删除）；云下雨可提前落回海面
+// 适老化：恢复是安全操作，不弹确认，点一下立即执行 + 明确反馈；飘散倒计时明示
 const api = require('../../utils/api')
+const CLOUD_TTL_MS = 5 * 24 * 3600 * 1000   // 5 天后飘散
 
 Page({
   data: {
@@ -15,7 +16,16 @@ Page({
   async load () {
     this.setData({ loading: true })
     try {
-      const items = await api.listRecycled()
+      // 到期云完全飘散（永久删除），只清自己的、已删除且超 5 天的
+      const db = wx.cloud.database()
+      const cutoff = Date.now() - CLOUD_TTL_MS
+      try {
+        await db.collection('icebergs').where({ deleted: true, deletedAt: db.command.lt(cutoff) }).remove()
+      } catch (e) { /* 清理失败不阻塞展示 */ }
+      const items = (await api.listRecycled()).map((it) => {
+        const left = it.deletedAt ? Math.max(0, Math.ceil((it.deletedAt + CLOUD_TTL_MS - Date.now()) / 86400000)) : 5
+        return Object.assign({}, it, { daysLeft: left })
+      })
       this.setData({ items, loading: false })
     } catch (e) {
       console.error('云朵加载失败', e)

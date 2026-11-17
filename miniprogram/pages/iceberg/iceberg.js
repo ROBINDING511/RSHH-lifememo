@@ -146,7 +146,7 @@ Page({
     const r = await new Promise((resolve) => {
       wx.showModal({
         title: '让这座冰山化成云吗？',
-        content: '它会飘到"云朵"里，不会真的消失。想它了，随时可以让它落回海面。',
+        content: '它会飘到"云朵"里，5 天后完全飘散。想留住，就早点让它落回海面。',
         confirmText: '化成云',
         cancelText: '再看看',
         confirmColor: '#B3402F',
