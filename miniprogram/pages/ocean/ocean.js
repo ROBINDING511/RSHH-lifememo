@@ -48,6 +48,7 @@ Page({
     recording: false,
     recordMode: '',      // 'hold' 按住（大按钮 / 鲸鱼）
     cancelArmed: false,  // 上滑进入取消态
+    asrDebug: '',        // 实时链路诊断（排查流式不出字）
     transcript: '',
     asrHint: '',         // ''=实时识别正常 | 'connecting'=连接中 | 'offline'=没连上
     elapsed: 0,
@@ -99,12 +100,14 @@ Page({
   onHide () {
     // 切后台/来电：正在录音就先落地成草稿，回来能找回
     if (this.data.recording) this.saveDraftAndStop()
+    if (this._dbgTimer) { clearInterval(this._dbgTimer); this._dbgTimer = null }
     this.stopPreviewVoice()
     // 后台会杀 socket，回前台 onShow 会重新预热，这里主动释放避免僵尸连接
     this.releaseAsr()
   },
 
   onUnload () {
+    if (this._dbgTimer) { clearInterval(this._dbgTimer); this._dbgTimer = null }
     this.releaseAsr()
     this.stopPreviewVoice()
   },
@@ -134,6 +137,7 @@ Page({
   bindAsr (asr) {
     asr.on('partial', (text) => this.flushTranscript(text))
     asr.on('sentence', (text) => this.flushTranscript(text, true))
+    asr.on('ready', () => this.flushFrameBuf())
     asr.on('error', (e) => {
       if (this.data.recording) this.setData({ asrHint: 'offline' })
       console.warn('[asr] error:', e && e.message)
@@ -266,33 +270,15 @@ Page({
     else this.finishRecording()           // 松手 = 发送（进复核）
   },
 
-  async startRecording (mode) {
-    if (this.data.recording || this.data.analyzing || this.data.preview) return
-    // 0 延迟：手指一按立刻弹出实时转写面板（微信式），授权/建连在后台进行
-    this.setData({ recording: true, recordMode: mode, transcript: '', elapsed: 0, countdown: 0, cancelArmed: false, asrHint: '' })
-    this._pendingText = null
-    if (wx.vibrateShort) wx.vibrateShort({ type: 'medium' })
-    const app = getApp()
-    if (!app.globalData.asrConfig) {
-      await app.silentLogin().catch(() => {})
-    }
+  // 确保有一条实时识别连接：复用预热 / 立即建连 / 缺配置则后台登录补，均不阻塞开口
+  ensureAsr () {
     const cfg = api.getAsrConfig()
-
-    // 权限（onShow 已预热授权，通常瞬时）
-    try {
-      await wx.authorize({ scope: 'scope.record' })
-    } catch (e) {
-      this.setData({ recording: false })
-      this.guideOpenSetting()
+    if (this.asr && (this.asr.isReady || this.asr.state === 'connecting')) {
+      if (this.asr.isReady) { this.asr.reset(); this.asr.stopKeepAlive() }
+      this.setData({ asrHint: this.asr.isReady ? '' : 'connecting' })
       return
     }
-
-    // ===== 实时识别：绝不让建连挡住开口 =====
-    if (this.asr && this.asr.isReady) {
-      this.asr.reset()
-      this.asr.stopKeepAlive()
-      this.setData({ asrHint: '' })
-    } else if (cfg && cfg.key) {
+    if (cfg && cfg.key) {
       this.releaseAsr()
       const { AsrStream } = require('../../utils/asr')
       this.asr = new AsrStream(cfg)
@@ -300,23 +286,47 @@ Page({
       this.setData({ asrHint: 'connecting' })
       this.asr.connect().then((ok) => {
         if (this.data.recording) this.setData({ asrHint: ok ? '' : 'offline' })
-      }).catch(() => {
-        if (this.data.recording) this.setData({ asrHint: 'offline' })
-      })
+        if (ok) this.flushFrameBuf()
+      }).catch(() => { if (this.data.recording) this.setData({ asrHint: 'offline' }) })
     } else {
-      console.warn('[ocean] ASR 配置缺失，将走兜底转写')
+      // 配置还没到（登录未回）：后台登录，到了再建连；期间麦克风帧先存页面缓存
       this.asr = null
-      this.setData({ asrHint: 'offline' })
+      this.setData({ asrHint: 'connecting' })
+      getApp().silentLogin().then(() => {
+        if (!this.data.recording) return
+        const c = api.getAsrConfig()
+        if (c && c.key) this.ensureAsr()
+        else this.setData({ asrHint: 'offline' })
+      }).catch(() => { if (this.data.recording) this.setData({ asrHint: 'offline' }) })
     }
+  },
 
+  // 把建连前攒下的麦克风帧补发给识别服务
+  flushFrameBuf () {
+    const b = this._frameBuf || []
+    this._frameBuf = []
+    for (const f of b) { if (this.asr) this.asr.sendFrame(f) }
+  },
+
+  async startRecording (mode) {
+    if (this.data.recording || this.data.analyzing || this.data.preview) return
+    // 0 延迟：手指一按立刻弹出实时转写面板（微信式），授权/建连在后台进行
+    this.setData({ recording: true, recordMode: mode, transcript: '', elapsed: 0, countdown: 0, cancelArmed: false, asrHint: '' })
+    this._pendingText = null
+    this._recFrames = 0
+    this._frameBuf = []
+    if (wx.vibrateShort) wx.vibrateShort({ type: 'medium' })
+    // 建连/登录后台进行；麦克风立即开录（授权已在 onShow 预热），一帧都不丢
+    this.ensureAsr()
     this.recorder.start({
-      onFrame: (buf) => this.asr && this.asr.sendFrame(buf),
+      onFrame: (buf) => { this._recFrames = (this._recFrames || 0) + 1; if (this.asr) this.asr.sendFrame(buf); else this._frameBuf.push(buf) },
       onTick: (s) => this.setData({ elapsed: s }),
       onCountdown: (left) => {
         this.setData({ countdown: left })
         if (left <= 3 && wx.vibrateShort) wx.vibrateShort({ type: 'light' })
       },
       onStop: async (wavPath, durationMs, err) => {
+        if (this._dbgTimer) { clearInterval(this._dbgTimer); this._dbgTimer = null }
         this.setData({ recording: false, countdown: 0, elapsed: 0, recordMode: '', whalePaused: false, cancelArmed: false })
         // 松手瞬间先把界面上已有的字定住（节流可能还压着最后一小段）
         this.applyTranscript()
@@ -331,6 +341,8 @@ Page({
           return
         }
         if (err) {
+          const em = (err && (err.errMsg || err.message)) || ''
+          if (/auth|permission|deny|authorize/i.test(em)) { this.guideOpenSetting(); return }
           if (wavPath && durationMs >= 800) {
             draft.save({ wavPath, text: this.data.transcript, reason: '录音中断' })
             this.setData({ drafts: draft.list(), transcript: '' })
@@ -345,32 +357,22 @@ Page({
           return
         }
 
-        let finalText = (this.data.transcript || '').trim()
-        if (this.asr) {
-          const live = this.asr.isReady
-          const t = await this.asr.finish(1500)
-          console.log('[ocean] ASR report:', JSON.stringify(this.asr.report()))
-          if (t && t.trim().length > finalText.length) finalText = t.trim()
-          if (!live && !finalText) console.warn('[ocean] 实时流未就绪，走云函数兜底')
-          if (live) {
-            this.asr.startKeepAlive()
-          } else {
-            this.releaseAsr()
-            this.preheatAsr()
-          }
-        }
-        if ((!finalText || !finalText.trim()) && wavPath) {
-          finalText = await this.fallbackTranscribe(wavPath)
-        }
-        this.setData({ transcript: finalText })
-        this.openPreview(wavPath, finalText || this.data.transcript)
+        // 0 等待：松手立即进复核卡；流式收尾 / AI 建议 / 兜底转写全部后台补
+        this.openPreview(wavPath, (this.data.transcript || '').trim())
       }
     })
+    // 实时链路诊断：每 500ms 刷新，便于真机定位流式不出字
+    this._dbgTimer = setInterval(() => {
+      const a = this.asr
+      const cfg = api.getAsrConfig()
+      const s = a ? a.stats : null
+      this.setData({ asrDebug: (a ? a.state : 'no-asr') + ' rec' + (this._recFrames || 0) + (s ? ' send' + s.framesSent + ' q' + s.framesQueued + ' d' + s.deltas + ' c' + s.completed : '') + (a && a.lastError ? ' err:' + a.lastError : '') + (cfg && cfg.key ? '' : ' NOKEY') })
+    }, 500)
   },
 
   // 兜底转写：WAV 上传云存储 → transcribe 云函数
   async fallbackTranscribe (wavPath) {
-    wx.showLoading({ title: '正在整理您说的话…', mask: true })
+    // 后台兜底，不弹 loading 遮罩（复核卡已先展示，不打断用户）
     let fileID = ''
     const cleanup = () => { if (fileID) wx.cloud.deleteFile({ fileList: [fileID] }).catch(() => {}) }
     try {
@@ -386,8 +388,6 @@ Page({
       console.error('兜底转写异常:', e)
       cleanup()
       return ''
-    } finally {
-      wx.hideLoading()
     }
   },
 
@@ -444,36 +444,45 @@ Page({
   // ==================== 发布卡片 ====================
   async openPreview (wavPath, text) {
     const hasText = text && text.replace(/\s/g, '').length >= 2
-    if (!hasText) {
-      this.setData({
-        preview: {
-          wavPath, text: '', audioOnly: !!wavPath,
-          timeOptions: ['说不清了'], timeIndex: 0,
-          zoneOptions: ['新的开始'], zoneIndex: 0,
-          photos: [], previewVoicePlaying: false
-        }
-      })
-      if (wavPath) wx.showToast({ title: '没听清，可以先存声音，或直接打字', icon: 'none', duration: 3000 })
-      return
-    }
-    this.setData({ analyzing: true })
-    let r = null
-    try { r = await api.analyzeMemory(text) } catch (e) { console.warn(e) }
-    this.setData({ analyzing: false })
-    const timeOptions = (r && r.timeOptions && r.timeOptions.length) ? r.timeOptions : ['说不清了']
-    const zoneOptions = (r && r.zoneOptions && r.zoneOptions.length) ? r.zoneOptions : ['新的开始']
+    // 0 等待：复核卡立即弹出（先给默认选项），AI 建议/流式收尾后台补
     this.setData({
       preview: {
-        wavPath,
-        text: (r && r.title) ? `${r.title}\n${text}` : text,
-        rawText: text,
-        audioOnly: false,
-        timeOptions, timeIndex: 0,
-        zoneOptions, zoneIndex: 0,
-        photos: [],
-        previewVoicePlaying: false
+        wavPath, text: text || '', rawText: text || '', audioOnly: !hasText && !!wavPath,
+        timeOptions: ['说不清了'], timeIndex: 0,
+        zoneOptions: ['新的开始'], zoneIndex: 0,
+        photos: [], previewVoicePlaying: false
       }
     })
+    if (!hasText && wavPath) wx.showToast({ title: '没听清，可以先存声音，或直接打字', icon: 'none', duration: 3000 })
+    this.refinePreview(wavPath, text || '')
+  },
+
+  // 后台补全复核卡：流式收尾定稿 → 无字则兜底转写 → AI 时间/海域/标题建议（不阻塞用户）
+  async refinePreview (wavPath, text) {
+    let finalText = (text || '').trim()
+    if (this.asr) {
+      const live = this.asr.isReady
+      const t = await this.asr.finish(1200).catch(() => '')
+      if (t && t.trim().length > finalText.length) finalText = t.trim()
+      if (live) this.asr.startKeepAlive()
+      else { this.releaseAsr(); this.preheatAsr() }
+    }
+    if (!finalText && wavPath) {
+      finalText = (await this.fallbackTranscribe(wavPath).catch(() => '')) || ''
+    }
+    let p = this.data.preview
+    if (!p || p.wavPath !== wavPath) return   // 用户已关闭/换了一段
+    let r = null
+    if (finalText.replace(/\s/g, '').length >= 2) {
+      try { r = await api.analyzeMemory(finalText) } catch (e) { console.warn(e) }
+    }
+    p = this.data.preview
+    if (!p || p.wavPath !== wavPath) return
+    const upd = { 'preview.rawText': finalText, 'preview.audioOnly': !finalText && !!wavPath }
+    if (finalText) upd['preview.text'] = (r && r.title) ? `${r.title}\n${finalText}` : finalText
+    if (r && r.timeOptions && r.timeOptions.length) { upd['preview.timeOptions'] = r.timeOptions; upd['preview.timeIndex'] = 0 }
+    if (r && r.zoneOptions && r.zoneOptions.length) { upd['preview.zoneOptions'] = r.zoneOptions; upd['preview.zoneIndex'] = 0 }
+    this.setData(upd)
   },
 
   onPreviewInput (e) {

@@ -52,6 +52,9 @@
     </view>
   </view>
 
+  <!-- 临时链路诊断芯片（松手后仍显示，便于截图定位；排查后移除） -->
+  <view class="dbg-chip" wx:if="{{asrDebug && !recording}}" style="top: {{capsuleBottom + 12}}px;">{{asrDebug}}</view>
+
   <!-- ============ 草稿找回（说过的话绝不丢） ============ -->
   <view class="draft-bar" wx:if="{{drafts.length && !recording && !preview}}"
     style="top: {{capsuleBottom + 16}}px;">
@@ -113,6 +116,7 @@
         <text class="live-countdown-label">秒后自动结束</text>
       </view>
       <text class="live-hint">{{cancelArmed ? '松开即取消，话会存进草稿' : '上滑取消 · 松手发送'}}</text>
+      <text class="live-dbg" wx:if="{{asrDebug}}">{{asrDebug}}</text>
     </view>
   </view>
 
