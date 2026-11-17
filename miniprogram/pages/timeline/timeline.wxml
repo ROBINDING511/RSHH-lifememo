@@ -6,7 +6,7 @@
     - 记不清年份的回忆单独分组，文案温和不指责
     - 空态给出明确的下一步动作按钮
 -->
-<view class="page">
+<view class="page wash-bg">
   <view class="tl-head">
     <text class="tl-title">人生的时间轴</text>
     <text class="tl-sub">一共 {{total}} 座冰山，点一下就能看</text>

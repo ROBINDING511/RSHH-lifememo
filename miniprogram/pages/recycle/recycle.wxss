@@ -1,33 +1,24 @@
-/* pages/recycle/recycle.wxss — 适老化样式 */
-.page {
-  height: 100vh; display: flex; flex-direction: column;
-  background: linear-gradient(180deg, #E8F4FB 0%, #F7FBFE 40%);
-}
+/* pages/recycle/recycle.wxss — 云朵回收站（温暖水彩 · 适老化） */
+.page { height: 100vh; display: flex; flex-direction: column; }
 .head { padding: 32rpx 36rpx 20rpx; }
 .title { display: block; font-size: 48rpx; font-weight: 500; color: var(--c-text); }
 .sub { display: block; font-size: var(--fs-sm); color: var(--c-text-2); margin-top: 10rpx; }
 
 /* ============ 空态 ============ */
-.empty {
-  display: flex; flex-direction: column; align-items: center;
-  padding: 120rpx 48rpx 60rpx;
-}
-.empty-img { width: 280rpx; height: 200rpx; opacity: 0.75; margin-bottom: 32rpx; }
+.empty { display: flex; flex-direction: column; align-items: center; padding: 120rpx 48rpx 60rpx; }
+.empty-img { width: 280rpx; height: 200rpx; margin-bottom: 32rpx; }
 .empty-title { font-size: var(--fs-xl); color: var(--c-text); font-weight: 500; }
-.empty-sub {
-  font-size: var(--fs-sm); color: var(--c-text-2);
-  margin-top: 12rpx; text-align: center; line-height: 1.7;
-}
+.empty-sub { font-size: var(--fs-sm); color: var(--c-text-2); margin-top: 12rpx; text-align: center; line-height: 1.7; }
 .empty-btn { width: 100%; margin-top: 56rpx; }
 
 /* ============ 列表 ============ */
 .list { flex: 1; padding: 0 36rpx 60rpx; box-sizing: border-box; }
 .cloud-card {
   display: flex; align-items: center; gap: 20rpx;
-  background: #fff; border-radius: var(--radius-lg);
-  padding: 32rpx 28rpx;
-  margin-bottom: 24rpx;
-  box-shadow: 0 6rpx 24rpx rgba(36,100,143,0.10);
+  background: var(--c-card); border-radius: var(--radius-lg);
+  padding: 32rpx 28rpx; margin-bottom: 24rpx;
+  border: 2rpx solid rgba(31, 100, 120, 0.06);
+  box-shadow: 0 6rpx 24rpx rgba(31, 100, 120, 0.10);
 }
 .cloud-img { width: 120rpx; height: 88rpx; flex-shrink: 0; }
 .cloud-info { flex: 1; min-width: 0; }
@@ -38,7 +29,6 @@
 }
 .cloud-meta { display: block; font-size: var(--fs-xs); color: var(--c-text-2); margin-top: 8rpx; }
 
-/* 恢复按钮：≥96rpx 高，全宽好按 */
 .rain-btn {
   flex-shrink: 0; margin: 0;
   min-width: 180rpx; min-height: 96rpx; line-height: 96rpx;
@@ -48,18 +38,12 @@
 }
 .rain-btn::after { border: none; }
 .rain-btn.rain-hover { background: var(--c-primary-deep); transform: scale(0.97); }
-.rain-btn[disabled] { background: #A9C4D8; color: #fff; }
+.rain-btn[disabled] { background: #9FC3C6; color: #fff; }
 
 .list-tip { padding: 8rpx 8rpx 24rpx; text-align: center; }
 .list-tip text { font-size: var(--fs-xs); color: var(--c-text-2); }
 
-/* ============ 恢复中动效：云轻轻上下浮动 ============ */
+/* ============ 恢复中动效 ============ */
 .raining { animation: rain-shake 0.6s ease-in-out infinite; }
-@keyframes rain-shake {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(8rpx); }
-}
-/* 尊重系统"减少动态效果"设置 */
-@media (prefers-reduced-motion: reduce) {
-  .raining { animation: none; }
-}
+@keyframes rain-shake { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(8rpx); } }
+@media (prefers-reduced-motion: reduce) { .raining { animation: none; } }

@@ -2,7 +2,7 @@
     适老化：文字大、对比足、"上一步/下一步"都给，进度看得清；
     "跳过"不再是几乎看不见的浅色小字。
 -->
-<view class="page">
+<view class="page wash-bg" style="padding-top:{{safeTop}}px">
   <view class="g-step">第 {{step + 1}} 步 / 共 {{steps.length}} 步</view>
 
   <image class="g-img" src="{{steps[step].img}}" mode="aspectFit" />

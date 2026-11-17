@@ -1,25 +1,18 @@
-/* pages/iceberg/iceberg.wxss — 适老化样式 */
+/* pages/iceberg/iceberg.wxss — 冰山详情（温暖水彩 · 适老化） */
 .page { padding: 24rpx 32rpx 220rpx; }
 .berg-head { margin-bottom: 24rpx; }
 .berg-head-row { display: flex; align-items: center; gap: 24rpx; }
 .berg-icon { width: 96rpx; height: 132rpx; flex-shrink: 0; }
 .berg-titles { flex: 1; min-width: 0; }
-.berg-title {
-  display: block; font-size: 46rpx; font-weight: 500; color: var(--c-text);
-  line-height: 1.5;
-}
+.berg-title { display: block; font-size: 46rpx; font-weight: 500; color: var(--c-text); line-height: 1.5; }
 .berg-meta { display: block; font-size: var(--fs-sm); color: var(--c-text-2); margin-top: 12rpx; }
 
 /* ============ 正文 ============ */
 .berg-body { margin-bottom: 24rpx; }
 .berg-text {
-  display: block;
-  font-size: var(--fs-lg);      /* 40rpx */
-  line-height: 1.95;            /* 老人读长文需要更大行距 */
-  color: var(--c-text);
-  letter-spacing: 1rpx;
-  white-space: pre-wrap;
-  word-break: break-word;
+  display: block; font-size: var(--fs-lg); line-height: 1.95;
+  color: var(--c-text); letter-spacing: 1rpx;
+  white-space: pre-wrap; word-break: break-word;
 }
 
 /* ============ 播放原声 ============ */
@@ -28,19 +21,16 @@
   min-height: 152rpx; margin-top: 32rpx; padding: 20rpx 28rpx;
   background: var(--c-primary-soft); border-radius: var(--radius-md);
 }
-.voice-row.voice-hover { background: #DCE9F2; }
+.voice-row.voice-hover { background: #D3E4E5; }
 .voice-btn {
   width: 120rpx; height: 120rpx; border-radius: 50%;
   background: var(--c-primary);
-  display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
 }
 .voice-on { background: var(--c-danger); }
-/* 播放三角 / 暂停双竖条，用形状而非仅颜色区分状态 */
 .voice-glyph {
   width: 0; height: 0; margin-left: 8rpx;
-  border-top: 20rpx solid transparent;
-  border-bottom: 20rpx solid transparent;
+  border-top: 20rpx solid transparent; border-bottom: 20rpx solid transparent;
   border-left: 32rpx solid #fff;
 }
 .voice-glyph-on {
@@ -54,55 +44,40 @@
 
 /* ============ 照片 ============ */
 .berg-photos { margin-bottom: 24rpx; }
-.photos-label {
-  display: block; font-size: var(--fs-sm); color: var(--c-text-2);
-  font-weight: 500; margin-bottom: 20rpx;
-}
+.photos-label { display: block; font-size: var(--fs-sm); color: var(--c-text-2); font-weight: 500; margin-bottom: 20rpx; }
 .photos-grid { display: flex; flex-wrap: wrap; gap: 20rpx; }
 .photo-cell { width: 220rpx; height: 220rpx; }
-.photo-img {
-  width: 220rpx; height: 220rpx; border-radius: var(--radius-md);
-  background: var(--c-soft);
-}
+.photo-img { width: 220rpx; height: 220rpx; border-radius: var(--radius-md); background: var(--c-soft); }
 
 /* ============ 底部操作 ============ */
 .actions {
   position: fixed; left: 32rpx; right: 32rpx; bottom: 32rpx;
   display: flex; gap: 24rpx;
-  background: rgba(255,255,255,0.96);
+  background: rgba(253, 252, 249, 0.96);
   border-radius: 60rpx; padding: 16rpx;
-  box-shadow: 0 -4rpx 24rpx rgba(36,100,143,0.10);
+  box-shadow: 0 -4rpx 24rpx rgba(31, 100, 120, 0.12);
 }
 .actions .btn-ghost, .actions .btn-primary { height: 104rpx; line-height: 104rpx; }
 
 /* ============ 标记选择 ============ */
-.icon-mask {
-  position: fixed; left: 0; right: 0; top: 0; bottom: 0;
-  background: rgba(15,58,92,0.5); display: flex; align-items: flex-end;
-}
+.icon-mask { position: fixed; left: 0; right: 0; top: 0; bottom: 0; background: rgba(23, 80, 95, 0.5); display: flex; align-items: flex-end; }
 .icon-sheet {
-  width: 100%; background: #fff; border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+  width: 100%; background: var(--c-card);
+  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
   padding: 40rpx 32rpx; box-sizing: border-box;
   max-height: 84vh; overflow-y: auto;
 }
 .sheet-title { display: block; font-size: var(--fs-xl); font-weight: 500; color: var(--c-text); }
 .sheet-sub { display: block; font-size: var(--fs-sm); color: var(--c-text-2); margin-top: 12rpx; }
-.icon-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160rpx, 1fr));
-  gap: 20rpx; margin: 32rpx 0 36rpx;
-}
+.icon-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160rpx, 1fr)); gap: 20rpx; margin: 32rpx 0 36rpx; }
 .icon-cell {
-  position: relative;
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center;
   min-height: 190rpx; padding: 20rpx 0;
   background: var(--c-soft); border: 4rpx solid transparent;
   border-radius: var(--radius-md); box-sizing: border-box;
 }
 .icon-cell.icon-hover { background: var(--c-primary-soft); }
-.icon-cell-on {
-  background: var(--c-primary-soft); border-color: var(--c-primary);
-}
+.icon-cell-on { background: var(--c-primary-soft); border-color: var(--c-primary); }
 .icon-img { width: 84rpx; height: 108rpx; }
 .icon-name { font-size: var(--fs-sm); color: var(--c-text-2); margin-top: 12rpx; }
 .icon-cell-on .icon-name { color: var(--c-primary); font-weight: 500; }
@@ -115,10 +90,7 @@
 .sheet-close { width: 100%; }
 
 /* ============ 加载失败 ============ */
-.page-load-fail {
-  height: 100vh; display: flex; flex-direction: column;
-  align-items: center; justify-content: center; padding: 0 60rpx;
-}
+.page-load-fail { height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 0 60rpx; }
 .fail-title { font-size: var(--fs-xl); color: var(--c-text); font-weight: 500; }
 .fail-sub { font-size: var(--fs-sm); color: var(--c-text-2); margin-top: 16rpx; text-align: center; }
 .fail-btn { width: 100%; margin-top: 24rpx; }

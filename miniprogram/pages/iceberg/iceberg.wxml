@@ -5,7 +5,7 @@
     - 所有按钮 ≥104rpx 高；删除入口写"化成云"并说明可找回
     - 标记选择用大图标 + 文字，选中态不只靠颜色
 -->
-<view class="page" wx:if="{{b}}">
+<view class="page wash-bg" wx:if="{{b}}">
   <view class="berg-head card">
     <view class="berg-head-row">
       <image class="berg-icon" wx:if="{{iconFile}}" src="{{iconFile}}" mode="aspectFit" />
@@ -70,7 +70,7 @@
 </view>
 
 <!-- 加载失败兜底 -->
-<view class="page-load-fail" wx:if="{{!b && loadFailed}}">
+<view class="page-load-fail wash-bg" wx:if="{{!b && loadFailed}}">
   <text class="fail-title">这座冰山暂时打不开</text>
   <text class="fail-sub">可能是网络不太好，等一会儿再试试</text>
   <button class="btn-primary fail-btn" hover-class="btn-hover" hover-stay-time="80"
