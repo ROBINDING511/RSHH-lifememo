@@ -79,16 +79,15 @@ def parse_rules(text):
 # 人工登记的「前景元素 → 实际底色」映射（跨选择器，无法自动推断的）
 # key = 前景选择器片段, value = (底色选择器片段 or 直接色值, 说明)
 EXPLICIT_BG = {
-    '.record-sub':     ('.record-btn',    '录音按钮主色底上的副文字'),
-    '.record-main':    ('.record-btn',    '录音按钮主色底上的主文字'),
-    '.transcript':     ('.transcript-box','深色转写框上的正文'),
-    '.timer-main':     ('.record-mask',   '录音遮罩上的计时'),
-    '.timer-limit':    ('.record-mask',   '录音遮罩上的时限提示'),
-    '.countdown-num':  ('.record-mask',   '最后10秒倒计时的大号数字'),
-    '.countdown-label':('.record-mask',   '最后10秒倒计时的说明文字'),
-    '.rec-state':      ('.record-mask',   '录音遮罩上的状态'),
-    '.rec-cancel':     ('.record-mask',   '录音遮罩上的取消按钮'),
-    '.rec-done':       ('.rec-done',      '完成按钮自身白底主色字'),
+    '.record-sub':     ('.record-btn',    '按住说话按钮主色底上的副文字'),
+    '.record-main':    ('.record-btn',    '按住说话按钮主色底上的主文字'),
+    '.live-text':      ('.live-card',     '实时转写纸白底上的正文'),
+    '.live-state':     ('.live-card',     '实时转写面板状态文字'),
+    '.live-timer':     ('.live-card',     '实时转写面板计时'),
+    '.live-asr':       ('.live-card',     '实时转写面板连线提示'),
+    '.live-hint':      ('.live-card',     '实时转写面板操作提示'),
+    '.live-countdown-num':  ('.live-card', '最后10秒倒计时大号数字'),
+    '.live-countdown-label':('.live-card', '最后10秒倒计时说明'),
     '.draft-text':     ('.draft-bar',     '草稿条黄底上的文字'),
     '.draft-btn':      ('.draft-btn',     '草稿按钮棕底白字'),
     '.vc-text':        ('.voice-check',   '回听条浅蓝底上的文字'),
@@ -193,6 +192,9 @@ def main():
         if key == '.hint-card':
             # rgba(16,48,66,.72) 叠最浅海面 #C9E7ED 的不透明近似（最坏情况，白字仍 ≥4.5:1）
             bgcache[key] = '#446372'
+            return bgcache[key]
+        if key == '.live-card':
+            bgcache[key] = '#FDFCF9'   # rgba(253,252,249,.97) 纸白近似
             return bgcache[key]
         c = collect_bg_color(key, merged, tok, [(s, p) for _, s, p in all_rules])
         bgcache[key] = c

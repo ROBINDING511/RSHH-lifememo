@@ -44,9 +44,10 @@ Page({
     midBergs: [],
     nearBergs: [],
     whalePaused: false,
-    // 录音
+    // 录音（微信式按住说话 + 流式转写）
     recording: false,
-    recordMode: '',      // 'tap' 点按 | 'hold' 长按鲸鱼
+    recordMode: '',      // 'hold' 按住（大按钮 / 鲸鱼）
+    cancelArmed: false,  // 上滑进入取消态
     transcript: '',
     asrHint: '',         // ''=实时识别正常 | 'connecting'=连接中 | 'offline'=没连上
     elapsed: 0,
@@ -91,6 +92,8 @@ Page({
     this.setData({ drafts: draft.list(), whalePaused: false })
     // 预热实时识别连接：妈妈点录音时不用再等建连，开口即出字
     this.preheatAsr()
+    // 预热麦克风授权：按住说话时 0 延迟开口，不再等授权弹窗
+    wx.authorize({ scope: 'scope.record' }).catch(() => {})
   },
 
   onHide () {
@@ -232,6 +235,7 @@ Page({
   // 副入口：长按杭航 = 按住说话
   onWhaleLongPress () {
     if (this.data.recording || this.data.analyzing || this.data.preview) return
+    this._holdSource = 'whale'
     this.startRecording('hold')
   },
 
@@ -241,29 +245,47 @@ Page({
     if (id) wx.navigateTo({ url: `/pages/iceberg/iceberg?id=${id}` })
   },
 
-  // ==================== 录音 ====================
-  // 主入口：底部大按钮，点一下开始、说完了再点一下
-  toggleRecord () {
-    if (this.data.recording) this.finishRecording()
-    else this.startRecording('tap')
+  // ==================== 录音（微信式按住说话 + 流式转写）====================
+  // 主入口：按住大按钮说话，松手发送、上滑取消（参考微信语音输入习惯）
+  onHoldStart (e) {
+    this._holdSource = 'button'
+    this._holdY = (e.touches && e.touches[0]) ? e.touches[0].clientY : 0
+    this.startRecording('hold')
+  },
+  onHoldMove (e) {
+    if (!this.data.recording || this._holdSource !== 'button') return
+    const y = (e.touches && e.touches[0]) ? e.touches[0].clientY : 0
+    const armed = (this._holdY - y) > 80   // 上滑超 80px 进入取消态
+    if (armed !== this.data.cancelArmed) this.setData({ cancelArmed: armed })
+  },
+  onHoldEnd () {
+    if (!this.data.recording) return
+    const cancel = this.data.cancelArmed
+    this.setData({ cancelArmed: false })
+    if (cancel) this.saveDraftAndStop()   // 上滑松手 = 取消（落草稿，不丢）
+    else this.finishRecording()           // 松手 = 发送（进复核）
   },
 
   async startRecording (mode) {
     if (this.data.recording || this.data.analyzing || this.data.preview) return
+    // 0 延迟：手指一按立刻弹出实时转写面板（微信式），授权/建连在后台进行
+    this.setData({ recording: true, recordMode: mode, transcript: '', elapsed: 0, countdown: 0, cancelArmed: false, asrHint: '' })
+    this._pendingText = null
+    if (wx.vibrateShort) wx.vibrateShort({ type: 'medium' })
     const app = getApp()
     if (!app.globalData.asrConfig) {
       await app.silentLogin().catch(() => {})
     }
     const cfg = api.getAsrConfig()
 
-    // 权限
+    // 权限（onShow 已预热授权，通常瞬时）
     try {
       await wx.authorize({ scope: 'scope.record' })
     } catch (e) {
+      this.setData({ recording: false })
       this.guideOpenSetting()
       return
     }
-    if (wx.vibrateShort) wx.vibrateShort({ type: 'medium' })
 
     // ===== 实时识别：绝不让建连挡住开口 =====
     if (this.asr && this.asr.isReady) {
@@ -287,8 +309,6 @@ Page({
       this.setData({ asrHint: 'offline' })
     }
 
-    this.setData({ recording: true, recordMode: mode, transcript: '', elapsed: 0, countdown: 0 })
-    this._pendingText = null
     this.recorder.start({
       onFrame: (buf) => this.asr && this.asr.sendFrame(buf),
       onTick: (s) => this.setData({ elapsed: s }),
@@ -297,7 +317,7 @@ Page({
         if (left <= 3 && wx.vibrateShort) wx.vibrateShort({ type: 'light' })
       },
       onStop: async (wavPath, durationMs, err) => {
-        this.setData({ recording: false, countdown: 0, elapsed: 0, recordMode: '', whalePaused: false })
+        this.setData({ recording: false, countdown: 0, elapsed: 0, recordMode: '', whalePaused: false, cancelArmed: false })
         // 松手瞬间先把界面上已有的字定住（节流可能还压着最后一小段）
         this.applyTranscript()
 

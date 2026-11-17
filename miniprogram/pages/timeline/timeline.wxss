@@ -8,7 +8,7 @@
 .tl-year { display: flex; margin-bottom: 28rpx; }
 
 .year-badge {
-  width: 140rpx; flex-shrink: 0; text-align: center;
+  width: 168rpx; flex-shrink: 0; text-align: center;
   color: #fff; background: var(--c-primary);
   font-size: var(--fs-md); font-weight: 500;
   border-radius: var(--radius-md); padding: 16rpx 0; height: fit-content;

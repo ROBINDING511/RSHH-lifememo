@@ -70,8 +70,8 @@
   </view>
 
   <!-- ============ 底部操作区（拇指区） ============ -->
-  <view class="dock safe-bottom" wx:if="{{!recording && !analyzing && !preview}}">
-    <view class="dock-row">
+  <view class="dock safe-bottom" wx:if="{{!analyzing && !preview}}">
+    <view class="dock-row" wx:if="{{!recording}}">
       <view class="dock-pill" hover-class="btn-hover" hover-stay-time="80" bindtap="goTimeline">
         <image src="/images/pixel/flag-blue.png" class="dock-icon" mode="aspectFit" />
         <text>时间轴</text>
@@ -81,47 +81,38 @@
         <text>云朵</text>
       </view>
     </view>
-    <view class="record-btn" hover-class="record-hover" hover-stay-time="80" bindtap="toggleRecord">
+    <view class="record-btn {{recording ? (cancelArmed ? 'record-cancel' : 'record-on') : ''}}"
+      hover-class="record-hover" hover-stay-time="80"
+      bindtouchstart="onHoldStart" bindtouchmove="onHoldMove"
+      catchtouchend="onHoldEnd" catchtouchcancel="onHoldEnd">
       <image class="record-whale" src="/images/misc/recording-whale.png" mode="aspectFit" />
       <view class="record-label">
-        <text class="record-main">点这里说话</text>
-        <text class="record-sub">说完再点一下"说完了"就好</text>
+        <text class="record-main">{{recording ? (cancelArmed ? '松开 取消' : '松开 发送') : '按住 说话'}}</text>
+        <text class="record-sub">{{recording ? (cancelArmed ? '已上滑，松开就取消' : '上滑取消 · 松手发送') : '像微信一样，按住说话'}}</text>
       </view>
     </view>
   </view>
 
-  <!-- ============ 录音中（原生渲染，可随微信字体放大） ============ -->
-  <view class="record-mask {{recordMode === 'hold' ? 'mask-through' : 'mask-block'}}" wx:if="{{recording}}">
-    <view class="rec-status">
-      <view class="rec-dot"></view>
-      <text class="rec-state">杭航正在听您说…</text>
-      <text class="asr-hint" wx:if="{{asrHint === 'connecting'}}">正在连线，字马上就来</text>
-      <text class="asr-hint asr-hint-warn" wx:elif="{{asrHint === 'offline'}}">字暂时不出来，别急，说完松手会自动整理好</text>
-    </view>
-
-    <view class="transcript-box">
-      <scroll-view scroll-y class="transcript-scroll" scroll-into-view="t-end">
-        <text class="transcript">{{transcript || '正在听，您慢慢说…'}}</text>
+  <!-- ============ 实时转写面板（微信式：按住即弹 0 延迟，边说边出字）============
+       pointer-events:none，不抢按钮触摸；松手发送 / 上滑取消。原生 text 可随微信字体放大。 -->
+  <view class="live-mask" wx:if="{{recording}}">
+    <view class="live-card {{cancelArmed ? 'live-cancel' : ''}}">
+      <view class="live-status">
+        <view class="live-dot"></view>
+        <text class="live-state">{{cancelArmed ? '松开手指，取消' : '正在听，松手发送'}}</text>
+        <text class="live-timer">{{elapsed}}s</text>
+      </view>
+      <text class="live-asr" wx:if="{{asrHint === 'connecting'}}">正在连线，字马上就来</text>
+      <text class="live-asr live-asr-warn" wx:elif="{{asrHint === 'offline'}}">字暂时不出来，别急，松手会自动整理好</text>
+      <scroll-view scroll-y class="live-scroll" scroll-into-view="t-end">
+        <text class="live-text">{{transcript || '您慢慢说，字马上出来…'}}</text>
         <text id="t-end"></text>
       </scroll-view>
-    </view>
-
-    <view class="rec-timer">
-      <text class="timer-main">已说 {{elapsed}} 秒</text>
-      <view class="countdown-box" wx:if="{{countdown > 0}}">
-        <text class="countdown-num">{{countdown}}</text>
-        <text class="countdown-label">秒后自动结束</text>
+      <view class="live-countdown" wx:if="{{countdown > 0}}">
+        <text class="live-countdown-num">{{countdown}}</text>
+        <text class="live-countdown-label">秒后自动结束</text>
       </view>
-      <text class="timer-limit" wx:else>最长可说 {{maxSeconds}} 秒</text>
-    </view>
-
-    <view class="rec-hold-hint" wx:if="{{recordMode === 'hold'}}">
-      <text>松开手，就说完啦</text>
-    </view>
-
-    <view class="rec-actions safe-bottom" wx:else>
-      <view class="rec-cancel" hover-class="btn-hover" hover-stay-time="80" bindtap="cancelRecording">不录了</view>
-      <view class="rec-done" hover-class="btn-hover" hover-stay-time="80" bindtap="finishRecording">说完了</view>
+      <text class="live-hint">{{cancelArmed ? '松开即取消，话会存进草稿' : '上滑取消 · 松手发送'}}</text>
     </view>
   </view>
 

@@ -42,13 +42,13 @@ page {
   --ripple-rgb: 255, 255, 255;
   --c-bird: #26404F;
 
-  /* ---- 字号（最小 30rpx，正文 36rpx+）---- */
+  /* ---- 字号（适老放大：最小 30rpx，正文 38rpx+，转写 54rpx）---- */
   --fs-xs: 30rpx;
   --fs-sm: 32rpx;
-  --fs-md: 36rpx;
-  --fs-lg: 40rpx;
-  --fs-xl: 44rpx;
-  --fs-xxl: 52rpx;
+  --fs-md: 38rpx;
+  --fs-lg: 42rpx;
+  --fs-xl: 46rpx;
+  --fs-xxl: 54rpx;
 
   /* ---- 触控（≥88rpx ≈44px）---- */
   --tap-min: 88rpx;
@@ -70,7 +70,8 @@ page {
   font-family: -apple-system, 'PingFang SC', 'Helvetica Neue', sans-serif;
   font-size: var(--fs-md);
   color: var(--c-text);
-  line-height: 1.7;
+  line-height: 1.8;
+  letter-spacing: 0.5rpx;
 }
 
 /* 子页面共用：暖纸→淡海 柔和渐变底 + 顶部一点晨光 */
