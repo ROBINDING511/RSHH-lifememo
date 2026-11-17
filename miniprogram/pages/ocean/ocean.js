@@ -45,9 +45,10 @@ Page({
     milestones: [],
     stages: life.getStages(),
     worldWidth: 0,
-    stageWidth: 0,
+    worldHeight: 0,
+    movX: 0,
+    movY: 0,
     tintGradient: '',
-    scrollLeft: 0,
     birthYear: null,
     whalePaused: false,
     // 录音（微信式按住说话 + 流式转写）
@@ -98,7 +99,6 @@ Page({
     this.layoutMilestones()
     this.setData({
       birthYear: life.getBirthYear(),
-      stages: life.getStages(),
       drafts: draft.list(), whalePaused: false
     })
     this.refreshData()
@@ -108,24 +108,39 @@ Page({
     wx.authorize({ scope: 'scope.record' }).catch(() => {})
   },
 
-  // 整片海：世界宽 = 阶段数 × 屏宽；阶段色连续渐变（滚动时海色平滑过渡）
+  // 整片海向四面八方扩展：2D 世界（3×3 屏），人生阶段呈放射状分布；
+  // 拖动如滚地球——海面纹理随世界滚过、各阶段海色晕染、边缘曲率暗角。
   setupWorld () {
-    const w = (wx.getWindowInfo ? wx.getWindowInfo().windowWidth : 375)
-    const n = life.getStages().length
-    const tint = 'linear-gradient(90deg,' + life.getStages().map((s, i) => `${s.color} ${(i / (n - 1) * 100).toFixed(1)}%`).join(',') + ')'
-    this.setData({ stageWidth: w, worldWidth: w * n, tintGradient: tint })
+    const info = wx.getWindowInfo ? wx.getWindowInfo() : { windowWidth: 375, windowHeight: 667 }
+    const W = info.windowWidth, H = info.windowHeight
+    const W2 = W * 3, H2 = H * 3
+    const stages = life.getStages()
+    const n = stages.length
+    const cx0 = W2 / 2, cy0 = H2 / 2
+    const R = Math.min(W2, H2) * 0.30
+    const regions = stages.map((s, i) => {
+      if (i === 0) return Object.assign({}, s, { cx: cx0, cy: cy0, r: R * 0.62 })
+      const ang = (-90 + (i - 1) * (360 / Math.max(1, n - 1))) * Math.PI / 180
+      return Object.assign({}, s, { cx: cx0 + R * Math.cos(ang), cy: cy0 + R * Math.sin(ang), r: R * 0.55 })
+    })
+    const tint = regions.map((g) => `radial-gradient(circle at ${g.cx}px ${g.cy}px, ${g.color} 0%, ${g.color}00 ${g.r}px)`).join(',')
+    this._regions = regions
+    this.setData({
+      worldWidth: W2, worldHeight: H2,
+      movX: -(W2 - W) / 2, movY: -(H2 - H) / 2,
+      tintGradient: tint, stages: regions
+    })
   },
 
   // 人生节点 → 海面上的小旗标记（落在所属阶段带内）
   layoutMilestones () {
-    const sw = this.data.stageWidth || 375
-    const stages = life.getStages()
+    const regions = this._regions || life.getStages()
     const ms = life.getMilestones().map((m) => {
       const st = life.stageOfAge(m.age)
-      const si = stages.findIndex((x) => x.key === st.key)
+      const g = regions.find((x) => x.key === st.key) || regions[0]
       const span = Math.max(1, st.to - st.from + 1)
       const frac = Math.min(1, Math.max(0, (m.age - st.from) / span))
-      return { id: m.id, name: m.name, age: m.age, left: si * sw + 20 + frac * (sw - 40), top: 26 }
+      return { id: m.id, name: m.name, age: m.age, left: g.cx + (frac - 0.5) * (g.r || 120), top: g.cy - (g.r || 120) * 0.6 }
     })
     this.setData({ milestones: ms })
   },
@@ -224,7 +239,7 @@ Page({
   // 布局：真实回忆 → 鸟瞰海面冰山。支持不限数量追加：按 id 哈希散点 + 深度分层，
   // 新增回忆持续落海（isNew 播落下动画），不做数量截断。
   layoutBergs (icebergs) {
-    const sw = this.data.stageWidth || 375
+    const regions = this._regions || life.getStages()
     const bergs = []
     ;(icebergs || []).forEach((b) => {
       const seed = hash(b._id)
@@ -236,14 +251,14 @@ Page({
           ? life.stageOfYear(yr, this.data.birthYear)
           : life.getStages()[seed % life.getStages().length]
       }
-      const si = life.getStages().findIndex((x) => x.key === stage.key)
+      const g = regions.find((x) => x.key === stage.key) || regions[0]
       const layer = b.size === 'large' ? 'near' : b.size === 'small' ? 'far' : 'mid'
-      const band = layer === 'far' ? { y0: 10, span: 14, w: 25 }
-        : layer === 'mid' ? { y0: 34, span: 22, w: 41 }
-          : { y0: 60, span: 16, w: 56 }
-      const width = Math.round(band.w * (SIZE_SCALE[b.size] || 1))
-      const left = si * sw + 12 + (seed % Math.max(1, sw - width - 24))
-      const top = band.y0 + ((seed >> 4) % band.span)
+      const width = Math.round((layer === 'far' ? 25 : layer === 'mid' ? 41 : 56) * (SIZE_SCALE[b.size] || 1))
+      // 在该阶段海域内极坐标散点（四面八方）
+      const ang = (seed % 360) * Math.PI / 180
+      const rad = (((seed >> 3) % 100) / 100) * (g.r || 120) * 0.8
+      const left = g.cx + rad * Math.cos(ang) - width / 2
+      const top = g.cy + rad * Math.sin(ang) - width / 2
       const swayDur = (8 + (seed % 40) / 10).toFixed(1)
       const swayDelay = (-(seed % 80) / 10).toFixed(1)
       const swayAnim = `sway ${swayDur}s ease-in-out ${swayDelay}s infinite`
@@ -650,7 +665,15 @@ Page({
       await this.refreshData()
       // 滚到新冰山所在的人生阶段（整片海连续滚动）
       const st = life.stageByKey(p.zoneOptions[p.zoneIndex])
-      if (st) this.setData({ scrollLeft: life.getStages().findIndex((x) => x.key === st.key) * (this.data.stageWidth || 375) })
+      if (st) {
+        const g = (this._regions || life.getStages()).find((x) => x.key === st.key)
+        if (g) {
+          const info = wx.getWindowInfo ? wx.getWindowInfo() : { windowWidth: 375, windowHeight: 667 }
+          const mx = Math.max(-(this.data.worldWidth - info.windowWidth), Math.min(0, -(g.cx - info.windowWidth / 2)))
+          const my = Math.max(-(this.data.worldHeight - info.windowHeight), Math.min(0, -(g.cy - info.windowHeight / 2)))
+          this.setData({ movX: mx, movY: my })
+        }
+      }
       // 新冰山播完落下动画后切回常态摇曳
       if (this.lastPublishedId) {
         const pid = this.lastPublishedId

@@ -15,25 +15,30 @@
     <view class="caustic c1"></view>
     <view class="caustic c2"></view>
 
-    <!-- 整片连续海：横向滚动，人生阶段色连续渐变（不分成独立海域） -->
-    <scroll-view scroll-x class="sea-scroll" enhanced show-scrollbar="{{false}}"
-      scroll-left="{{scrollLeft}}" scroll-with-animation>
-      <view class="sea-world" style="width:{{worldWidth}}px">
+    <!-- 整片海向四面八方扩展：2D 可拖世界，拖动如滚地球（海面纹理随世界滚过+各阶段海色晕染） -->
+    <movable-area class="sea-area">
+      <movable-view class="sea-world" direction="all" inertia damping="{{40}}" friction="{{2}}"
+        out-of-bounds="{{false}}" style="width:{{worldWidth}}px;height:{{worldHeight}}px"
+        x="{{movX}}" y="{{movY}}">
+        <image class="sea-texture" src="/images/ocean/sea_bg.jpg" mode="scaleToFill"
+          style="width:{{worldWidth}}px;height:{{worldHeight}}px" />
         <view class="sea-tint" style="background:{{tintGradient}}"></view>
         <text wx:for="{{stages}}" wx:key="key" class="stage-label"
-          style="left:{{index * stageWidth + stageWidth / 2}}px">{{item.name}}之海</text>
+          style="left:{{item.cx}}px;top:{{item.cy}}px">{{item.name}}之海</text>
         <view wx:for="{{bergs}}" wx:key="id" class="berg"
-          style="left:{{item.left}}px;top:{{item.top}}%;width:{{item.width}}px;opacity:{{item.opacity}};animation:{{item.anim}}"
+          style="left:{{item.left}}px;top:{{item.top}}px;width:{{item.width}}px;opacity:{{item.opacity}};animation:{{item.anim}}"
           data-id="{{item.id}}" bindtap="onBergTap" hover-class="berg-hover" hover-stay-time="80">
           <image class="berg-img" src="/images/ocean/berg.png" mode="widthFix" />
         </view>
         <!-- 自定义人生节点：小旗标记 -->
-        <view wx:for="{{milestones}}" wx:key="id" class="ms-marker" style="left:{{item.left}}px;top:{{item.top}}%">
+        <view wx:for="{{milestones}}" wx:key="id" class="ms-marker" style="left:{{item.left}}px;top:{{item.top}}px">
           <view class="ms-flag"></view>
           <text class="ms-label">{{item.name}}·{{item.age}}岁</text>
         </view>
-      </view>
-    </scroll-view>
+      </movable-view>
+    </movable-area>
+    <!-- 球面曲率暗角：滚动如滚地球的边缘收暗 -->
+    <view class="sea-curve"></view>
 
     <!-- 鲸鱼杭航：屏幕层游弋（始终可见）+ 自然微动；长按说话副入口 -->
     <view class="whale-layer">
