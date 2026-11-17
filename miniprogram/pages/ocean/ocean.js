@@ -48,7 +48,6 @@ Page({
     recording: false,
     recordMode: '',      // 'hold' 按住（大按钮 / 鲸鱼）
     cancelArmed: false,  // 上滑进入取消态
-    asrDebug: '',        // 实时链路诊断（排查流式不出字）
     transcript: '',
     asrHint: '',         // ''=实时识别正常 | 'connecting'=连接中 | 'offline'=没连上
     elapsed: 0,
@@ -361,13 +360,6 @@ Page({
         this.openPreview(wavPath, (this.data.transcript || '').trim())
       }
     })
-    // 实时链路诊断：每 500ms 刷新，便于真机定位流式不出字
-    this._dbgTimer = setInterval(() => {
-      const a = this.asr
-      const cfg = api.getAsrConfig()
-      const s = a ? a.stats : null
-      this.setData({ asrDebug: (a ? a.state : 'no-asr') + ' rec' + (this._recFrames || 0) + (s ? ' send' + s.framesSent + ' q' + s.framesQueued + ' d' + s.deltas + ' c' + s.completed : '') + (a && a.lastError ? ' err:' + a.lastError : '') + (cfg && cfg.key ? '' : ' NOKEY') })
-    }, 500)
   },
 
   // 兜底转写：WAV 上传云存储 → transcribe 云函数
