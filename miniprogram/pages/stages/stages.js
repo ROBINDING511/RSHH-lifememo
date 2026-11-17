@@ -86,10 +86,18 @@ Page({
     const age = parseInt(this.data.msAge, 10)
     if (!name) return wx.showToast({ title: '写个节点名字', icon: 'none' })
     if (!isFinite(age)) return wx.showToast({ title: '填几岁', icon: 'none' })
-    this.setData({ milestones: life.addMilestone(name, age), msName: '', msAge: '' })
-    wx.showToast({ title: '记下了', icon: 'none' })
+    const ms = life.addMilestone(name, age)   // 加节点 = 开启一片新海
+    this._draft = life.getStages().map((s) => ({ name: s.name, to: s.to }))
+    this.setData({ milestones: ms, msName: '', msAge: '' })
+    this.syncDraft()
+    wx.showToast({ title: '记下了，多了一片海', icon: 'none' })
   },
-  removeMs (e) { this.setData({ milestones: life.removeMilestone(e.currentTarget.dataset.id) }) },
+  removeMs (e) {
+    const ms = life.removeMilestone(e.currentTarget.dataset.id)   // 删节点 = 合并海
+    this._draft = life.getStages().map((s) => ({ name: s.name, to: s.to }))
+    this.setData({ milestones: ms })
+    this.syncDraft()
+  },
 
   // ---- 语音：按住跟杭航说 ----
   onVoiceStart () {

@@ -41,8 +41,8 @@
   </view>
 
   <view class="card">
-    <text class="prof-title">你的人生节点（可选）</text>
-    <text class="ms-invite">结婚、孩子出生、搬家、退休…这些只属于你的重要时刻。记下来，海上会为你立一个小标记。</text>
+    <text class="prof-title">人生节点＝海的开端</text>
+    <text class="ms-invite">节点和海是同一件事：每个转折点开启一片新的海。结婚、孩子出生、退休…记下它，就多一片以它命名的海，海上立一面小旗；删掉节点，两片海就合并。</text>
     <view class="ms-list">
       <view wx:for="{{milestones}}" wx:key="id" class="ms-row">
         <text class="ms-age">{{item.age}}岁</text>

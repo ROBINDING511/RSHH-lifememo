@@ -100,17 +100,34 @@ function parseStagesFromText (text) {
   return hit ? list : null
 }
 
-// ---- 自定义人生节点 ----
-function getMilestones () { try { const m = wx.getStorageSync('lifeMilestones'); if (Array.isArray(m)) return m } catch (e) {} return [] }
-function setMilestones (m) { try { wx.setStorageSync('lifeMilestones', m) } catch (e) {} }
-function addMilestone (name, age) {
-  const m = getMilestones()
-  m.push({ id: Date.now() + '_' + Math.floor(Math.random() * 1000), name: String(name).slice(0, 12), age: Number(age) })
-  m.sort((a, b) => a.age - b.age)
-  setMilestones(m)
-  return m
+// ---- 人生节点 == 海的开端（同一份清单的两种视图）----
+// 节点是转折点(点)，海是它开启的区间；加节点=多一片海，删节点=合并海。
+function getMilestones () {
+  return getStages().slice(1).map((s) => ({ id: s.key, name: s.name, age: s.from }))
 }
-function removeMilestone (id) { const m = getMilestones().filter((x) => x.id !== id); setMilestones(m); return m }
+function setMilestones (m) { /* 节点即海边界，直接改海即可，此处保留空实现兼容 */ }
+function addMilestone (name, age) {
+  const a = Number(age)
+  const stages = getStages()
+  const list = stages.map((s) => ({ name: s.name, to: s.to }))
+  const i = stages.findIndex((s) => a >= s.from && a <= s.to)
+  if (i < 0) return getMilestones()
+  const oldTo = list[i].to
+  list[i].to = a - 1                      // 左半保留原名
+  list.splice(i + 1, 0, { name: String(name).slice(0, 8), to: oldTo })  // 新节点开启新海
+  setStages(list)
+  return getMilestones()
+}
+function removeMilestone (id) {
+  const stages = getStages()
+  const i = stages.findIndex((s) => s.key === id)
+  if (i <= 0) return getMilestones()
+  const list = stages.map((s) => ({ name: s.name, to: s.to }))
+  list[i - 1].to = list[i].to             // 合并进前一片海
+  list.splice(i, 1)
+  setStages(list)
+  return getMilestones()
+}
 function parseMilestoneFromText (text) {
   const t = String(text || '')
   let m = t.match(/(\d{1,2})\s*岁(?:那年|的时候|时)?[，,]?\s*([^，,。；;]{2,12})/)
