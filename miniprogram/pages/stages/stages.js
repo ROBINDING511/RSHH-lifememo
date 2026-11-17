@@ -7,7 +7,6 @@ Page({
   data: {
     bounds: [], stages: [],
     profileMode: 'year', profileBirthday: '', profileAge: '', profileYear: '',
-    barLeft: 0, barWidth: 1, dragIndex: -1,
     listening: false, voiceText: ''
   },
   onLoad () {
@@ -18,11 +17,6 @@ Page({
       profileBirthday: p.birthday || '', profileAge: p.age != null ? String(p.age) : '', profileYear: p.year != null ? String(p.year) : ''
     })
     this.recorder = createRecorder()
-  },
-  onReady () {
-    this.createSelectorQuery().select('#stageBar').boundingClientRect((r) => {
-      if (r) this.setData({ barLeft: r.left, barWidth: r.width })
-    }).exec()
   },
   noop () {},
 
@@ -41,21 +35,29 @@ Page({
     wx.showToast({ title: '记好了', icon: 'none' })
   },
 
-  // ---- 拖拽分隔点 ----
-  onHandleStart (e) { this.setData({ dragIndex: Number(e.currentTarget.dataset.i) }) },
-  onHandleMove (e) {
-    const i = this.data.dragIndex
-    if (i < 0) return
-    const x = e.touches[0].clientX
-    let age = Math.round((x - this.data.barLeft) / this.data.barWidth * 100)
+  // ---- 数字框改边界（比拖拽更稳、适老）----
+  onToInput (e) {
+    const i = Number(e.currentTarget.dataset.i)
+    if (i >= 4) return
+    const v = parseInt(e.detail.value, 10)
+    if (!isFinite(v)) return
     const b = this.data.bounds.slice()
     const lo = i === 0 ? 1 : b[i - 1] + 1
     const hi = i === 3 ? 99 : b[i + 1] - 1
-    age = Math.max(lo, Math.min(hi, age))
-    b[i] = age
+    b[i] = Math.max(lo, Math.min(hi, v))
     this.setData({ bounds: b, stages: this.stagesOf(b) })
   },
-  onHandleEnd () { this.setData({ dragIndex: -1 }) },
+  onFromInput (e) {
+    const i = Number(e.currentTarget.dataset.i)
+    if (i === 0) return
+    const v = parseInt(e.detail.value, 10)
+    if (!isFinite(v)) return
+    const b = this.data.bounds.slice()
+    const lo = i - 1 === 0 ? 1 : b[i - 2] + 1
+    const hi = b[i] - 1
+    b[i - 1] = Math.max(lo, Math.min(hi, v - 1))
+    this.setData({ bounds: b, stages: this.stagesOf(b) })
+  },
   stagesOf (b) {
     const starts = [0, b[0] + 1, b[1] + 1, b[2] + 1, b[3] + 1]
     return life.NAMES.map((n, i) => {

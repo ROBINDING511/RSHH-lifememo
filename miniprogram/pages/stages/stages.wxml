@@ -21,21 +21,20 @@
   </view>
 
   <view class="card">
-    <text class="prof-title">拖动分隔点，调整各阶段到几岁</text>
-    <view class="stage-bar" id="stageBar">
+    <text class="prof-title">每个阶段从几岁到几岁，直接改数字</text>
+    <view class="stage-bar">
       <view wx:for="{{stages}}" wx:key="key" class="seg"
         style="left:{{item.from}}%;width:{{item.dispTo-item.from+1}}%;background:{{item.color}}"></view>
-      <view wx:for="{{bounds}}" wx:key="*this" class="handle" style="left:{{item}}%"
-        data-i="{{index}}" catchtouchstart="onHandleStart" catchtouchmove="onHandleMove" catchtouchend="onHandleEnd">
-        <text class="handle-age">{{item}}</text>
-        <view class="handle-dot"></view>
-      </view>
     </view>
-    <view class="stage-list">
-      <view wx:for="{{stages}}" wx:key="key" class="stage-row">
+    <view class="stage-rows">
+      <view wx:for="{{stages}}" wx:key="key" class="stage-row2">
+        <input class="num-box" type="number" value="{{item.from}}" data-i="{{index}}" bindinput="onFromInput" disabled="{{index===0}}" />
+        <text class="dash">–</text>
+        <input wx:if="{{index<4}}" class="num-box" type="number" value="{{item.to}}" data-i="{{index}}" bindinput="onToInput" />
+        <text wx:else class="num-box num-open">以后</text>
+        <text class="unit" wx:if="{{index<4}}">岁</text>
         <view class="stage-swatch" style="background:{{item.color}}"></view>
         <text class="stage-name">{{item.key}}</text>
-        <text class="stage-range">{{item.from}}–{{item.to}}岁</text>
       </view>
     </view>
   </view>
