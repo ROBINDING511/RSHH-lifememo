@@ -190,9 +190,9 @@ Page({
       const seed = hash(b._id)
       const layer = b.size === 'large' ? 'near' : b.size === 'small' ? 'far' : 'mid'
       // 深度带：远小淡 / 中 / 近大；带宽与基准尺寸放大，冰山更醒目
-      const band = layer === 'far' ? { y0: 8, span: 16, w: 36 }
-        : layer === 'mid' ? { y0: 32, span: 24, w: 58 }
-          : { y0: 60, span: 16, w: 80 }
+      const band = layer === 'far' ? { y0: 8, span: 16, w: 25 }
+        : layer === 'mid' ? { y0: 32, span: 24, w: 41 }
+          : { y0: 60, span: 16, w: 56 }
       const left = 3 + (seed % 86)
       const top = band.y0 + ((seed >> 4) % band.span)
       const width = Math.round(band.w * (SIZE_SCALE[b.size] || 1))
