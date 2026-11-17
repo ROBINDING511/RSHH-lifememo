@@ -95,9 +95,9 @@ EXPLICIT_BG = {
     '.option-label':   ('.preview-card',  '白卡上的选项标签'),
     '.chip':           ('.preview-card',  '白卡上的未选 chip'),
     '.chip-on':        ('.chip-on',       '选中 chip 主色底白字'),
-    '.hint-sub':       ('.page',          '页面底上的空态副标题'),
-    '.hint-sub2':      ('.page',          '页面底上的空态说明'),
-    '.hint-title':     ('.page',          '页面底上的空态标题'),
+    '.hint-sub':       ('.hint-card',     '空态深色胶囊白字副标题'),
+    '.hint-sub2':      ('.hint-card',     '空态深色胶囊白字说明'),
+    '.hint-title':     ('.hint-card',     '空态深色胶囊白字标题'),
     '.g-desc':         ('.page',          '引导页描述'),
     '.g-skip':         ('.page',          '引导页跳过'),
     '.back-btn':       ('.top-zone',      '顶栏白底上的返回'),
@@ -189,6 +189,10 @@ def main():
             return bgcache[key]
         if key == '.analyze-mask':
             bgcache[key] = '#E8F4FB'   # rgba(232,244,251,.94) 近似
+            return bgcache[key]
+        if key == '.hint-card':
+            # rgba(16,48,66,.72) 叠最浅海面 #C9E7ED 的不透明近似（最坏情况，白字仍 ≥4.5:1）
+            bgcache[key] = '#446372'
             return bgcache[key]
         c = collect_bg_color(key, merged, tok, [(s, p) for _, s, p in all_rules])
         bgcache[key] = c

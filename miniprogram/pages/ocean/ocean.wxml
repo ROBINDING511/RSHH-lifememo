@@ -1,44 +1,88 @@
-<!--pages/ocean/ocean.wxml — 人生海洋主界面
-    适老化要点：
-    - 顶部让开状态栏与微信胶囊（右上角不放任何可点元素）
-    - 所有可点目标 ≥ 88rpx，主操作放底部拇指区
-    - 录音主入口 = 底部大按钮「点一下开始说 / 说完了点这里」，无需长时间按住
-    - 长按鲸鱼杭航 = 等效的第二个入口（保留情感化交互）
-    - 录音中的文字用原生 view 渲染，跟随微信字体大小设置放大（Canvas 文字不会放大）
+<!--pages/ocean/ocean.wxml — 人生海洋主界面（鸟瞰矢量海面 P0）
+    渲染：独立 SVG 资源 + <image> + WXSS 关键帧 + z-index 深度分层（零位图、零 Canvas）。
+    分层：z3 远冰 → z5 鲸鱼 → z7 中冰 → z9 近冰 → z11/12 水纹 → z13 飞鸟 → z20 UI。
+    鲸鱼从冰山「后面」穿过；只动画 transform/opacity。
+    适老化：录音主入口=底部大按钮（点一下开始/说完了再点）；长按鲸鱼=副入口；
+    关键信息用原生 view/text（随微信字体放大、读屏可达）；空态提示压深色胶囊白字。
 -->
-<view class="page">
-  <canvas id="oceanCanvas" type="2d" class="ocean-canvas"
-    bindtouchstart="onTouchStart" bindtouchmove="onTouchMove"
-    bindtouchend="onTouchEnd" bindtouchcancel="onTouchEnd"></canvas>
+<view class="page" bindtouchend="onSceneTouchEnd">
 
-  <!-- ============ 顶部：仅状态信息，右上角留白给微信胶囊 ============ -->
-  <view class="top-zone" wx:if="{{viewLevel === 'zone' && !recording && !preview}}"
-    style="top: {{capsuleBottom + 16}}px;">
-    <view class="back-btn" hover-class="btn-hover" hover-stay-time="80" bindtap="backToGlobal">
-      <text class="back-arrow">‹</text>
-      <text>海洋全景</text>
+  <!-- ============ 矢量海面场景 ============ -->
+  <view class="scene" bindtouchstart="onSceneTouchStart">
+    <view class="bg"></view>
+    <view class="caustic c1"></view>
+    <view class="caustic c2"></view>
+    <view class="caustic c3"></view>
+
+    <!-- z3 远冰（小、淡） -->
+    <view class="layer z-far">
+      <view wx:for="{{farBergs}}" wx:key="id" class="berg"
+        style="left:{{item.left}}%;top:{{item.top}}%;width:{{item.width}}px;opacity:{{item.opacity}};animation:{{item.anim}}"
+        data-id="{{item.id}}" bindtap="onBergTap" hover-class="berg-hover" hover-stay-time="80">
+        <image class="berg-img" src="/images/ocean/berg-{{item.type}}.svg" mode="widthFix" />
+      </view>
     </view>
-    <text class="zone-name">{{currentZone}}</text>
+
+    <!-- z5 鲸鱼杭航：巡游 + 转身 + 8 帧行波；长按说话副入口 -->
+    <view class="layer z-whale">
+      <view class="cruise {{whalePaused || recording ? 'paused' : ''}}">
+        <view class="flip">
+          <view class="whalebox" bindlongpress="onWhaleLongPress" hover-class="whale-hover" hover-stay-time="80">
+            <image class="wshadow" src="/images/ocean/whale-shadow.svg" mode="aspectFit" />
+            <image wx:for="{{whaleFrames}}" wx:key="*this" class="wf wf{{item}}"
+              src="/images/ocean/whale-f{{item}}.svg" mode="aspectFit" />
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- z7 中冰（鲸鱼从这些冰山后面穿过；新回忆落这里） -->
+    <view class="layer z-mid">
+      <view wx:for="{{midBergs}}" wx:key="id" class="berg"
+        style="left:{{item.left}}%;top:{{item.top}}%;width:{{item.width}}px;opacity:{{item.opacity}};animation:{{item.anim}}"
+        data-id="{{item.id}}" bindtap="onBergTap" hover-class="berg-hover" hover-stay-time="80">
+        <image class="berg-img" src="/images/ocean/berg-{{item.type}}.svg" mode="widthFix" />
+      </view>
+    </view>
+
+    <!-- z9 近冰（大） -->
+    <view class="layer z-near">
+      <view wx:for="{{nearBergs}}" wx:key="id" class="berg"
+        style="left:{{item.left}}%;top:{{item.top}}%;width:{{item.width}}px;opacity:{{item.opacity}};animation:{{item.anim}}"
+        data-id="{{item.id}}" bindtap="onBergTap" hover-class="berg-hover" hover-stay-time="80">
+        <image class="berg-img" src="/images/ocean/berg-{{item.type}}.svg" mode="widthFix" />
+      </view>
+    </view>
+
+    <!-- z11/12 水纹（无缝漂移） -->
+    <image class="ripples r1 z-rip1" src="/images/ocean/ripple-1.svg" mode="scaleToFill" />
+    <image class="ripples r2 z-rip2" src="/images/ocean/ripple-2.svg" mode="scaleToFill" />
+
+    <!-- z13 飞鸟（两帧扇翅 + 掠过） -->
+    <view class="bird z-bird">
+      <image class="bird-f b0" src="/images/ocean/bird-0.svg" mode="aspectFit" />
+      <image class="bird-f b1" src="/images/ocean/bird-1.svg" mode="aspectFit" />
+    </view>
   </view>
 
   <!-- ============ 草稿找回（说过的话绝不丢） ============ -->
-  <!-- 仅全景视图显示，避免和海域返回栏抢同一个顶部位置 -->
-  <view class="draft-bar" wx:if="{{drafts.length && viewLevel === 'global' && !recording && !preview}}"
+  <view class="draft-bar" wx:if="{{drafts.length && !recording && !preview}}"
     style="top: {{capsuleBottom + 16}}px;">
     <view class="draft-text">有 {{drafts.length}} 段话没存好</view>
     <view class="draft-btn" hover-class="btn-hover" hover-stay-time="80" bindtap="recoverDraft">找回来</view>
   </view>
 
-  <!-- ============ 空态提示 ============ -->
+  <!-- ============ 空态提示（深色胶囊白字，压在任何水色上都看得清） ============ -->
   <view class="empty-hint" wx:if="{{icebergCount === 0 && !recording && !preview && !drafts.length}}">
-    <text class="hint-title">想说什么，就说给杭航听</text>
-    <text class="hint-sub">按住下面的蓝色按钮，或者长按小鲸鱼</text>
-    <text class="hint-sub2">您说的每一句话，都会变成一座冰山</text>
+    <view class="hint-card">
+      <text class="hint-title">想说什么，就说给杭航听</text>
+      <text class="hint-sub">点下面的蓝色按钮，或者长按小鲸鱼</text>
+      <text class="hint-sub2">您说的每一句话，都会变成一座冰山</text>
+    </view>
     <view class="hint-arrow"></view>
   </view>
 
   <!-- ============ 底部操作区（拇指区） ============ -->
-  <!-- 待机：时间轴 / 云朵 + 录音主按钮 -->
   <view class="dock safe-bottom" wx:if="{{!recording && !analyzing && !preview}}">
     <view class="dock-row">
       <view class="dock-pill" hover-class="btn-hover" hover-stay-time="80" bindtap="goTimeline">
@@ -50,8 +94,7 @@
         <text>云朵</text>
       </view>
     </view>
-    <view class="record-btn" hover-class="record-hover" hover-stay-time="80"
-      bindtap="toggleRecord">
+    <view class="record-btn" hover-class="record-hover" hover-stay-time="80" bindtap="toggleRecord">
       <image class="record-whale" src="/images/misc/recording-whale.png" mode="aspectFit" />
       <view class="record-label">
         <text class="record-main">点这里说话</text>
@@ -61,14 +104,10 @@
   </view>
 
   <!-- ============ 录音中（原生渲染，可随微信字体放大） ============ -->
-  <!-- 长按模式：遮罩穿透触摸，松手事件才能传回 canvas 结束录音
-       点按模式：遮罩拦截触摸，避免误碰海面造成缩放/误入详情 -->
-  <view class="record-mask {{recordMode === 'hold' ? 'mask-through' : 'mask-block'}}"
-    wx:if="{{recording}}">
+  <view class="record-mask {{recordMode === 'hold' ? 'mask-through' : 'mask-block'}}" wx:if="{{recording}}">
     <view class="rec-status">
       <view class="rec-dot"></view>
       <text class="rec-state">杭航正在听您说…</text>
-      <!-- 实时识别状态：失败可见，不再静默降级让用户误以为在流式 -->
       <text class="asr-hint" wx:if="{{asrHint === 'connecting'}}">正在连线，字马上就来</text>
       <text class="asr-hint asr-hint-warn" wx:elif="{{asrHint === 'offline'}}">字暂时不出来，别急，说完松手会自动整理好</text>
     </view>
@@ -82,7 +121,6 @@
 
     <view class="rec-timer">
       <text class="timer-main">已说 {{elapsed}} 秒</text>
-      <!-- 最后 10 秒：换成大号红色倒计时，一眼就能看到还剩多久，和微信语音一致 -->
       <view class="countdown-box" wx:if="{{countdown > 0}}">
         <text class="countdown-num">{{countdown}}</text>
         <text class="countdown-label">秒后自动结束</text>
@@ -90,12 +128,10 @@
       <text class="timer-limit" wx:else>最长可说 {{maxSeconds}} 秒</text>
     </view>
 
-    <!-- 长按鲸鱼：手指正占着屏幕，松手即结束，不放按钮 -->
     <view class="rec-hold-hint" wx:if="{{recordMode === 'hold'}}">
       <text>松开手，就说完啦</text>
     </view>
 
-    <!-- 点按模式：明确给两个大按钮 -->
     <view class="rec-actions safe-bottom" wx:else>
       <view class="rec-cancel" hover-class="btn-hover" hover-stay-time="80" bindtap="cancelRecording">不录了</view>
       <view class="rec-done" hover-class="btn-hover" hover-stay-time="80" bindtap="finishRecording">说完了</view>
@@ -122,7 +158,6 @@
         bindinput="onPreviewInput"
         placeholder="没听清的话，也可以在这里打字补上"></textarea>
 
-      <!-- 原声：先听一遍再决定 -->
       <view class="voice-check" wx:if="{{preview.wavPath}}"
         hover-class="btn-hover" hover-stay-time="80" bindtap="playPreviewVoice">
         <view class="vc-btn {{previewVoicePlaying ? 'vc-on' : ''}}"></view>

@@ -1,32 +1,140 @@
-/* pages/ocean/ocean.wxss — 适老化样式
- * 触控目标一律 ≥ 88rpx（≈44px，WCAG 2.2 Target Size AA）
- * 顶部位置由 JS 注入 capsuleBottom，避开状态栏与微信胶囊
+/* pages/ocean/ocean.wxss — 鸟瞰矢量海面（P0）
+ * 渲染层：独立 SVG 资源 + <image> + WXSS 关键帧 + z-index 深度分层。
+ * 只动画 transform / opacity（合成层友好，低端机不掉帧）；无运行时滤镜。
+ * 场景色一律引用 app.wxss 的 --sea-* token；浮层文字压深色胶囊（白字全渐变达标）。
+ * 触控目标 ≥ 88rpx；保留的录音/发布 UI 样式沿用适老化定稿。
  */
 .page { width: 100vw; height: 100vh; position: relative; overflow: hidden; }
-.ocean-canvas { width: 100vw; height: 100vh; }
 
-/* ============ 顶部（左侧，右上角留白给胶囊） ============ */
-.top-zone {
-  position: absolute; left: 24rpx;
-  display: flex; align-items: center; gap: 20rpx;
-  background: rgba(255,255,255,0.94); border-radius: 40rpx;
-  padding: 10rpx 12rpx 10rpx 8rpx;
-  box-shadow: 0 4rpx 16rpx rgba(36,100,143,0.12);
+/* ============ 场景层 ============ */
+.scene { position: absolute; left: 0; top: 0; right: 0; bottom: 0; overflow: hidden; }
+.bg {
+  position: absolute; left: 0; top: 0; right: 0; bottom: 0;
+  background:
+    radial-gradient(120% 34% at 50% -4%, rgba(var(--sea-warm-rgb), .5) 0%, rgba(var(--sea-warm-rgb), .16) 42%, rgba(var(--sea-warm-rgb), 0) 68%),
+    radial-gradient(80% 28% at 26% 92%, rgba(var(--sea-deep-rgb), .32), rgba(var(--sea-deep-rgb), 0) 70%),
+    linear-gradient(180deg, var(--sea-0) 0%, var(--sea-1) 10%, var(--sea-2) 26%, var(--sea-3) 48%, var(--sea-4) 68%, var(--sea-5) 86%, var(--sea-6) 100%);
 }
-.back-btn {
-  display: flex; align-items: center; gap: 4rpx;
-  min-height: 88rpx; padding: 0 28rpx;
-  border-radius: 44rpx;
-  color: var(--c-primary); font-size: var(--fs-sm); font-weight: 500;
-  background: var(--c-primary-soft);
+/* 焦散光斑：radial-gradient 自带柔边，不用 filter:blur（省性能） */
+.caustic {
+  position: absolute; border-radius: 50%; opacity: .12;
+  background: radial-gradient(circle, rgba(var(--caustic-rgb), .9) 0%, rgba(var(--caustic-rgb), 0) 70%);
 }
-.back-btn.btn-hover { background: #DCE9F2; }
-.back-arrow { font-size: 40rpx; line-height: 1; margin-right: 2rpx; }
-.zone-name { color: var(--c-text); font-size: var(--fs-md); font-weight: 500; padding-right: 16rpx; }
+.c1 { left: 8%; top: 22%; width: 300rpx; height: 140rpx; animation: caust 19s ease-in-out infinite; }
+.c2 { left: 56%; top: 38%; width: 380rpx; height: 160rpx; animation: caust 26s ease-in-out -6s infinite; }
+.c3 { left: 18%; top: 64%; width: 340rpx; height: 148rpx; animation: caust 22s ease-in-out -12s infinite; }
+@keyframes caust {
+  0%, 100% { transform: translateX(0) scaleX(1); opacity: .09; }
+  50% { transform: translateX(32rpx) scaleX(1.12); opacity: .15; }
+}
 
-/* ============ 草稿找回 ============ */
+.layer { position: absolute; left: 0; top: 0; right: 0; bottom: 0; pointer-events: none; }
+.z-far { z-index: 3; }
+.z-whale { z-index: 5; }
+.z-mid { z-index: 7; }
+.z-near { z-index: 9; }
+.z-rip1 { z-index: 11; }
+.z-rip2 { z-index: 12; }
+.z-bird { z-index: 13; }
+
+/* ============ 冰山 ============ */
+.berg {
+  position: absolute; transform-origin: 50% 55%;
+  pointer-events: auto; will-change: transform;
+}
+.berg-img { display: block; width: 100%; }
+.berg-hover { opacity: .82; transform: scale(1.04); }
+
+/* ============ 鲸鱼（杭航）============ */
+.cruise { position: absolute; left: 0; top: 0; width: 0; height: 0; animation: cruise 34s ease-in-out infinite; will-change: transform; }
+.flip { transform-origin: 0 0; animation: flip 34s ease-in-out infinite; }
+.whalebox {
+  position: absolute; left: -104rpx; top: -60rpx; width: 208rpx; height: 120rpx;
+  pointer-events: auto;
+}
+.whale-hover { opacity: .85; }
+.wshadow { position: absolute; left: 0; top: 0; width: 100%; height: 100%; }
+.wf { position: absolute; left: 0; top: 0; width: 100%; height: 100%; opacity: 0; }
+.wf0 { animation: wff0 2.6s steps(1, end) infinite; }
+.wf1 { animation: wff1 2.6s steps(1, end) infinite; }
+.wf2 { animation: wff2 2.6s steps(1, end) infinite; }
+.wf3 { animation: wff3 2.6s steps(1, end) infinite; }
+.wf4 { animation: wff4 2.6s steps(1, end) infinite; }
+.wf5 { animation: wff5 2.6s steps(1, end) infinite; }
+.wf6 { animation: wff6 2.6s steps(1, end) infinite; }
+.wf7 { animation: wff7 2.6s steps(1, end) infinite; }
+/* 手指落下 / 录音中：整条鲸鱼定住（巡游+转身+摆尾全停），目标不跑，好按 */
+.cruise.paused, .cruise.paused .flip, .cruise.paused .wf { animation-play-state: paused; }
+
+@keyframes cruise {
+  0% { transform: translate(500rpx, 600rpx); }
+  16% { transform: translate(352rpx, 688rpx); }
+  40% { transform: translate(96rpx, 616rpx); }
+  50% { transform: translate(68rpx, 608rpx); }
+  66% { transform: translate(280rpx, 764rpx); }
+  88% { transform: translate(516rpx, 676rpx); }
+  100% { transform: translate(500rpx, 600rpx); }
+}
+@keyframes flip {
+  0%, 40% { transform: perspective(840rpx) rotateY(0deg); }
+  50%, 88% { transform: perspective(840rpx) rotateY(180deg); }
+  98%, 100% { transform: perspective(840rpx) rotateY(360deg); }
+}
+/* 8 帧行波 ping-pong（14 步：0..7 + 6..1），每步恰一帧亮 */
+@keyframes wff0 { 0% { opacity: 1; } 7.143% { opacity: 0; } }
+@keyframes wff1 { 0% { opacity: 0; } 7.143% { opacity: 1; } 14.286% { opacity: 0; } 92.857% { opacity: 1; } 100% { opacity: 0; } }
+@keyframes wff2 { 0% { opacity: 0; } 14.286% { opacity: 1; } 21.429% { opacity: 0; } 85.714% { opacity: 1; } 92.857% { opacity: 0; } }
+@keyframes wff3 { 0% { opacity: 0; } 21.429% { opacity: 1; } 28.571% { opacity: 0; } 78.571% { opacity: 1; } 85.714% { opacity: 0; } }
+@keyframes wff4 { 0% { opacity: 0; } 28.571% { opacity: 1; } 35.714% { opacity: 0; } 71.429% { opacity: 1; } 78.571% { opacity: 0; } }
+@keyframes wff5 { 0% { opacity: 0; } 35.714% { opacity: 1; } 42.857% { opacity: 0; } 64.286% { opacity: 1; } 71.429% { opacity: 0; } }
+@keyframes wff6 { 0% { opacity: 0; } 42.857% { opacity: 1; } 50% { opacity: 0; } 57.143% { opacity: 1; } 64.286% { opacity: 0; } }
+@keyframes wff7 { 0% { opacity: 0; } 50% { opacity: 1; } 57.143% { opacity: 0; } }
+
+/* ============ 水纹 / 飞鸟 ============ */
+.ripples { position: absolute; left: 0; top: 0; width: 200%; height: 100%; pointer-events: none; }
+.r1 { animation: drift 46s linear infinite; opacity: .45; }
+.r2 { animation: drift 74s linear infinite reverse; opacity: .28; }
+@keyframes drift { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+.bird { position: absolute; left: 0; top: 15%; width: 52rpx; height: 24rpx; animation: fly 34s linear infinite; animation-delay: 5s; }
+.bird-f { position: absolute; left: 0; top: 0; width: 100%; height: 100%; opacity: 0; }
+.b0 { animation: birdf0 1.1s steps(1, end) infinite; }
+.b1 { animation: birdf1 1.1s steps(1, end) infinite; }
+@keyframes fly {
+  0% { transform: translate(-10vw, 2vh); }
+  45% { transform: translate(45vw, -4vh); }
+  100% { transform: translate(110vw, 0); }
+}
+@keyframes birdf0 { 0% { opacity: 1; } 50% { opacity: 0; } 100% { opacity: 1; } }
+@keyframes birdf1 { 0% { opacity: 0; } 50% { opacity: 1; } 100% { opacity: 0; } }
+
+/* ============ 空态提示（深色胶囊底白字，全渐变达标）============ */
+.empty-hint {
+  position: absolute; left: 40rpx; right: 40rpx; top: 24%;
+  display: flex; flex-direction: column; align-items: center;
+  pointer-events: none; z-index: 20;
+}
+.hint-card {
+  display: flex; flex-direction: column; align-items: center;
+  background: rgba(var(--hint-cap-rgb), .72);
+  border-radius: var(--radius-lg); padding: 32rpx 36rpx;
+}
+.hint-title { font-size: var(--fs-xl); color: #FFFFFF; font-weight: 500; text-align: center; }
+.hint-sub { font-size: var(--fs-md); color: #FFFFFF; margin-top: 16rpx; text-align: center; font-weight: 500; }
+.hint-sub2 { font-size: var(--fs-sm); color: rgba(255, 255, 255, .85); margin-top: 8rpx; text-align: center; }
+.hint-arrow {
+  width: 4rpx; height: 88rpx; margin-top: 24rpx;
+  background: rgba(255, 255, 255, .85); position: relative;
+}
+.hint-arrow::after {
+  content: ''; position: absolute; bottom: -4rpx; left: 50%; transform: translateX(-50%);
+  border-left: 18rpx solid transparent; border-right: 18rpx solid transparent;
+  border-top: 26rpx solid rgba(255, 255, 255, .85);
+}
+
+/* ============ 草稿找回（沿用定稿）============ */
 .draft-bar {
-  position: absolute; left: 24rpx; right: 24rpx;
+  position: absolute; left: 24rpx; right: 24rpx; z-index: 21;
   display: flex; align-items: center; justify-content: space-between; gap: 16rpx;
   background: #FFF6E5; border: 2rpx solid #E8C77A;
   border-radius: var(--radius-lg); padding: 20rpx 16rpx 20rpx 28rpx;
@@ -40,30 +148,9 @@
 }
 .draft-btn.btn-hover { background: #7A5009; }
 
-/* ============ 空态提示 ============ */
-.empty-hint {
-  position: absolute; left: 40rpx; right: 40rpx; top: 26%;
-  display: flex; flex-direction: column; align-items: center;
-  pointer-events: none;
-}
-.hint-title { font-size: var(--fs-xl); color: #1F5580; font-weight: 500; text-align: center; }
-.hint-sub { font-size: var(--fs-md); color: var(--c-text-2); margin-top: 20rpx; text-align: center; font-weight: 500; }
-.hint-sub2 { font-size: var(--fs-sm); color: var(--c-text-2); margin-top: 8rpx; text-align: center; }
-.hint-arrow {
-  width: 4rpx; height: 96rpx; margin-top: 32rpx;
-  background: var(--c-primary); position: relative;
-}
-.hint-arrow::after {
-  content: ''; position: absolute; bottom: -4rpx; left: 50%;
-  transform: translateX(-50%);
-  border-left: 18rpx solid transparent;
-  border-right: 18rpx solid transparent;
-  border-top: 26rpx solid var(--c-primary);
-}
-
-/* ============ 底部操作区 ============ */
+/* ============ 底部操作区（沿用定稿）============ */
 .dock {
-  position: absolute; left: 0; right: 0; bottom: 0;
+  position: absolute; left: 0; right: 0; bottom: 0; z-index: 20;
   display: flex; flex-direction: column; gap: 20rpx;
   padding: 20rpx 32rpx 16rpx;
 }
@@ -77,8 +164,6 @@
 }
 .dock-pill.btn-hover { background: var(--c-primary-soft); transform: scale(0.97); }
 .dock-icon { width: 48rpx; height: 48rpx; }
-
-/* 录音主按钮：96rpx 高起步，实际 132rpx，全宽好按 */
 .record-btn {
   display: flex; align-items: center; gap: 24rpx;
   min-height: 132rpx; padding: 0 36rpx;
@@ -91,97 +176,36 @@
 .record-main { color: #fff; font-size: var(--fs-lg); font-weight: 500; letter-spacing: 1rpx; }
 .record-sub { color: #CFE3F2; font-size: var(--fs-xs); }
 
-/* ============ 录音中 ============ */
-/* 关键：遮罩本身必须穿透触摸，否则"长按鲸鱼说话"松手时 touchend 传不回 canvas，
-   录音停不下来。只有底部按钮层单独接收触摸。 */
+/* ============ 录音中（沿用定稿）============ */
 .record-mask {
-  position: absolute; left: 0; right: 0; top: 0; bottom: 0;
+  position: absolute; left: 0; right: 0; top: 0; bottom: 0; z-index: 30;
   display: flex; flex-direction: column; justify-content: flex-end;
   background: rgba(15,58,92,0.62);
 }
-/* 长按模式：遮罩穿透，松手的 touchend 才能传回 canvas 结束录音 */
 .mask-through { pointer-events: none; }
-.mask-through .rec-actions,
-.mask-through .rec-hold-hint { pointer-events: auto; }
-/* 点按模式：遮罩拦截，避免误碰海面缩放或误入冰山详情 */
+.mask-through .rec-actions, .mask-through .rec-hold-hint { pointer-events: auto; }
 .mask-block { pointer-events: auto; }
-.rec-status {
-  display: flex; align-items: center; justify-content: center; gap: 16rpx;
-  margin-bottom: 20rpx;
-}
-.rec-dot {
-  width: 22rpx; height: 22rpx; border-radius: 50%;
-  background: #E24B4A; animation: rec-pulse 1.2s ease-in-out infinite;
-}
-@keyframes rec-pulse {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.45; transform: scale(0.82); }
-}
-/* 尊重系统"减少动态效果"：保留呼吸灯但不闪烁，避免眩晕 */
-@media (prefers-reduced-motion: reduce) {
-  .rec-dot { animation: none; }
-  .record-btn.record-hover,
-  .dock-pill.btn-hover,
-  .rec-done.btn-hover { transform: none; }
-}
+.rec-status { display: flex; align-items: center; justify-content: center; gap: 16rpx; margin-bottom: 20rpx; flex-wrap: wrap; }
+.rec-dot { width: 22rpx; height: 22rpx; border-radius: 50%; background: #E24B4A; animation: rec-pulse 1.2s ease-in-out infinite; }
+@keyframes rec-pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.45; transform: scale(0.82); } }
 .rec-state { color: #fff; font-size: var(--fs-md); font-weight: 500; }
-
-/* 实时识别状态提示：换行显示在"正在听"下方，老人一眼看懂当前情况 */
-.rec-status { flex-wrap: wrap; }
-.asr-hint {
-  flex-basis: 100%; text-align: center;
-  color: rgba(255, 255, 255, 0.8);
-  font-size: var(--fs-sm); line-height: 1.4;
-  margin-top: 4rpx;
-}
+.asr-hint { flex-basis: 100%; text-align: center; color: rgba(255,255,255,0.8); font-size: var(--fs-sm); line-height: 1.4; margin-top: 4rpx; }
 .asr-hint-warn { color: #FFD98E; }
-
-.transcript-box {
-  margin: 0 32rpx; background: #1A4E77;
-  border-radius: var(--radius-lg); padding: 32rpx;
-  min-height: 200rpx; max-height: 460rpx;
-}
+.transcript-box { margin: 0 32rpx; background: #1A4E77; border-radius: var(--radius-lg); padding: 32rpx; min-height: 200rpx; max-height: 460rpx; }
 .transcript-scroll { max-height: 400rpx; }
 .transcript { color: #fff; font-size: var(--fs-xxl); line-height: 1.65; }
-
-.rec-timer {
-  display: flex; flex-direction: column; align-items: center;
-  margin: 24rpx 0;
-}
+.rec-timer { display: flex; flex-direction: column; align-items: center; margin: 24rpx 0; }
 .timer-main { color: #fff; font-size: var(--fs-lg); font-weight: 500; }
-.timer-limit {
-  color: #B8D4E8; font-size: var(--fs-sm); margin-top: 6rpx;
-  /* 父级 align-items:center 会让子项收缩到内容宽，长文案不折行反而溢出；
-     显式给宽度 + box-sizing 才能真正换行。文案要跟随微信字体放大，故留边距居中 */
-  width: 100%; box-sizing: border-box;
-  padding: 0 48rpx; text-align: center; line-height: 1.5;
-}
-
-/* 最后 10 秒的大号倒计时：数字远大于常规字号，老人扫一眼就知道还剩多久。
-   #FFD9D5 在遮罩底色上对比度 9.07:1，已通过 a11y_check（勿改深，会掉到红线以下） */
-.countdown-box {
-  display: flex; align-items: baseline; gap: 10rpx;
-  margin-top: 10rpx; text-align: center;
-}
-.countdown-num {
-  color: #FFD9D5; font-size: 76rpx; font-weight: 600; line-height: 1;
-}
-.countdown-label {
-  color: #FFD9D5; font-size: var(--fs-sm); font-weight: 500;
-}
-
-.rec-actions {
-  display: flex; gap: 24rpx; padding: 0 32rpx 16rpx;
-  pointer-events: auto;   /* 遮罩穿透，仅按钮层接收触摸 */
-}
-/* 长按模式：手指占着屏幕，只显示提示，不放按钮 */
+.timer-limit { color: #B8D4E8; font-size: var(--fs-sm); margin-top: 6rpx; width: 100%; box-sizing: border-box; padding: 0 48rpx; text-align: center; line-height: 1.5; }
+.countdown-box { display: flex; align-items: baseline; gap: 10rpx; margin-top: 10rpx; text-align: center; }
+.countdown-num { color: #FFD9D5; font-size: 76rpx; font-weight: 600; line-height: 1; }
+.countdown-label { color: #FFD9D5; font-size: var(--fs-sm); font-weight: 500; }
+.rec-actions { display: flex; gap: 24rpx; padding: 0 32rpx 16rpx; pointer-events: auto; }
 .rec-hold-hint {
   display: flex; align-items: center; justify-content: center;
   min-height: 112rpx; margin: 0 32rpx 16rpx;
-  background: rgba(255,255,255,0.16);
-  border: 2rpx solid rgba(255,255,255,0.42);
-  border-radius: 56rpx;
-  color: #fff; font-size: var(--fs-lg); font-weight: 500;
+  background: rgba(255,255,255,0.16); border: 2rpx solid rgba(255,255,255,0.42);
+  border-radius: 56rpx; color: #fff; font-size: var(--fs-lg); font-weight: 500;
 }
 .rec-cancel {
   flex: 0 0 200rpx; min-height: 112rpx;
@@ -198,9 +222,9 @@
 }
 .rec-done.btn-hover { background: #EAF2F8; transform: scale(0.98); }
 
-/* ============ 分析中 ============ */
+/* ============ 分析中（沿用定稿）============ */
 .analyze-mask {
-  position: absolute; left: 0; right: 0; top: 0; bottom: 0;
+  position: absolute; left: 0; right: 0; top: 0; bottom: 0; z-index: 30;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   background: rgba(232,244,251,0.94);
 }
@@ -208,96 +232,44 @@
 .analyze-text { color: var(--c-text); font-size: var(--fs-lg); font-weight: 500; }
 .analyze-sub { color: var(--c-text-2); font-size: var(--fs-sm); margin-top: 12rpx; }
 
-/* ============ 发布卡片 ============ */
-.preview-mask {
-  position: absolute; left: 0; right: 0; top: 0; bottom: 0;
-  background: rgba(15,58,92,0.5);
-  display: flex; align-items: flex-end;
-}
-.preview-card {
-  width: 100%; background: #fff; border-radius: var(--radius-xl) var(--radius-xl) 0 0;
-  padding: 40rpx 36rpx 40rpx; box-sizing: border-box;
-  max-height: 88vh; overflow-y: auto;
-}
+/* ============ 发布卡片（沿用定稿）============ */
+.preview-mask { position: absolute; left: 0; right: 0; top: 0; bottom: 0; z-index: 30; background: rgba(15,58,92,0.5); display: flex; align-items: flex-end; }
+.preview-card { width: 100%; background: #fff; border-radius: var(--radius-xl) var(--radius-xl) 0 0; padding: 40rpx 36rpx 40rpx; box-sizing: border-box; max-height: 88vh; overflow-y: auto; }
 .preview-head { margin-bottom: 20rpx; }
 .preview-title { display: block; font-size: var(--fs-xl); font-weight: 500; color: var(--c-text); }
 .preview-hint { display: block; font-size: var(--fs-sm); color: var(--c-text-2); margin-top: 8rpx; }
-
-.preview-text {
-  width: 100%; min-height: 200rpx;
-  font-size: var(--fs-lg); line-height: 1.7; color: var(--c-text);
-  padding: 28rpx; box-sizing: border-box;
-  background: var(--c-soft); border-radius: var(--radius-md);
-  border: 2rpx solid #DCE9F2;
-}
-
-/* 原声回听 */
-.voice-check {
-  display: flex; align-items: center; gap: 20rpx;
-  min-height: 96rpx; margin-top: 20rpx; padding: 0 28rpx;
-  background: var(--c-primary-soft); border-radius: var(--radius-md);
-}
+.preview-text { width: 100%; min-height: 200rpx; font-size: var(--fs-lg); line-height: 1.7; color: var(--c-text); padding: 28rpx; box-sizing: border-box; background: var(--c-soft); border-radius: var(--radius-md); border: 2rpx solid #DCE9F2; }
+.voice-check { display: flex; align-items: center; gap: 20rpx; min-height: 96rpx; margin-top: 20rpx; padding: 0 28rpx; background: var(--c-primary-soft); border-radius: var(--radius-md); }
 .voice-check.btn-hover { background: #DCE9F2; }
-.vc-btn {
-  width: 56rpx; height: 56rpx; border-radius: 50%;
-  background: var(--c-primary); position: relative; flex-shrink: 0;
-}
-.vc-btn::after {
-  content: ''; position: absolute; top: 50%; left: 54%;
-  transform: translate(-50%,-50%);
-  border-top: 12rpx solid transparent;
-  border-bottom: 12rpx solid transparent;
-  border-left: 18rpx solid #fff;
-}
+.vc-btn { width: 56rpx; height: 56rpx; border-radius: 50%; background: var(--c-primary); position: relative; flex-shrink: 0; }
+.vc-btn::after { content: ''; position: absolute; top: 50%; left: 54%; transform: translate(-50%,-50%); border-top: 12rpx solid transparent; border-bottom: 12rpx solid transparent; border-left: 18rpx solid #fff; }
 .vc-on { background: var(--c-danger); }
-.vc-on::after {
-  border: none; width: 18rpx; height: 22rpx; background: #fff;
-  top: 50%; left: 50%; transform: translate(-50%,-50%); border-radius: 3rpx;
-}
+.vc-on::after { border: none; width: 18rpx; height: 22rpx; background: #fff; top: 50%; left: 50%; transform: translate(-50%,-50%); border-radius: 3rpx; }
 .vc-text { color: var(--c-primary); font-size: var(--fs-sm); font-weight: 500; }
-
 .option-group { margin-top: 32rpx; }
 .option-label { display: block; font-size: var(--fs-sm); color: var(--c-text-2); font-weight: 500; }
 .chips { display: flex; flex-wrap: wrap; gap: 16rpx; margin-top: 16rpx; }
-.chip {
-  display: flex; align-items: center; justify-content: center;
-  min-height: 88rpx; padding: 0 36rpx;
-  background: var(--c-primary-soft); color: var(--c-primary);
-  border: 2rpx solid transparent;
-  border-radius: 44rpx; font-size: var(--fs-sm); font-weight: 500;
-  box-sizing: border-box;
-}
+.chip { display: flex; align-items: center; justify-content: center; min-height: 88rpx; padding: 0 36rpx; background: var(--c-primary-soft); color: var(--c-primary); border: 2rpx solid transparent; border-radius: 44rpx; font-size: var(--fs-sm); font-weight: 500; box-sizing: border-box; }
 .chip.chip-hover { background: #DCE9F2; }
-/* 选中态不只靠颜色：加深底色 + 白字 + 前置勾选符号 */
-.chip-on {
-  background: var(--c-primary); color: #fff;
-  border-color: var(--c-primary-deep);
-}
+.chip-on { background: var(--c-primary); color: #fff; border-color: var(--c-primary-deep); }
 .chip-on::before { content: '✓ '; font-weight: 500; }
-
-/* 照片 */
 .photo-group { margin-top: 32rpx; }
 .photo-grid { display: flex; flex-wrap: wrap; gap: 20rpx; margin-top: 16rpx; }
 .photo-cell { position: relative; width: 200rpx; height: 200rpx; }
 .photo-img { width: 200rpx; height: 200rpx; border-radius: var(--radius-md); }
-/* 删除角标 72rpx（原 40rpx≈20px，低于 WCAG 24px 下限） */
-.photo-del {
-  position: absolute; top: -16rpx; right: -16rpx;
-  width: 72rpx; height: 72rpx; border-radius: 50%;
-  background: var(--c-danger); border: 4rpx solid #fff;
-  display: flex; align-items: center; justify-content: center;
-  box-sizing: border-box;
-}
+.photo-del { position: absolute; top: -16rpx; right: -16rpx; width: 72rpx; height: 72rpx; border-radius: 50%; background: var(--c-danger); border: 4rpx solid #fff; display: flex; align-items: center; justify-content: center; box-sizing: border-box; }
 .photo-del.del-hover { background: #9E2B20; transform: scale(1.08); }
 .photo-del-x { color: #fff; font-size: 40rpx; line-height: 1; margin-top: -4rpx; }
-.photo-add {
-  width: 200rpx; height: 200rpx; border-radius: var(--radius-md);
-  background: var(--c-primary-soft); border: 2rpx dashed #A9C4D8;
-  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4rpx;
-  box-sizing: border-box;
-}
+.photo-add { width: 200rpx; height: 200rpx; border-radius: var(--radius-md); background: var(--c-primary-soft); border: 2rpx dashed #A9C4D8; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4rpx; box-sizing: border-box; }
 .photo-add.btn-hover { background: #DCE9F2; }
 .photo-add-plus { color: var(--c-primary); font-size: 56rpx; line-height: 1; }
 .photo-add-text { color: var(--c-primary); font-size: var(--fs-xs); }
-
 .preview-actions { display: flex; gap: 24rpx; margin-top: 48rpx; }
+
+/* ============ 减少动态效果：全停，静态显示首帧鲸鱼 ============ */
+@media (prefers-reduced-motion: reduce) {
+  .caustic, .cruise, .flip, .wf, .ripples, .bird, .bird-f, .berg, .rec-dot { animation: none !important; }
+  .wf0 { opacity: 1; }
+  .b0 { opacity: 1; }
+  .record-btn.record-hover, .dock-pill.btn-hover, .rec-done.btn-hover, .berg-hover { transform: none; }
+}
