@@ -21,7 +21,7 @@
       <view class="sea-world" style="width:{{worldWidth}}px">
         <view class="sea-tint" style="background:{{tintGradient}}"></view>
         <text wx:for="{{stages}}" wx:key="key" class="stage-label"
-          style="left:{{index * stageWidth + stageWidth / 2}}px">{{item.key}}</text>
+          style="left:{{index * stageWidth + stageWidth / 2}}px">{{item.name}}之海</text>
         <view wx:for="{{bergs}}" wx:key="id" class="berg"
           style="left:{{item.left}}px;top:{{item.top}}%;width:{{item.width}}px;opacity:{{item.opacity}};animation:{{item.anim}}"
           data-id="{{item.id}}" bindtap="onBergTap" hover-class="berg-hover" hover-stay-time="80">
@@ -39,7 +39,9 @@
     <view class="whale-layer">
       <view class="cruise {{whalePaused || recording ? 'paused' : ''}}">
         <view class="whalebox" bindtap="onWhaleTap" bindlongpress="onWhaleLongPress" hover-class="whale-hover" hover-stay-time="80">
-          <image class="whale-img" src="/images/ocean/whale.png" mode="aspectFit" />
+          <image class="wf wf-straight" src="/images/ocean/whale.png" mode="aspectFit" />
+          <image class="wf wf-left" src="/images/ocean/whale_l.png" mode="aspectFit" />
+          <image class="wf wf-right" src="/images/ocean/whale_r.png" mode="aspectFit" />
         </view>
       </view>
     </view>

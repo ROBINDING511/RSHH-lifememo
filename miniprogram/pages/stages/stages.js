@@ -1,25 +1,27 @@
-// pages/stages/stages.js — 人生阶段规划：拖拽分隔点 / 语音告诉杭航 / 个人资料
+// pages/stages/stages.js — 人生之海规划：片数/名字/边界可调 + 语音 + 个人资料 + 人生节点
 const life = require('../../utils/life')
 const api = require('../../utils/api')
 const { createRecorder } = require('../../utils/recorder')
 
 Page({
   data: {
-    bounds: [], stages: [],
+    stages: [],
     profileMode: 'year', profileBirthday: '', profileAge: '', profileYear: '',
     milestones: life.getMilestones(), msName: '', msAge: '',
     listening: false, voiceText: ''
   },
   onLoad () {
     const p = life.getProfile() || {}
+    this._draft = life.getStages().map((s) => ({ name: s.name, to: s.to }))
     this.setData({
-      bounds: life.getBounds(), stages: this.stagesOf(life.getBounds()),
+      stages: life.getStages(),
       profileMode: p.mode || 'year',
       profileBirthday: p.birthday || '', profileAge: p.age != null ? String(p.age) : '', profileYear: p.year != null ? String(p.year) : ''
     })
     this.recorder = createRecorder()
   },
   noop () {},
+  syncDraft () { this.setData({ stages: life.buildStages(this._draft) }) },
 
   // ---- 个人资料 ----
   setMode (e) { this.setData({ profileMode: e.currentTarget.dataset.m }) },
@@ -36,37 +38,47 @@ Page({
     wx.showToast({ title: '记好了', icon: 'none' })
   },
 
-  // ---- 数字框改边界（比拖拽更稳、适老）----
+  // ---- 海：改名 / 改边界 / 增删片数 ----
+  onNameInput (e) {
+    const i = Number(e.currentTarget.dataset.i)
+    this._draft[i].name = e.detail.value || ('海' + (i + 1))
+    this.syncDraft()
+  },
   onToInput (e) {
     const i = Number(e.currentTarget.dataset.i)
-    if (i >= 4) return
+    if (i >= this._draft.length - 1) return   // 最后一片是"以后"
     const v = parseInt(e.detail.value, 10)
     if (!isFinite(v)) return
-    const b = this.data.bounds.slice()
-    const lo = i === 0 ? 1 : b[i - 1] + 1
-    const hi = i === 3 ? 99 : b[i + 1] - 1
-    b[i] = Math.max(lo, Math.min(hi, v))
-    this.setData({ bounds: b, stages: this.stagesOf(b) })
+    const lo = i === 0 ? 1 : this._draft[i - 1].to + 1
+    const hi = this._draft[i + 1].to - 1
+    this._draft[i].to = Math.max(lo, Math.min(hi, v))
+    this.syncDraft()
   },
-  onFromInput (e) {
-    const i = Number(e.currentTarget.dataset.i)
-    if (i === 0) return
-    const v = parseInt(e.detail.value, 10)
-    if (!isFinite(v)) return
-    const b = this.data.bounds.slice()
-    const lo = i - 1 === 0 ? 1 : b[i - 2] + 1
-    const hi = b[i] - 1
-    b[i - 1] = Math.max(lo, Math.min(hi, v - 1))
-    this.setData({ bounds: b, stages: this.stagesOf(b) })
+  addSea () {
+    const last = this._draft[this._draft.length - 1]
+    const prev = this._draft[this._draft.length - 2]
+    const mid = Math.round((prev.to + last.to) / 2)
+    this._draft.splice(this._draft.length - 1, 0, { name: '新海', to: Math.max(prev.to + 1, mid) })
+    this.syncDraft()
   },
-  stagesOf (b) {
-    const starts = [0, b[0] + 1, b[1] + 1, b[2] + 1, b[3] + 1]
-    return life.NAMES.map((n, i) => {
-      const to = i < 4 ? b[i] : 120
-      return { key: n, from: starts[i], to, dispTo: Math.min(to, 100), color: life.COLORS[i] }
-    })
+  removeSea (e) {
+    if (this._draft.length <= 2) return wx.showToast({ title: '至少留两片海', icon: 'none' })
+    this._draft.splice(Number(e.currentTarget.dataset.i), 1)
+    this.syncDraft()
   },
-  // ---- 自定义人生节点 ----
+  resetDefault () {
+    life.resetStages()
+    this._draft = life.getStages().map((s) => ({ name: s.name, to: s.to }))
+    this.syncDraft()
+    wx.showToast({ title: '恢复默认了', icon: 'none' })
+  },
+  saveAll () {
+    life.setStages(this._draft)
+    wx.showToast({ title: '保存好了', icon: 'none' })
+    setTimeout(() => wx.navigateBack(), 900)
+  },
+
+  // ---- 人生节点 ----
   onMsName (e) { this.setData({ msName: e.detail.value }) },
   onMsAge (e) { this.setData({ msAge: e.detail.value }) },
   addMs () {
@@ -77,22 +89,9 @@ Page({
     this.setData({ milestones: life.addMilestone(name, age), msName: '', msAge: '' })
     wx.showToast({ title: '记下了', icon: 'none' })
   },
-  removeMs (e) {
-    this.setData({ milestones: life.removeMilestone(e.currentTarget.dataset.id) })
-  },
+  removeMs (e) { this.setData({ milestones: life.removeMilestone(e.currentTarget.dataset.id) }) },
 
-  resetDefault () {
-    life.resetBounds()
-    this.setData({ bounds: life.getBounds(), stages: life.getStages() })
-    wx.showToast({ title: '恢复默认了', icon: 'none' })
-  },
-  saveAll () {
-    life.setBounds(this.data.bounds)
-    wx.showToast({ title: '保存好了', icon: 'none' })
-    setTimeout(() => wx.navigateBack(), 900)
-  },
-
-  // ---- 语音：按住跟杭航说划分 ----
+  // ---- 语音：按住跟杭航说 ----
   onVoiceStart () {
     if (this.data.listening) return
     this.setData({ listening: true, voiceText: '' })
@@ -111,10 +110,12 @@ Page({
         let text = this.data.voiceText
         if (this.asr) { const t = await this.asr.finish(1200).catch(() => ''); if (t && t.length > text.length) text = t; this.asr.close() }
         this.setData({ listening: false })
-        const b = life.parseStagesFromText(text)
-        if (b) {
-          life.setBounds(b)
-          this.setData({ bounds: b, stages: this.stagesOf(b), voiceText: text })
+        const list = life.parseStagesFromText(text)
+        if (list) {
+          life.setStages(list)
+          this._draft = life.getStages().map((s) => ({ name: s.name, to: s.to }))
+          this.syncDraft()
+          this.setData({ voiceText: text })
           wx.showToast({ title: '按你说的设好了', icon: 'none', duration: 2200 })
         } else {
           const ms = life.parseMilestoneFromText(text)
