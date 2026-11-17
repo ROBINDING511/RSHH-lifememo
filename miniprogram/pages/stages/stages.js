@@ -7,6 +7,7 @@ Page({
   data: {
     bounds: [], stages: [],
     profileMode: 'year', profileBirthday: '', profileAge: '', profileYear: '',
+    milestones: life.getMilestones(), msName: '', msAge: '',
     listening: false, voiceText: ''
   },
   onLoad () {
@@ -65,6 +66,21 @@ Page({
       return { key: n, from: starts[i], to, dispTo: Math.min(to, 100), color: life.COLORS[i] }
     })
   },
+  // ---- 自定义人生节点 ----
+  onMsName (e) { this.setData({ msName: e.detail.value }) },
+  onMsAge (e) { this.setData({ msAge: e.detail.value }) },
+  addMs () {
+    const name = (this.data.msName || '').trim()
+    const age = parseInt(this.data.msAge, 10)
+    if (!name) return wx.showToast({ title: '写个节点名字', icon: 'none' })
+    if (!isFinite(age)) return wx.showToast({ title: '填几岁', icon: 'none' })
+    this.setData({ milestones: life.addMilestone(name, age), msName: '', msAge: '' })
+    wx.showToast({ title: '记下了', icon: 'none' })
+  },
+  removeMs (e) {
+    this.setData({ milestones: life.removeMilestone(e.currentTarget.dataset.id) })
+  },
+
   resetDefault () {
     life.resetBounds()
     this.setData({ bounds: life.getBounds(), stages: life.getStages() })
@@ -101,7 +117,13 @@ Page({
           this.setData({ bounds: b, stages: this.stagesOf(b), voiceText: text })
           wx.showToast({ title: '按你说的设好了', icon: 'none', duration: 2200 })
         } else {
-          wx.showToast({ title: '没听清划分，试试拖拽或说"童年到18岁"', icon: 'none', duration: 2600 })
+          const ms = life.parseMilestoneFromText(text)
+          if (ms && ms.name) {
+            this.setData({ milestones: life.addMilestone(ms.name, ms.age), voiceText: text })
+            wx.showToast({ title: '记下节点：' + ms.age + '岁 ' + ms.name, icon: 'none', duration: 2400 })
+          } else {
+            wx.showToast({ title: '没听清，试试说"童年到18岁"或"30岁孩子出生"', icon: 'none', duration: 2600 })
+          }
         }
       }
     })

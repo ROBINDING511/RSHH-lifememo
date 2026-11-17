@@ -87,10 +87,44 @@ function parseStagesFromText (text) {
   return b
 }
 
+// ---- 自定义人生节点（结婚/孩子出生/离婚/退休… 用户自己的重要时刻）----
+function getMilestones () {
+  try {
+    const m = wx.getStorageSync('lifeMilestones')
+    if (Array.isArray(m)) return m
+  } catch (e) {}
+  return []
+}
+function setMilestones (m) {
+  try { wx.setStorageSync('lifeMilestones', m) } catch (e) {}
+}
+function addMilestone (name, age) {
+  const m = getMilestones()
+  m.push({ id: Date.now() + '_' + Math.floor(Math.random() * 1000), name: String(name).slice(0, 12), age: Number(age) })
+  m.sort((a, b) => a.age - b.age)
+  setMilestones(m)
+  return m
+}
+function removeMilestone (id) {
+  const m = getMilestones().filter((x) => x.id !== id)
+  setMilestones(m)
+  return m
+}
+// 口述节点："我30岁孩子出生" / "30岁孩子出生" / "孩子出生那年30" / "45岁离婚"
+function parseMilestoneFromText (text) {
+  const t = String(text || '')
+  let m = t.match(/(\d{1,2})\s*岁(?:那年|的时候|时)?[，,]?\s*([^，,。；;]{2,12})/)
+  if (m) return { age: Number(m[1]), name: m[2].trim() }
+  m = t.match(/([^，,。；;]{2,12}?)(?:那年|的时候|时)?[，,]?\s*(?:我)?(\d{1,2})\s*岁/)
+  if (m) return { age: Number(m[2]), name: m[1].trim() }
+  return null
+}
+
 module.exports = {
   NAMES, COLORS, DEFAULT_BOUNDS,
   getBounds, setBounds, resetBounds, getStages,
   stageOfAge, stageOfYear, stageByKey,
   getProfile, setProfile, getBirthYear,
-  parseAge, eventYear, parseStagesFromText
+  parseAge, eventYear, parseStagesFromText,
+  getMilestones, setMilestones, addMilestone, removeMilestone, parseMilestoneFromText
 }

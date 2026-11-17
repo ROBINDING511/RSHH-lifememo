@@ -22,6 +22,19 @@
 .stage-swatch { width: 32rpx; height: 32rpx; border-radius: 8rpx; }
 .stage-name { flex: 1; font-size: var(--fs-md); color: var(--c-text); font-weight: 500; }
 
+/* 自定义人生节点 */
+.ms-invite { display: block; font-size: var(--fs-xs); color: var(--c-text-2); line-height: 1.6; margin-bottom: 16rpx; }
+.ms-row { display: flex; align-items: center; gap: 16rpx; min-height: 72rpx; }
+.ms-age { flex: 0 0 110rpx; font-size: var(--fs-sm); color: var(--c-primary); font-weight: 600; }
+.ms-name { flex: 1; font-size: var(--fs-md); color: var(--c-text); }
+.ms-del { width: 56rpx; height: 56rpx; display: flex; align-items: center; justify-content: center; color: var(--c-danger); font-size: 40rpx; border-radius: 50%; background: var(--c-danger-soft); }
+.ms-empty { font-size: var(--fs-sm); color: var(--c-text-2); padding: 8rpx 0 16rpx; }
+.ms-add { display: flex; gap: 12rpx; margin-top: 12rpx; }
+.ms-input { min-height: 80rpx; background: var(--c-soft); border: 2rpx solid rgba(31,100,120,.15); border-radius: var(--radius-md); padding: 0 20rpx; font-size: var(--fs-sm); color: var(--c-text); box-sizing: border-box; }
+.ms-name-input { flex: 1; }
+.ms-age-input { flex: 0 0 140rpx; text-align: center; }
+.ms-add-btn { flex: 0 0 120rpx; min-height: 80rpx; display: flex; align-items: center; justify-content: center; background: linear-gradient(160deg,#2E7C93,#1F6478); color: #fff; border-radius: var(--radius-md); font-size: var(--fs-sm); }
+
 .voice-hold { margin: 8rpx 0 12rpx; min-height: 96rpx; display: flex; align-items: center; justify-content: center; background: linear-gradient(160deg,#2E7C93,#1F6478); color: #fff; border-radius: 48rpx; font-size: var(--fs-md); font-weight: 500; }
 .voice-hold.on { background: linear-gradient(160deg,#C4574A,#B3402F); }
 .voice-eg { display: block; text-align: center; font-size: var(--fs-xs); color: var(--c-text-2); }

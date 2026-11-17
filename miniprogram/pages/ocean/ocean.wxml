@@ -27,6 +27,11 @@
           data-id="{{item.id}}" bindtap="onBergTap" hover-class="berg-hover" hover-stay-time="80">
           <image class="berg-img" src="/images/ocean/berg.png" mode="widthFix" />
         </view>
+        <!-- 自定义人生节点：小旗标记 -->
+        <view wx:for="{{milestones}}" wx:key="id" class="ms-marker" style="left:{{item.left}}px;top:{{item.top}}%">
+          <view class="ms-flag"></view>
+          <text class="ms-label">{{item.name}}·{{item.age}}岁</text>
+        </view>
       </view>
     </scroll-view>
 

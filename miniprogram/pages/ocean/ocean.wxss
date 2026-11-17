@@ -26,6 +26,11 @@
 .sea-world { position: relative; height: 100%; }
 .sea-tint { position: absolute; left: 0; top: 0; bottom: 0; width: 100%; opacity: .38; pointer-events: none; }
 .stage-label { position: absolute; top: 360rpx; transform: translateX(-50%); color: rgba(18,58,72,.85); background: rgba(255,255,255,.55); padding: 8rpx 28rpx; border-radius: 32rpx; font-size: var(--fs-sm); font-weight: 600; letter-spacing: 6rpx; pointer-events: none; }
+/* 人生节点小旗 */
+.ms-marker { position: absolute; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; pointer-events: none; }
+.ms-flag { width: 4rpx; height: 48rpx; background: rgba(18,58,72,.55); position: relative; }
+.ms-flag::after { content: ''; position: absolute; top: 0; left: 4rpx; border-top: 14rpx solid transparent; border-bottom: 14rpx solid transparent; border-left: 20rpx solid rgba(179,64,47,.8); }
+.ms-label { margin-top: 6rpx; font-size: var(--fs-xs); color: rgba(18,58,72,.85); background: rgba(255,255,255,.6); padding: 2rpx 14rpx; border-radius: 20rpx; white-space: nowrap; }
 .whale-layer { position: absolute; left: 0; top: 0; right: 0; bottom: 0; z-index: 5; pointer-events: none; }
 .whale-layer .whalebox { pointer-events: auto; }
 

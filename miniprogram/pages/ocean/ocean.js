@@ -42,6 +42,7 @@ Page({
     // 插画场景
     bgLoaded: false,
     bergs: [],
+    milestones: [],
     stages: life.getStages(),
     worldWidth: 0,
     stageWidth: 0,
@@ -94,6 +95,7 @@ Page({
       return
     }
     this.setupWorld()
+    this.layoutMilestones()
     this.setData({
       birthYear: life.getBirthYear(),
       stages: life.getStages(),
@@ -112,6 +114,20 @@ Page({
     const n = life.getStages().length
     const tint = 'linear-gradient(90deg,' + life.getStages().map((s, i) => `${s.color} ${(i / (n - 1) * 100).toFixed(1)}%`).join(',') + ')'
     this.setData({ stageWidth: w, worldWidth: w * n, tintGradient: tint })
+  },
+
+  // 人生节点 → 海面上的小旗标记（落在所属阶段带内）
+  layoutMilestones () {
+    const sw = this.data.stageWidth || 375
+    const stages = life.getStages()
+    const ms = life.getMilestones().map((m) => {
+      const st = life.stageOfAge(m.age)
+      const si = stages.findIndex((x) => x.key === st.key)
+      const span = Math.max(1, st.to - st.from + 1)
+      const frac = Math.min(1, Math.max(0, (m.age - st.from) / span))
+      return { id: m.id, name: m.name, age: m.age, left: si * sw + 20 + frac * (sw - 40), top: 26 }
+    })
+    this.setData({ milestones: ms })
   },
 
   // 点鲸鱼 = 打开人生阶段规划（拖拽 / 语音自定义）
@@ -220,7 +236,7 @@ Page({
           ? life.stageOfYear(yr, this.data.birthYear)
           : life.getStages()[seed % life.getStages().length]
       }
-      const si = life.getStages().indexOf(stage)
+      const si = life.getStages().findIndex((x) => x.key === stage.key)
       const layer = b.size === 'large' ? 'near' : b.size === 'small' ? 'far' : 'mid'
       const band = layer === 'far' ? { y0: 10, span: 14, w: 25 }
         : layer === 'mid' ? { y0: 34, span: 22, w: 41 }
@@ -509,7 +525,7 @@ Page({
       const yr = life.eventYear(this.data.birthYear, age)
       upd['preview.timeOptions'] = [`${yr}年（${age}岁）`, '说不清了']
       upd['preview.timeIndex'] = 0
-      upd['preview.zoneIndex'] = life.getStages().indexOf(life.stageOfAge(age))
+      upd['preview.zoneIndex'] = life.getStages().findIndex((x) => x.key === life.stageOfAge(age).key)
       upd['preview._autoYear'] = yr
     } else if (r && r.timeOptions && r.timeOptions.length) {
       upd['preview.timeOptions'] = r.timeOptions.slice(0, 6)
@@ -634,7 +650,7 @@ Page({
       await this.refreshData()
       // 滚到新冰山所在的人生阶段（整片海连续滚动）
       const st = life.stageByKey(p.zoneOptions[p.zoneIndex])
-      if (st) this.setData({ scrollLeft: life.getStages().indexOf(st) * (this.data.stageWidth || 375) })
+      if (st) this.setData({ scrollLeft: life.getStages().findIndex((x) => x.key === st.key) * (this.data.stageWidth || 375) })
       // 新冰山播完落下动画后切回常态摇曳
       if (this.lastPublishedId) {
         const pid = this.lastPublishedId

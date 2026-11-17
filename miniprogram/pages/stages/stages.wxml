@@ -39,6 +39,24 @@
     </view>
   </view>
 
+  <view class="card">
+    <text class="prof-title">你的人生节点（可选）</text>
+    <text class="ms-invite">结婚、孩子出生、搬家、退休…这些只属于你的重要时刻。记下来，海上会为你立一个小标记。</text>
+    <view class="ms-list">
+      <view wx:for="{{milestones}}" wx:key="id" class="ms-row">
+        <text class="ms-age">{{item.age}}岁</text>
+        <text class="ms-name">{{item.name}}</text>
+        <view class="ms-del" hover-class="btn-hover" hover-stay-time="80" data-id="{{item.id}}" bindtap="removeMs">×</view>
+      </view>
+      <view wx:if="{{!milestones.length}}" class="ms-empty">还没有节点，加一个试试</view>
+    </view>
+    <view class="ms-add">
+      <input class="ms-input ms-name-input" value="{{msName}}" placeholder="比如 孩子出生" bindinput="onMsName" />
+      <input class="ms-input ms-age-input" type="number" value="{{msAge}}" placeholder="几岁" bindinput="onMsAge" />
+      <view class="ms-add-btn" hover-class="btn-hover" hover-stay-time="80" bindtap="addMs">添加</view>
+    </view>
+  </view>
+
   <view class="voice-hold {{listening?'on':''}}"
     bindtouchstart="onVoiceStart" catchtouchend="onVoiceEnd" catchtouchcancel="onVoiceEnd">
     <text>{{listening ? '松开，我听懂就设好' : '按住跟杭航说你的划分'}}</text>
