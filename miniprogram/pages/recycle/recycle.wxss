@@ -1,7 +1,7 @@
 /* pages/recycle/recycle.wxss — 云朵回收站（温暖水彩 · 适老化） */
 .page { height: 100vh; display: flex; flex-direction: column; }
 .head { padding: 32rpx 36rpx 20rpx; }
-.title { display: block; font-size: 48rpx; font-weight: 500; color: var(--c-text); }
+.title { display: block; font-size: var(--fs-xl); font-weight: 600; color: var(--c-text); }
 .sub { display: block; font-size: var(--fs-sm); color: var(--c-text-2); margin-top: 10rpx; }
 
 /* ============ 空态 ============ */

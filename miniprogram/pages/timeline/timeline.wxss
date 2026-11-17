@@ -1,7 +1,7 @@
 /* pages/timeline/timeline.wxss — 时间轴（温暖水彩 · 适老化） */
 .page { height: 100vh; display: flex; flex-direction: column; }
 .tl-head { padding: 32rpx 36rpx 20rpx; }
-.tl-title { display: block; font-size: 48rpx; font-weight: 500; color: var(--c-text); }
+.tl-title { display: block; font-size: var(--fs-xl); font-weight: 600; color: var(--c-text); }
 .tl-sub { display: block; font-size: var(--fs-sm); color: var(--c-text-2); margin-top: 10rpx; }
 
 .tl-scroll { flex: 1; padding: 0 36rpx 60rpx; box-sizing: border-box; }

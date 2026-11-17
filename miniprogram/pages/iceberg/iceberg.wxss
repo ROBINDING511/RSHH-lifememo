@@ -4,7 +4,7 @@
 .berg-head-row { display: flex; align-items: center; gap: 24rpx; }
 .berg-icon { width: 96rpx; height: 132rpx; flex-shrink: 0; }
 .berg-titles { flex: 1; min-width: 0; }
-.berg-title { display: block; font-size: 46rpx; font-weight: 500; color: var(--c-text); line-height: 1.5; }
+.berg-title { display: block; font-size: var(--fs-xl); font-weight: 600; color: var(--c-text); line-height: 1.5; }
 .berg-meta { display: block; font-size: var(--fs-sm); color: var(--c-text-2); margin-top: 12rpx; }
 
 /* ============ 正文 ============ */
@@ -57,7 +57,7 @@
   border-radius: 60rpx; padding: 16rpx;
   box-shadow: 0 -4rpx 24rpx rgba(31, 100, 120, 0.12);
 }
-.actions .btn-ghost, .actions .btn-primary { height: 104rpx; line-height: 104rpx; }
+.actions .btn-ghost, .actions .btn-primary { height: 96rpx; line-height: 96rpx; }
 
 /* ============ 标记选择 ============ */
 .icon-mask { position: fixed; left: 0; right: 0; top: 0; bottom: 0; background: rgba(23, 80, 95, 0.5); display: flex; align-items: flex-end; }

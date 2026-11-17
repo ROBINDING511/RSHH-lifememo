@@ -182,28 +182,32 @@ Page({
     }
   },
 
-  // 布局：真实回忆 → 固定鸟瞰海面上的冰山（确定性布点，按深度分层）
-  // 海面保持克制，最多呈现一屏布点；全部回忆在时间轴页可查。
+  // 布局：真实回忆 → 鸟瞰海面冰山。支持不限数量追加：按 id 哈希散点 + 深度分层，
+  // 新增回忆持续落海（isNew 播落下动画），不做数量截断。
   layoutBergs (icebergs) {
     const far = [], mid = [], near = []
-    const visible = (icebergs || []).slice(0, BERG_SLOTS.length)
-    visible.forEach((b, idx) => {
-      const s = BERG_SLOTS[idx]
+    ;(icebergs || []).forEach((b) => {
       const seed = hash(b._id)
-      const width = Math.round(s.w * (SIZE_SCALE[b.size] || 1))
+      const layer = b.size === 'large' ? 'near' : b.size === 'small' ? 'far' : 'mid'
+      // 深度带：远小淡 / 中 / 近大；带宽与基准尺寸放大，冰山更醒目
+      const band = layer === 'far' ? { y0: 8, span: 16, w: 36 }
+        : layer === 'mid' ? { y0: 32, span: 24, w: 58 }
+          : { y0: 60, span: 16, w: 80 }
+      const left = 3 + (seed % 86)
+      const top = band.y0 + ((seed >> 4) % band.span)
+      const width = Math.round(band.w * (SIZE_SCALE[b.size] || 1))
       const swayDur = (8 + (seed % 40) / 10).toFixed(1)
       const swayDelay = (-(seed % 80) / 10).toFixed(1)
       const swayAnim = `sway ${swayDur}s ease-in-out ${swayDelay}s infinite`
       const isNew = b._id === this.lastPublishedId
       const berg = {
-        id: b._id,
-        left: s.l, top: s.t, width,
-        opacity: s.layer === 'far' ? 0.82 : 1,
+        id: b._id, left, top, width,
+        opacity: layer === 'far' ? 0.85 : 1,
         swayAnim,
         anim: isNew ? BERG_DROP : swayAnim
       }
-      if (s.layer === 'far') far.push(berg)
-      else if (s.layer === 'mid') mid.push(berg)
+      if (layer === 'far') far.push(berg)
+      else if (layer === 'mid') mid.push(berg)
       else near.push(berg)
     })
     this.setData({ farBergs: far, midBergs: mid, nearBergs: near })
@@ -503,6 +507,7 @@ Page({
     if (!p || !p.wavPath) return
     if (this.data.previewVoicePlaying) { this.stopPreviewVoice(); return }
     this.previewAudio = wx.createInnerAudioContext()
+    this.previewAudio.obeyMuteSwitch = false   // iOS 静音键下也出声
     this.previewAudio.onEnded(() => this.setData({ previewVoicePlaying: false }))
     this.previewAudio.onError(() => {
       this.setData({ previewVoicePlaying: false })

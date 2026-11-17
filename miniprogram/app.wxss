@@ -42,13 +42,13 @@ page {
   --ripple-rgb: 255, 255, 255;
   --c-bird: #26404F;
 
-  /* ---- 字号（适老放大：最小 30rpx，正文 38rpx+，转写 54rpx）---- */
-  --fs-xs: 30rpx;
-  --fs-sm: 32rpx;
-  --fs-md: 38rpx;
-  --fs-lg: 42rpx;
-  --fs-xl: 46rpx;
-  --fs-xxl: 54rpx;
+  /* ---- 字号：对齐微信/WeUI 阶梯（正文17px/次要15px/标题20px），保留适老下限30rpx ---- */
+  --fs-xs: 30rpx;   /* 辅助 15px（适老下限） */
+  --fs-sm: 30rpx;   /* 次要 15px */
+  --fs-md: 34rpx;   /* 正文 17px（WeUI 正文） */
+  --fs-lg: 36rpx;   /* 小标题 18px */
+  --fs-xl: 40rpx;   /* 页面标题 20px */
+  --fs-xxl: 48rpx;  /* 录音转写 24px（朗读级，保留放大） */
 
   /* ---- 触控（≥88rpx ≈44px）---- */
   --tap-min: 88rpx;
@@ -87,8 +87,8 @@ page {
   color: var(--c-on-primary);
   border-radius: 48rpx;
   font-size: var(--fs-lg);
-  height: 112rpx;
-  line-height: 112rpx;
+  height: 96rpx;   /* 48px，WeUI 主按钮 */
+  line-height: 96rpx;
   font-weight: 500;
   letter-spacing: 2rpx;
   box-shadow: 0 6rpx 20rpx rgba(31, 100, 120, 0.22);
@@ -101,8 +101,8 @@ page {
   color: var(--c-primary);
   border-radius: 48rpx;
   font-size: var(--fs-md);
-  height: 104rpx;
-  line-height: 104rpx;
+  height: 88rpx;   /* 44px，WeUI 触控下限 */
+  line-height: 88rpx;
   font-weight: 500;
 }
 .btn-ghost::after { border: none; }

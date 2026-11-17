@@ -53,6 +53,8 @@ Page({
   },
 
   async load () {
+    this.stopAudio()
+    this._audioLocal = null
     wx.showLoading({ title: '正在打开…', mask: true })
     try {
       const res = await wx.cloud.database().collection('icebergs').doc(this.id).get()
@@ -80,24 +82,36 @@ Page({
 
   goBack () { wx.navigateBack() },
 
-  // 播放妈妈的原声（再点一次暂停）
-  playVoice () {
+  // 播放妈妈的原声（再点一次暂停）。下载到本地再播 + 关静音键跟随，避免"听不到"。
+  async playVoice () {
     const b = this.data.b
-    if (!b || !b.audioURL) return
+    if (!b || !b.audioFileID) return
     if (this.data.playing) {
       this.audio && this.audio.stop()
       this.setData({ playing: false })
       return
     }
+    let src = this._audioLocal
+    if (!src) {
+      try {
+        const d = await wx.cloud.downloadFile({ fileID: b.audioFileID })
+        src = d.tempFilePath
+        this._audioLocal = src
+      } catch (e) {
+        src = b.audioURL || ''   // 下载失败回退 https 临时链
+      }
+    }
+    if (!src) { wx.showToast({ title: '这段没有录音', icon: 'none' }); return }
     if (!this.audio) {
       this.audio = wx.createInnerAudioContext()
+      this.audio.obeyMuteSwitch = false   // iOS 静音键下也出声
       this.audio.onEnded(() => this.setData({ playing: false }))
       this.audio.onError(() => {
         this.setData({ playing: false })
         wx.showToast({ title: '声音放不出来，换个网络试试', icon: 'none', duration: 2600 })
       })
     }
-    this.audio.src = b.audioURL
+    this.audio.src = src
     this.audio.play()
     this.setData({ playing: true })
   },
