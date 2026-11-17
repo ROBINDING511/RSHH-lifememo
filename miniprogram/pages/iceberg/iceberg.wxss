@@ -57,7 +57,7 @@
   border-radius: 60rpx; padding: 16rpx;
   box-shadow: 0 -4rpx 24rpx rgba(31, 100, 120, 0.12);
 }
-.actions .btn-ghost, .actions .btn-primary { height: 96rpx; line-height: 96rpx; }
+.actions .btn-ghost, .actions .btn-primary { height: 96rpx; line-height: 1; }
 
 /* ============ 标记选择 ============ */
 .icon-mask { position: fixed; left: 0; right: 0; top: 0; bottom: 0; background: rgba(23, 80, 95, 0.5); display: flex; align-items: flex-end; }

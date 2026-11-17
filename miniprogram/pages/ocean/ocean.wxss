@@ -72,10 +72,10 @@
 .dock-pill.btn-hover { background: var(--c-primary-soft); transform: scale(0.97); }
 .dock-icon { width: 48rpx; height: 48rpx; }
 /* 微信式细长条：单行居中，干净简洁；高度 96rpx 仍 ≥88rpx 触控下限 */
-.record-btn { display: flex; align-items: center; justify-content: center; min-height: 96rpx; padding: 0 36rpx; background: var(--c-primary); border-radius: 48rpx; box-shadow: 0 4rpx 16rpx rgba(31,100,120,0.20); }
-.record-btn.record-hover { background: var(--c-primary-deep); transform: scale(0.98); }
-.record-btn.record-on { background: var(--c-primary-deep); }
-.record-btn.record-cancel { background: var(--c-danger); }
+.record-btn { display: flex; align-items: center; justify-content: center; min-height: 96rpx; padding: 0 36rpx; background: linear-gradient(160deg, #2E7C93 0%, #1F6478 55%, #1A5A6C 100%); border-radius: 48rpx; box-shadow: 0 4rpx 16rpx rgba(31,100,120,0.20); }
+.record-btn.record-hover { background: linear-gradient(160deg, #256A80 0%, #17505F 100%); transform: scale(0.98); }
+.record-btn.record-on { background: linear-gradient(160deg, #256A80 0%, #17505F 100%); }
+.record-btn.record-cancel { background: linear-gradient(160deg, #C4574A 0%, #B3402F 100%); }
 .record-main { color: #fff; font-size: var(--fs-lg); font-weight: 500; letter-spacing: 6rpx; line-height: 1.2; }
 
 /* ============ 实时转写面板（微信式按住说话，0 延迟弹出）============ */

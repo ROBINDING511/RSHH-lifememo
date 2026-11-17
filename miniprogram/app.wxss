@@ -83,33 +83,35 @@ page {
 
 /* ============ 按钮 ============ */
 .btn-primary {
-  background: var(--c-primary);
+  display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(160deg, #2E7C93 0%, #1F6478 55%, #1A5A6C 100%);  /* 同色系微渐变 */
   color: var(--c-on-primary);
   border-radius: 48rpx;
   font-size: var(--fs-lg);
   height: 96rpx;   /* 48px，WeUI 主按钮 */
-  line-height: 96rpx;
+  line-height: 1;
   font-weight: 500;
   letter-spacing: 2rpx;
   box-shadow: 0 6rpx 20rpx rgba(31, 100, 120, 0.22);
 }
 .btn-primary::after { border: none; }
-.btn-primary.btn-hover { background: var(--c-primary-deep); transform: scale(0.97); }
+.btn-primary.btn-hover { background: linear-gradient(160deg, #256A80 0%, #17505F 100%); transform: scale(0.97); }
 
 .btn-ghost {
-  background: var(--c-primary-soft);
+  display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(160deg, #EAF2F3 0%, #DCE9EA 100%);
   color: var(--c-primary);
   border-radius: 48rpx;
   font-size: var(--fs-md);
   height: 88rpx;   /* 44px，WeUI 触控下限 */
-  line-height: 88rpx;
+  line-height: 1;
   font-weight: 500;
 }
 .btn-ghost::after { border: none; }
-.btn-ghost.btn-hover { background: #D3E4E5; transform: scale(0.97); }
+.btn-ghost.btn-hover { background: linear-gradient(160deg, #DDE9EA 0%, #CFE0E1 100%); transform: scale(0.97); }
 
-.btn-danger-ghost { background: var(--c-danger-soft); color: var(--c-danger); }
-.btn-danger-ghost.btn-hover { background: #F0D9D2; transform: scale(0.97); }
+.btn-danger-ghost { background: linear-gradient(160deg, #FBEFEC 0%, #F5DED8 100%); color: var(--c-danger); }
+.btn-danger-ghost.btn-hover { background: linear-gradient(160deg, #F6E3DE 0%, #EFD2CB 100%); transform: scale(0.97); }
 
 /* ============ 纸卡片 ============ */
 .card {
