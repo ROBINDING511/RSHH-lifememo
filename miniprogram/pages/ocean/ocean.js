@@ -11,6 +11,7 @@
 const { createRecorder, MAX_SECONDS } = require('../../utils/recorder')
 const api = require('../../utils/api')
 const draft = require('../../utils/draft')
+const life = require('../../utils/life')
 
 // 海面冰山布点（左%、顶%、宽 px、所在深度层）——确定性布局，新回忆循环落位
 // 空灵俯视：冰山小而分散（远小淡、近大），2-3 段回忆时大片留白，多了也不挤
@@ -40,9 +41,15 @@ Page({
     capsuleBottom: 88,   // 微信胶囊下沿，顶部元素据此避让
     // 插画场景
     bgLoaded: false,
-    farBergs: [],
-    midBergs: [],
-    nearBergs: [],
+    bergs: [],
+    stages: life.STAGES,
+    worldWidth: 0,
+    stageWidth: 0,
+    tintGradient: '',
+    scrollLeft: 0,
+    birthday: '',
+    birthYear: null,
+    showBirthday: false,
     whalePaused: false,
     // 录音（微信式按住说话 + 流式转写）
     recording: false,
@@ -88,13 +95,40 @@ Page({
       wx.navigateTo({ url: '/packageGuide/pages/guide/guide' })
       return
     }
+    this.setupWorld()
+    const birthday = life.getBirthday()
+    this.setData({
+      birthday, birthYear: life.getBirthYear(),
+      showBirthday: !birthday,           // 首次先问生日，用于年份→人生阶段
+      drafts: draft.list(), whalePaused: false
+    })
     this.refreshData()
-    this.setData({ drafts: draft.list(), whalePaused: false })
     // 预热实时识别连接：妈妈点录音时不用再等建连，开口即出字
     this.preheatAsr()
     // 预热麦克风授权：按住说话时 0 延迟开口，不再等授权弹窗
     wx.authorize({ scope: 'scope.record' }).catch(() => {})
   },
+
+  // 整片海：世界宽 = 阶段数 × 屏宽；阶段色连续渐变（滚动时海色平滑过渡）
+  setupWorld () {
+    const w = (wx.getWindowInfo ? wx.getWindowInfo().windowWidth : 375)
+    const n = life.STAGES.length
+    const tint = 'linear-gradient(90deg,' + life.STAGES.map((s, i) => `${s.color} ${(i / (n - 1) * 100).toFixed(1)}%`).join(',') + ')'
+    this.setData({ stageWidth: w, worldWidth: w * n, tintGradient: tint })
+  },
+
+  // 生日选择 / 确认 / 跳过
+  onBirthdayPick (e) {
+    const v = e.detail.value
+    life.setBirthday(v)
+    this.setData({ birthday: v, birthYear: life.getBirthYear() })
+  },
+  confirmBirthday () {
+    if (!this.data.birthday) { wx.showToast({ title: '先选一下生日', icon: 'none' }); return }
+    this.setData({ showBirthday: false })
+    this.refreshData()
+  },
+  skipBirthday () { this.setData({ showBirthday: false }) },
 
   onHide () {
     // 切后台/来电：正在录音就先落地成草稿，回来能找回
@@ -185,41 +219,44 @@ Page({
   // 布局：真实回忆 → 鸟瞰海面冰山。支持不限数量追加：按 id 哈希散点 + 深度分层，
   // 新增回忆持续落海（isNew 播落下动画），不做数量截断。
   layoutBergs (icebergs) {
-    const far = [], mid = [], near = []
+    const sw = this.data.stageWidth || 375
+    const bergs = []
     ;(icebergs || []).forEach((b) => {
       const seed = hash(b._id)
+      // 归到人生阶段：优先 zoneName（阶段名），否则按 memoryTime 年份 + 生日推
+      let stage = life.stageByKey(b.zoneName)
+      if (!stage) {
+        const yr = parseInt(b.memoryTime, 10)
+        stage = (isFinite(yr) && this.data.birthYear)
+          ? life.stageOfYear(yr, this.data.birthYear)
+          : life.STAGES[seed % life.STAGES.length]
+      }
+      const si = life.STAGES.indexOf(stage)
       const layer = b.size === 'large' ? 'near' : b.size === 'small' ? 'far' : 'mid'
-      // 深度带：远小淡 / 中 / 近大；带宽与基准尺寸放大，冰山更醒目
-      const band = layer === 'far' ? { y0: 8, span: 16, w: 25 }
-        : layer === 'mid' ? { y0: 32, span: 24, w: 41 }
+      const band = layer === 'far' ? { y0: 10, span: 14, w: 25 }
+        : layer === 'mid' ? { y0: 34, span: 22, w: 41 }
           : { y0: 60, span: 16, w: 56 }
-      const left = 3 + (seed % 86)
-      const top = band.y0 + ((seed >> 4) % band.span)
       const width = Math.round(band.w * (SIZE_SCALE[b.size] || 1))
+      const left = si * sw + 12 + (seed % Math.max(1, sw - width - 24))
+      const top = band.y0 + ((seed >> 4) % band.span)
       const swayDur = (8 + (seed % 40) / 10).toFixed(1)
       const swayDelay = (-(seed % 80) / 10).toFixed(1)
       const swayAnim = `sway ${swayDur}s ease-in-out ${swayDelay}s infinite`
       const isNew = b._id === this.lastPublishedId
-      const berg = {
+      bergs.push({
         id: b._id, left, top, width,
         opacity: layer === 'far' ? 0.85 : 1,
-        swayAnim,
-        anim: isNew ? BERG_DROP : swayAnim
-      }
-      if (layer === 'far') far.push(berg)
-      else if (layer === 'mid') mid.push(berg)
-      else near.push(berg)
+        swayAnim, anim: isNew ? BERG_DROP : swayAnim, stage: stage.key
+      })
     })
-    this.setData({ farBergs: far, midBergs: mid, nearBergs: near })
+    this.setData({ bergs })
   },
 
   // 新冰山落下动画结束后，切回常态摇曳
   clearNewBerg (pid) {
-    ['farBergs', 'midBergs', 'nearBergs'].forEach((k) => {
-      const arr = this.data[k] || []
-      const i = arr.findIndex((b) => b.id === pid)
-      if (i >= 0) this.setData({ [`${k}[${i}].anim`]: arr[i].swayAnim })
-    })
+    const arr = this.data.bergs || []
+    const i = arr.findIndex((b) => b.id === pid)
+    if (i >= 0) this.setData({ [`bergs[${i}].anim`]: arr[i].swayAnim })
   },
 
   // ==================== 触摸交互（WXML 事件） ====================
@@ -445,7 +482,7 @@ Page({
       preview: {
         wavPath, text: text || '', rawText: text || '', audioOnly: !hasText && !!wavPath,
         timeOptions: ['童年', '上学时', '工作时', '结婚后', '近些年', '说不清了'], timeIndex: 5,
-        zoneOptions: ['童年', '结婚', '孩子', '工作', '晚年', '新的开始'], zoneIndex: 5,
+        zoneOptions: life.STAGES.map((s) => s.key), zoneIndex: life.STAGES.length - 1,
         photos: [], previewVoicePlaying: false
       }
     })
@@ -476,8 +513,19 @@ Page({
     if (!p || p.wavPath !== wavPath) return
     const upd = { 'preview.rawText': finalText, 'preview.audioOnly': !finalText && !!wavPath }
     if (finalText) upd['preview.text'] = (r && r.title) ? `${r.title}\n${finalText}` : finalText
-    if (r && r.timeOptions && r.timeOptions.length) { upd['preview.timeOptions'] = r.timeOptions.slice(0, 6); upd['preview.timeIndex'] = 0 }
-    if (r && r.zoneOptions && r.zoneOptions.length) { upd['preview.zoneOptions'] = r.zoneOptions.slice(0, 6); upd['preview.zoneIndex'] = 0 }
+    // 海 = 人生阶段（整片连续海）；"当我14岁" → 出生年+14-1 → 自动归阶段
+    upd['preview.zoneOptions'] = life.STAGES.map((s) => s.key)
+    const age = life.parseAge(finalText)
+    if (age != null && this.data.birthYear) {
+      const yr = life.eventYear(this.data.birthYear, age)
+      upd['preview.timeOptions'] = [`${yr}年（${age}岁）`, '说不清了']
+      upd['preview.timeIndex'] = 0
+      upd['preview.zoneIndex'] = life.STAGES.indexOf(life.stageOfAge(age))
+      upd['preview._autoYear'] = yr
+    } else if (r && r.timeOptions && r.timeOptions.length) {
+      upd['preview.timeOptions'] = r.timeOptions.slice(0, 6)
+      upd['preview.timeIndex'] = 0
+    }
     this.setData(upd)
   },
 
@@ -584,8 +632,8 @@ Page({
         text: body,
         audioPath: p.wavPath,
         photos: p.photos,
-        timeValue: p.timeIndex >= 0 ? p.timeOptions[p.timeIndex] : '说不清了',
-        zoneName: p.zoneIndex >= 0 ? p.zoneOptions[p.zoneIndex] : '新的开始',
+        timeValue: p._autoYear ? String(p._autoYear) : (p.timeIndex >= 0 ? p.timeOptions[p.timeIndex] : '说不清了'),
+        zoneName: p.zoneIndex >= 0 ? p.zoneOptions[p.zoneIndex] : '晚年',
         title: (p.rawText && body.startsWith(p.rawText)) ? '' : body.split('\n')[0].slice(0, 12)
       })
       this.lastPublishedId = created && created._id
@@ -595,6 +643,9 @@ Page({
       wx.hideLoading()
       wx.showToast({ title: '一座新的冰山入海了', icon: 'none', duration: 2400 })
       await this.refreshData()
+      // 滚到新冰山所在的人生阶段（整片海连续滚动）
+      const st = life.stageByKey(p.zoneOptions[p.zoneIndex])
+      if (st) this.setData({ scrollLeft: life.STAGES.indexOf(st) * (this.data.stageWidth || 375) })
       // 新冰山播完落下动画后切回常态摇曳
       if (this.lastPublishedId) {
         const pid = this.lastPublishedId

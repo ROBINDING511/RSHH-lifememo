@@ -21,11 +21,13 @@
 .c2 { left: 55%; top: 50%; width: 360rpx; height: 160rpx; animation: caust 26s ease-in-out -8s infinite; }
 @keyframes caust { 0%, 100% { transform: translateX(0) scaleX(1); opacity: .07; } 50% { transform: translateX(30rpx) scaleX(1.1); opacity: .13; } }
 
-.layer { position: absolute; left: 0; top: 0; right: 0; bottom: 0; pointer-events: none; }
-.z-far { z-index: 3; }
-.z-whale { z-index: 5; }
-.z-mid { z-index: 7; }
-.z-near { z-index: 9; }
+/* 整片连续海：横向滚动世界 + 阶段色连续渐变覆层 */
+.sea-scroll { position: absolute; left: 0; top: 0; width: 100%; height: 100%; }
+.sea-world { position: relative; height: 100%; }
+.sea-tint { position: absolute; left: 0; top: 0; bottom: 0; width: 100%; opacity: .38; pointer-events: none; }
+.stage-label { position: absolute; top: 360rpx; transform: translateX(-50%); color: rgba(18,58,72,.85); background: rgba(255,255,255,.55); padding: 8rpx 28rpx; border-radius: 32rpx; font-size: var(--fs-sm); font-weight: 600; letter-spacing: 6rpx; pointer-events: none; }
+.whale-layer { position: absolute; left: 0; top: 0; right: 0; bottom: 0; z-index: 5; pointer-events: none; }
+.whale-layer .whalebox { pointer-events: auto; }
 
 /* ============ 冰山（回忆，随波摇曳）============ */
 .berg { position: absolute; transform-origin: 50% 55%; pointer-events: auto; will-change: transform; }
@@ -58,6 +60,16 @@
 .hint-sub2 { font-size: var(--fs-sm); color: rgba(255, 255, 255, .85); margin-top: 8rpx; text-align: center; }
 .hint-arrow { width: 4rpx; height: 88rpx; margin-top: 24rpx; background: rgba(255, 255, 255, .85); position: relative; }
 .hint-arrow::after { content: ''; position: absolute; bottom: -4rpx; left: 50%; transform: translateX(-50%); border-left: 18rpx solid transparent; border-right: 18rpx solid transparent; border-top: 26rpx solid rgba(255, 255, 255, .85); }
+
+/* ============ 首次问生日 ============ */
+.bd-mask { position: absolute; left: 0; top: 0; right: 0; bottom: 0; z-index: 40; background: rgba(23,80,95,.45); display: flex; align-items: center; justify-content: center; padding: 0 48rpx; }
+.bd-card { width: 100%; background: var(--c-card); border-radius: var(--radius-lg); padding: 40rpx 36rpx; box-shadow: 0 12rpx 40rpx rgba(23,80,95,.25); }
+.bd-title { display: block; font-size: var(--fs-xl); font-weight: 600; color: var(--c-text); }
+.bd-sub { display: block; font-size: var(--fs-sm); color: var(--c-text-2); margin-top: 12rpx; line-height: 1.6; }
+.bd-picker { margin-top: 28rpx; min-height: 88rpx; display: flex; align-items: center; justify-content: center; background: var(--c-soft); border: 2rpx solid rgba(31,100,120,.15); border-radius: var(--radius-md); color: var(--c-primary); font-size: var(--fs-md); font-weight: 500; }
+.bd-btns { display: flex; gap: 24rpx; margin-top: 32rpx; }
+.bd-skip { flex: 1; min-height: 88rpx; display: flex; align-items: center; justify-content: center; background: var(--c-soft); color: var(--c-text-2); border-radius: 44rpx; font-size: var(--fs-md); }
+.bd-ok { flex: 1; min-height: 88rpx; display: flex; align-items: center; justify-content: center; background: linear-gradient(160deg,#2E7C93,#1F6478); color: #fff; border-radius: 44rpx; font-size: var(--fs-md); font-weight: 500; }
 
 /* ============ 草稿找回（沿用定稿）============ */
 .draft-bar { position: absolute; left: 24rpx; right: 24rpx; z-index: 21; display: flex; align-items: center; justify-content: space-between; gap: 16rpx; background: #FFF6E5; border: 2rpx solid #E8C77A; border-radius: var(--radius-lg); padding: 20rpx 16rpx 20rpx 28rpx; }

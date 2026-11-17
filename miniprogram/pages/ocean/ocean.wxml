@@ -15,39 +15,42 @@
     <view class="caustic c1"></view>
     <view class="caustic c2"></view>
 
-    <!-- z3 远冰（小淡） -->
-    <view class="layer z-far">
-      <view wx:for="{{farBergs}}" wx:key="id" class="berg"
-        style="left:{{item.left}}%;top:{{item.top}}%;width:{{item.width}}px;opacity:{{item.opacity}};animation:{{item.anim}}"
-        data-id="{{item.id}}" bindtap="onBergTap" hover-class="berg-hover" hover-stay-time="80">
-        <image class="berg-img" src="/images/ocean/berg.png" mode="widthFix" />
+    <!-- 整片连续海：横向滚动，人生阶段色连续渐变（不分成独立海域） -->
+    <scroll-view scroll-x class="sea-scroll" enhanced show-scrollbar="{{false}}"
+      scroll-left="{{scrollLeft}}" scroll-with-animation>
+      <view class="sea-world" style="width:{{worldWidth}}px">
+        <view class="sea-tint" style="background:{{tintGradient}}"></view>
+        <text wx:for="{{stages}}" wx:key="key" class="stage-label"
+          style="left:{{index * stageWidth + stageWidth / 2}}px">{{item.key}}</text>
+        <view wx:for="{{bergs}}" wx:key="id" class="berg"
+          style="left:{{item.left}}px;top:{{item.top}}%;width:{{item.width}}px;opacity:{{item.opacity}};animation:{{item.anim}}"
+          data-id="{{item.id}}" bindtap="onBergTap" hover-class="berg-hover" hover-stay-time="80">
+          <image class="berg-img" src="/images/ocean/berg.png" mode="widthFix" />
+        </view>
       </view>
-    </view>
+    </scroll-view>
 
-    <!-- z5 鲸鱼杭航：在冰山间游弋 + 自然微动；长按说话副入口 -->
-    <view class="layer z-whale">
+    <!-- 鲸鱼杭航：屏幕层游弋（始终可见）+ 自然微动；长按说话副入口 -->
+    <view class="whale-layer">
       <view class="cruise {{whalePaused || recording ? 'paused' : ''}}">
         <view class="whalebox" bindlongpress="onWhaleLongPress" hover-class="whale-hover" hover-stay-time="80">
           <image class="whale-img" src="/images/ocean/whale.png" mode="aspectFit" />
         </view>
       </view>
     </view>
+  </view>
 
-    <!-- z7 中冰（鲸鱼从这些冰山后面穿过；新回忆落这里） -->
-    <view class="layer z-mid">
-      <view wx:for="{{midBergs}}" wx:key="id" class="berg"
-        style="left:{{item.left}}%;top:{{item.top}}%;width:{{item.width}}px;opacity:{{item.opacity}};animation:{{item.anim}}"
-        data-id="{{item.id}}" bindtap="onBergTap" hover-class="berg-hover" hover-stay-time="80">
-        <image class="berg-img" src="/images/ocean/berg.png" mode="widthFix" />
-      </view>
-    </view>
-
-    <!-- z9 近冰（大） -->
-    <view class="layer z-near">
-      <view wx:for="{{nearBergs}}" wx:key="id" class="berg"
-        style="left:{{item.left}}%;top:{{item.top}}%;width:{{item.width}}px;opacity:{{item.opacity}};animation:{{item.anim}}"
-        data-id="{{item.id}}" bindtap="onBergTap" hover-class="berg-hover" hover-stay-time="80">
-        <image class="berg-img" src="/images/ocean/berg.png" mode="widthFix" />
+  <!-- ============ 首次：先问生日（年份→人生阶段） ============ -->
+  <view class="bd-mask" wx:if="{{showBirthday}}">
+    <view class="bd-card">
+      <text class="bd-title">先告诉我你的生日</text>
+      <text class="bd-sub">这样你说"当我14岁"，我就知道是哪一年、该漂在哪片海</text>
+      <picker mode="date" value="{{birthday || '1960-01-01'}}" start="1900-01-01" end="2020-12-31" bindchange="onBirthdayPick">
+        <view class="bd-picker">{{birthday || '点这里选生日'}}</view>
+      </picker>
+      <view class="bd-btns">
+        <view class="bd-skip" hover-class="btn-hover" hover-stay-time="80" bindtap="skipBirthday">先不说</view>
+        <view class="bd-ok" hover-class="btn-hover" hover-stay-time="80" bindtap="confirmBirthday">记好了</view>
       </view>
     </view>
   </view>
