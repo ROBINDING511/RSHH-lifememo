@@ -144,14 +144,11 @@
       </view>
 
       <!-- 微信式 cell：什么时候 / 哪片海，点开选择（有真实预设可选） -->
-      <view class="meta-cell" hover-class="cell-hover" hover-stay-time="80" bindtap="pickTimeSheet">
-        <text class="meta-label">什么时候</text>
-        <text class="meta-value">{{preview.timeOptions[preview.timeIndex]}}</text>
-        <text class="meta-arrow">›</text>
-      </view>
+      <!-- 什么时候 == 哪片海：只选一次；听到的年份/岁数仅作只读提示 -->
+      <text class="time-hint" wx:if="{{preview.timeLabel}}">听到 {{preview.timeLabel}}，落在</text>
       <view class="meta-cell" hover-class="cell-hover" hover-stay-time="80" bindtap="pickZoneSheet">
         <text class="meta-label">哪片海</text>
-        <text class="meta-value">{{preview.zoneOptions[preview.zoneIndex]}}</text>
+        <text class="meta-value">{{preview.zoneOptions[preview.zoneIndex]}}之海</text>
         <text class="meta-arrow">›</text>
       </view>
 

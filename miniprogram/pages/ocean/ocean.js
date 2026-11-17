@@ -501,8 +501,8 @@ Page({
     this.setData({
       preview: {
         wavPath, text: text || '', rawText: text || '', audioOnly: !hasText && !!wavPath,
-        timeOptions: ['童年', '上学时', '工作时', '结婚后', '近些年', '说不清了'], timeIndex: 5,
         zoneOptions: life.getStages().map((s) => s.key), zoneIndex: life.getStages().length - 1,
+        timeLabel: '', _autoYear: null,
         photos: [], previewVoicePlaying: false
       }
     })
@@ -535,16 +535,15 @@ Page({
     if (finalText) upd['preview.text'] = (r && r.title) ? `${r.title}\n${finalText}` : finalText
     // 海 = 人生阶段（整片连续海）；"当我14岁" → 出生年+14-1 → 自动归阶段
     upd['preview.zoneOptions'] = life.getStages().map((s) => s.key)
+    // 什么时候 == 哪片海：只选一次海；听到的年龄/年份仅作只读提示并自动归海
     const age = life.parseAge(finalText)
     if (age != null && this.data.birthYear) {
       const yr = life.eventYear(this.data.birthYear, age)
-      upd['preview.timeOptions'] = [`${yr}年（${age}岁）`, '说不清了']
-      upd['preview.timeIndex'] = 0
+      upd['preview.timeLabel'] = `${yr}年 · ${age}岁`
       upd['preview.zoneIndex'] = life.getStages().findIndex((x) => x.key === life.stageOfAge(age).key)
       upd['preview._autoYear'] = yr
-    } else if (r && r.timeOptions && r.timeOptions.length) {
-      upd['preview.timeOptions'] = r.timeOptions.slice(0, 6)
-      upd['preview.timeIndex'] = 0
+    } else {
+      upd['preview.timeLabel'] = ''
     }
     this.setData(upd)
   },
@@ -558,15 +557,7 @@ Page({
     })
   },
 
-  // 微信式：点 cell 弹 action sheet 选择（始终有真实预设可选）
-  pickTimeSheet () {
-    const p = this.data.preview
-    if (!p) return
-    wx.showActionSheet({
-      itemList: (p.timeOptions || []).slice(0, 6),
-      success: (r) => this.setData({ 'preview.timeIndex': r.tapIndex })
-    })
-  },
+  // 微信式：点 cell 弹 action sheet 选海（什么时候==哪片海，只选一次）
   pickZoneSheet () {
     const p = this.data.preview
     if (!p) return
@@ -652,7 +643,7 @@ Page({
         text: body,
         audioPath: p.wavPath,
         photos: p.photos,
-        timeValue: p._autoYear ? String(p._autoYear) : (p.timeIndex >= 0 ? p.timeOptions[p.timeIndex] : '说不清了'),
+        timeValue: p._autoYear ? String(p._autoYear) : (p.zoneOptions[p.zoneIndex] || '说不清了'),
         zoneName: p.zoneIndex >= 0 ? p.zoneOptions[p.zoneIndex] : '晚年',
         title: (p.rawText && body.startsWith(p.rawText)) ? '' : body.split('\n')[0].slice(0, 12)
       })

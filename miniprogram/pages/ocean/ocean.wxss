@@ -150,6 +150,7 @@
 .photo-add.btn-hover { background: #E5E6E8; }
 .photo-add-plus { color: #9AA0A6; font-size: 72rpx; line-height: 1; font-weight: 300; }
 /* 微信式 meta cell：左标签 / 右值 / 箭头，点开 action sheet */
+.time-hint { display: block; margin-top: 20rpx; font-size: var(--fs-sm); color: var(--c-text-2); }
 .meta-cell { display: flex; align-items: center; min-height: 96rpx; padding: 0 8rpx; border-bottom: 2rpx solid rgba(31, 100, 120, 0.08); }
 .meta-cell.cell-hover { background: var(--c-soft); }
 .meta-label { flex: 0 0 160rpx; color: var(--c-text); font-size: var(--fs-md); }
