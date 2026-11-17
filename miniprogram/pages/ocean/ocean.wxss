@@ -1,175 +1,77 @@
-/* pages/ocean/ocean.wxss — 鸟瞰矢量海面（P0）
- * 渲染层：独立 SVG 资源 + <image> + WXSS 关键帧 + z-index 深度分层。
- * 只动画 transform / opacity（合成层友好，低端机不掉帧）；无运行时滤镜。
- * 场景色一律引用 app.wxss 的 --sea-* token；浮层文字压深色胶囊（白字全渐变达标）。
- * 触控目标 ≥ 88rpx；保留的录音/发布 UI 样式沿用适老化定稿。
+/* pages/ocean/ocean.wxss — 空灵俯视插画海面
+ * 一张轻量插画空海背景 + 复用顶视冰山 sprite + 顶视小鲸鱼。
+ * 只动画 transform / opacity（GPU 合成，冰山多也不卡）；无运行时滤镜。
+ * 弱网：CSS 渐变兜底先出，插画背景加载后淡入。场景色引用 app.wxss --sea-* token。
+ * 触控 ≥88rpx；录音/发布 UI 沿用适老化定稿。
  */
 .page { width: 100vw; height: 100vh; position: relative; overflow: hidden; }
 
 /* ============ 场景层 ============ */
 .scene { position: absolute; left: 0; top: 0; right: 0; bottom: 0; overflow: hidden; }
-.bg {
+/* 弱网/加载兜底：插画未到位时先显示柔和海面渐变 */
+.bg-gradient {
   position: absolute; left: 0; top: 0; right: 0; bottom: 0;
-  background:
-    radial-gradient(120% 34% at 50% -4%, rgba(var(--sea-warm-rgb), .5) 0%, rgba(var(--sea-warm-rgb), .16) 42%, rgba(var(--sea-warm-rgb), 0) 68%),
-    radial-gradient(80% 28% at 26% 92%, rgba(var(--sea-deep-rgb), .32), rgba(var(--sea-deep-rgb), 0) 70%),
-    linear-gradient(180deg, var(--sea-0) 0%, var(--sea-1) 10%, var(--sea-2) 26%, var(--sea-3) 48%, var(--sea-4) 68%, var(--sea-5) 86%, var(--sea-6) 100%);
+  background: linear-gradient(180deg, var(--sea-0) 0%, var(--sea-2) 30%, var(--sea-4) 65%, var(--sea-6) 100%);
 }
-/* 焦散光斑：radial-gradient 自带柔边，不用 filter:blur（省性能） */
-.caustic {
-  position: absolute; border-radius: 50%; opacity: .12;
-  background: radial-gradient(circle, rgba(var(--caustic-rgb), .9) 0%, rgba(var(--caustic-rgb), 0) 70%);
-}
-.c1 { left: 8%; top: 22%; width: 300rpx; height: 140rpx; animation: caust 19s ease-in-out infinite; }
-.c2 { left: 56%; top: 38%; width: 380rpx; height: 160rpx; animation: caust 26s ease-in-out -6s infinite; }
-.c3 { left: 18%; top: 64%; width: 340rpx; height: 148rpx; animation: caust 22s ease-in-out -12s infinite; }
-@keyframes caust {
-  0%, 100% { transform: translateX(0) scaleX(1); opacity: .09; }
-  50% { transform: translateX(32rpx) scaleX(1.12); opacity: .15; }
-}
+.bg-art { position: absolute; left: 0; top: 0; width: 100%; height: 100%; opacity: 0; transition: opacity .8s ease; }
+.bg-art.show { opacity: 1; }
+/* 焦散光斑：让海面「活」起来，radial-gradient 柔边不用滤镜 */
+.caustic { position: absolute; border-radius: 50%; opacity: .1; background: radial-gradient(circle, rgba(var(--caustic-rgb), .8) 0%, rgba(var(--caustic-rgb), 0) 70%); }
+.c1 { left: 10%; top: 24%; width: 300rpx; height: 140rpx; animation: caust 19s ease-in-out infinite; }
+.c2 { left: 55%; top: 50%; width: 360rpx; height: 160rpx; animation: caust 26s ease-in-out -8s infinite; }
+@keyframes caust { 0%, 100% { transform: translateX(0) scaleX(1); opacity: .07; } 50% { transform: translateX(30rpx) scaleX(1.1); opacity: .13; } }
 
 .layer { position: absolute; left: 0; top: 0; right: 0; bottom: 0; pointer-events: none; }
 .z-far { z-index: 3; }
 .z-whale { z-index: 5; }
 .z-mid { z-index: 7; }
 .z-near { z-index: 9; }
-.z-rip1 { z-index: 11; }
-.z-rip2 { z-index: 12; }
-.z-bird { z-index: 13; }
 
-/* ============ 冰山 ============ */
-.berg {
-  position: absolute; transform-origin: 50% 55%;
-  pointer-events: auto; will-change: transform;
-}
+/* ============ 冰山（回忆，随波摇曳）============ */
+.berg { position: absolute; transform-origin: 50% 55%; pointer-events: auto; will-change: transform; }
 .berg-img { display: block; width: 100%; }
-.berg-hover { opacity: .82; transform: scale(1.04); }
+.berg-hover { opacity: .82; }
+@keyframes sway { 0%, 100% { transform: rotate(-2deg) translate(0, 0); } 50% { transform: rotate(2deg) translate(3rpx, 4rpx); } }
+@keyframes bergdrop { 0% { transform: scale(2.1); opacity: 0; } 55% { transform: scale(.93); opacity: 1; } 100% { transform: scale(1); } }
 
-/* ============ 鲸鱼（杭航）============ */
-.cruise { position: absolute; left: 0; top: 0; width: 0; height: 0; animation: cruise 34s ease-in-out infinite; will-change: transform; }
-.flip { transform-origin: 0 0; animation: flip 34s ease-in-out infinite; }
-.whalebox {
-  position: absolute; left: -104rpx; top: -60rpx; width: 208rpx; height: 120rpx;
-  pointer-events: auto;
-}
+/* ============ 鲸鱼杭航（冰山间游弋 + 自然微动）============ */
+.cruise { position: absolute; left: 0; top: 0; width: 0; height: 0; animation: cruise 38s ease-in-out infinite; will-change: transform; }
+.whalebox { position: absolute; left: -70rpx; top: -115rpx; width: 140rpx; height: 230rpx; pointer-events: auto; animation: whalebob 5s ease-in-out infinite; }
+.whale-img { width: 100%; height: 100%; }
 .whale-hover { opacity: .85; }
-.wshadow { position: absolute; left: 0; top: 0; width: 100%; height: 100%; }
-.wf { position: absolute; left: 0; top: 0; width: 100%; height: 100%; opacity: 0; }
-.wf0 { animation: wff0 2.6s steps(1, end) infinite; }
-.wf1 { animation: wff1 2.6s steps(1, end) infinite; }
-.wf2 { animation: wff2 2.6s steps(1, end) infinite; }
-.wf3 { animation: wff3 2.6s steps(1, end) infinite; }
-.wf4 { animation: wff4 2.6s steps(1, end) infinite; }
-.wf5 { animation: wff5 2.6s steps(1, end) infinite; }
-.wf6 { animation: wff6 2.6s steps(1, end) infinite; }
-.wf7 { animation: wff7 2.6s steps(1, end) infinite; }
-/* 手指落下 / 录音中：整条鲸鱼定住（巡游+转身+摆尾全停），目标不跑，好按 */
-.cruise.paused, .cruise.paused .flip, .cruise.paused .wf { animation-play-state: paused; }
-
+.cruise.paused, .cruise.paused .whalebox { animation-play-state: paused; }
 @keyframes cruise {
-  0% { transform: translate(500rpx, 600rpx); }
-  16% { transform: translate(352rpx, 688rpx); }
-  40% { transform: translate(96rpx, 616rpx); }
-  50% { transform: translate(68rpx, 608rpx); }
-  66% { transform: translate(280rpx, 764rpx); }
-  88% { transform: translate(516rpx, 676rpx); }
-  100% { transform: translate(500rpx, 600rpx); }
+  0% { transform: translate(300rpx, 520rpx); }
+  20% { transform: translate(480rpx, 640rpx); }
+  40% { transform: translate(200rpx, 700rpx); }
+  60% { transform: translate(420rpx, 820rpx); }
+  80% { transform: translate(160rpx, 600rpx); }
+  100% { transform: translate(300rpx, 520rpx); }
 }
-@keyframes flip {
-  0%, 40% { transform: perspective(840rpx) rotateY(0deg); }
-  50%, 88% { transform: perspective(840rpx) rotateY(180deg); }
-  98%, 100% { transform: perspective(840rpx) rotateY(360deg); }
-}
-/* 8 帧行波 ping-pong（14 步：0..7 + 6..1），每步恰一帧亮 */
-@keyframes wff0 { 0% { opacity: 1; } 7.143% { opacity: 0; } }
-@keyframes wff1 { 0% { opacity: 0; } 7.143% { opacity: 1; } 14.286% { opacity: 0; } 92.857% { opacity: 1; } 100% { opacity: 0; } }
-@keyframes wff2 { 0% { opacity: 0; } 14.286% { opacity: 1; } 21.429% { opacity: 0; } 85.714% { opacity: 1; } 92.857% { opacity: 0; } }
-@keyframes wff3 { 0% { opacity: 0; } 21.429% { opacity: 1; } 28.571% { opacity: 0; } 78.571% { opacity: 1; } 85.714% { opacity: 0; } }
-@keyframes wff4 { 0% { opacity: 0; } 28.571% { opacity: 1; } 35.714% { opacity: 0; } 71.429% { opacity: 1; } 78.571% { opacity: 0; } }
-@keyframes wff5 { 0% { opacity: 0; } 35.714% { opacity: 1; } 42.857% { opacity: 0; } 64.286% { opacity: 1; } 71.429% { opacity: 0; } }
-@keyframes wff6 { 0% { opacity: 0; } 42.857% { opacity: 1; } 50% { opacity: 0; } 57.143% { opacity: 1; } 64.286% { opacity: 0; } }
-@keyframes wff7 { 0% { opacity: 0; } 50% { opacity: 1; } 57.143% { opacity: 0; } }
+@keyframes whalebob { 0%, 100% { transform: rotate(-5deg) translateY(0); } 50% { transform: rotate(5deg) translateY(-8rpx); } }
 
-/* ============ 水纹 / 飞鸟 ============ */
-.ripples { position: absolute; left: 0; top: 0; width: 200%; height: 100%; pointer-events: none; }
-.r1 { animation: drift 46s linear infinite; opacity: .45; }
-.r2 { animation: drift 74s linear infinite reverse; opacity: .28; }
-@keyframes drift { from { transform: translateX(0); } to { transform: translateX(-50%); } }
-
-.bird { position: absolute; left: 0; top: 15%; width: 52rpx; height: 24rpx; animation: fly 34s linear infinite; animation-delay: 5s; }
-.bird-f { position: absolute; left: 0; top: 0; width: 100%; height: 100%; opacity: 0; }
-.b0 { animation: birdf0 1.1s steps(1, end) infinite; }
-.b1 { animation: birdf1 1.1s steps(1, end) infinite; }
-@keyframes fly {
-  0% { transform: translate(-10vw, 2vh); }
-  45% { transform: translate(45vw, -4vh); }
-  100% { transform: translate(110vw, 0); }
-}
-@keyframes birdf0 { 0% { opacity: 1; } 50% { opacity: 0; } 100% { opacity: 1; } }
-@keyframes birdf1 { 0% { opacity: 0; } 50% { opacity: 1; } 100% { opacity: 0; } }
-
-/* ============ 空态提示（深色胶囊底白字，全渐变达标）============ */
-.empty-hint {
-  position: absolute; left: 40rpx; right: 40rpx; top: 24%;
-  display: flex; flex-direction: column; align-items: center;
-  pointer-events: none; z-index: 20;
-}
-.hint-card {
-  display: flex; flex-direction: column; align-items: center;
-  background: rgba(var(--hint-cap-rgb), .72);
-  border-radius: var(--radius-lg); padding: 32rpx 36rpx;
-}
+/* ============ 空态提示（深色胶囊白字，全渐变达标）============ */
+.empty-hint { position: absolute; left: 40rpx; right: 40rpx; top: 24%; display: flex; flex-direction: column; align-items: center; pointer-events: none; z-index: 20; }
+.hint-card { display: flex; flex-direction: column; align-items: center; background: rgba(var(--hint-cap-rgb), .72); border-radius: var(--radius-lg); padding: 32rpx 36rpx; }
 .hint-title { font-size: var(--fs-xl); color: #FFFFFF; font-weight: 500; text-align: center; }
 .hint-sub { font-size: var(--fs-md); color: #FFFFFF; margin-top: 16rpx; text-align: center; font-weight: 500; }
 .hint-sub2 { font-size: var(--fs-sm); color: rgba(255, 255, 255, .85); margin-top: 8rpx; text-align: center; }
-.hint-arrow {
-  width: 4rpx; height: 88rpx; margin-top: 24rpx;
-  background: rgba(255, 255, 255, .85); position: relative;
-}
-.hint-arrow::after {
-  content: ''; position: absolute; bottom: -4rpx; left: 50%; transform: translateX(-50%);
-  border-left: 18rpx solid transparent; border-right: 18rpx solid transparent;
-  border-top: 26rpx solid rgba(255, 255, 255, .85);
-}
+.hint-arrow { width: 4rpx; height: 88rpx; margin-top: 24rpx; background: rgba(255, 255, 255, .85); position: relative; }
+.hint-arrow::after { content: ''; position: absolute; bottom: -4rpx; left: 50%; transform: translateX(-50%); border-left: 18rpx solid transparent; border-right: 18rpx solid transparent; border-top: 26rpx solid rgba(255, 255, 255, .85); }
 
 /* ============ 草稿找回（沿用定稿）============ */
-.draft-bar {
-  position: absolute; left: 24rpx; right: 24rpx; z-index: 21;
-  display: flex; align-items: center; justify-content: space-between; gap: 16rpx;
-  background: #FFF6E5; border: 2rpx solid #E8C77A;
-  border-radius: var(--radius-lg); padding: 20rpx 16rpx 20rpx 28rpx;
-}
+.draft-bar { position: absolute; left: 24rpx; right: 24rpx; z-index: 21; display: flex; align-items: center; justify-content: space-between; gap: 16rpx; background: #FFF6E5; border: 2rpx solid #E8C77A; border-radius: var(--radius-lg); padding: 20rpx 16rpx 20rpx 28rpx; }
 .draft-text { color: #7A5410; font-size: var(--fs-sm); font-weight: 500; }
-.draft-btn {
-  min-width: 180rpx; min-height: 88rpx;
-  display: flex; align-items: center; justify-content: center;
-  background: #96650F; color: #fff; border-radius: 44rpx;
-  font-size: var(--fs-sm); font-weight: 500;
-}
+.draft-btn { min-width: 180rpx; min-height: 88rpx; display: flex; align-items: center; justify-content: center; background: #96650F; color: #fff; border-radius: 44rpx; font-size: var(--fs-sm); font-weight: 500; }
 .draft-btn.btn-hover { background: #7A5009; }
 
 /* ============ 底部操作区（沿用定稿）============ */
-.dock {
-  position: absolute; left: 0; right: 0; bottom: 0; z-index: 20;
-  display: flex; flex-direction: column; gap: 20rpx;
-  padding: 20rpx 32rpx 16rpx;
-}
+.dock { position: absolute; left: 0; right: 0; bottom: 0; z-index: 20; display: flex; flex-direction: column; gap: 20rpx; padding: 20rpx 32rpx 16rpx; }
 .dock-row { display: flex; justify-content: center; gap: 24rpx; }
-.dock-pill {
-  display: flex; align-items: center; gap: 12rpx;
-  min-height: 88rpx; padding: 0 40rpx;
-  background: rgba(255,255,255,0.95); border-radius: 44rpx;
-  color: var(--c-primary); font-size: var(--fs-sm); font-weight: 500;
-  box-shadow: 0 4rpx 16rpx rgba(36,100,143,0.14);
-}
+.dock-pill { display: flex; align-items: center; gap: 12rpx; min-height: 88rpx; padding: 0 40rpx; background: rgba(255,255,255,0.95); border-radius: 44rpx; color: var(--c-primary); font-size: var(--fs-sm); font-weight: 500; box-shadow: 0 4rpx 16rpx rgba(36,100,143,0.14); }
 .dock-pill.btn-hover { background: var(--c-primary-soft); transform: scale(0.97); }
 .dock-icon { width: 48rpx; height: 48rpx; }
-.record-btn {
-  display: flex; align-items: center; gap: 24rpx;
-  min-height: 132rpx; padding: 0 36rpx;
-  background: var(--c-primary); border-radius: 66rpx;
-  box-shadow: 0 8rpx 28rpx rgba(36,100,143,0.32);
-}
+.record-btn { display: flex; align-items: center; gap: 24rpx; min-height: 132rpx; padding: 0 36rpx; background: var(--c-primary); border-radius: 66rpx; box-shadow: 0 8rpx 28rpx rgba(36,100,143,0.32); }
 .record-btn.record-hover { background: var(--c-primary-deep); transform: scale(0.98); }
 .record-whale { width: 84rpx; height: 84rpx; flex-shrink: 0; }
 .record-label { display: flex; flex-direction: column; gap: 2rpx; }
@@ -177,11 +79,7 @@
 .record-sub { color: #CFE3F2; font-size: var(--fs-xs); }
 
 /* ============ 录音中（沿用定稿）============ */
-.record-mask {
-  position: absolute; left: 0; right: 0; top: 0; bottom: 0; z-index: 30;
-  display: flex; flex-direction: column; justify-content: flex-end;
-  background: rgba(15,58,92,0.62);
-}
+.record-mask { position: absolute; left: 0; right: 0; top: 0; bottom: 0; z-index: 30; display: flex; flex-direction: column; justify-content: flex-end; background: rgba(15,58,92,0.62); }
 .mask-through { pointer-events: none; }
 .mask-through .rec-actions, .mask-through .rec-hold-hint { pointer-events: auto; }
 .mask-block { pointer-events: auto; }
@@ -201,33 +99,14 @@
 .countdown-num { color: #FFD9D5; font-size: 76rpx; font-weight: 600; line-height: 1; }
 .countdown-label { color: #FFD9D5; font-size: var(--fs-sm); font-weight: 500; }
 .rec-actions { display: flex; gap: 24rpx; padding: 0 32rpx 16rpx; pointer-events: auto; }
-.rec-hold-hint {
-  display: flex; align-items: center; justify-content: center;
-  min-height: 112rpx; margin: 0 32rpx 16rpx;
-  background: rgba(255,255,255,0.16); border: 2rpx solid rgba(255,255,255,0.42);
-  border-radius: 56rpx; color: #fff; font-size: var(--fs-lg); font-weight: 500;
-}
-.rec-cancel {
-  flex: 0 0 200rpx; min-height: 112rpx;
-  display: flex; align-items: center; justify-content: center;
-  background: rgba(255,255,255,0.18); border: 2rpx solid rgba(255,255,255,0.5);
-  border-radius: 56rpx; color: #fff; font-size: var(--fs-md);
-}
+.rec-hold-hint { display: flex; align-items: center; justify-content: center; min-height: 112rpx; margin: 0 32rpx 16rpx; background: rgba(255,255,255,0.16); border: 2rpx solid rgba(255,255,255,0.42); border-radius: 56rpx; color: #fff; font-size: var(--fs-lg); font-weight: 500; }
+.rec-cancel { flex: 0 0 200rpx; min-height: 112rpx; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.18); border: 2rpx solid rgba(255,255,255,0.5); border-radius: 56rpx; color: #fff; font-size: var(--fs-md); }
 .rec-cancel.btn-hover { background: rgba(255,255,255,0.3); }
-.rec-done {
-  flex: 1; min-height: 112rpx;
-  display: flex; align-items: center; justify-content: center;
-  background: #fff; border-radius: 56rpx;
-  color: var(--c-primary); font-size: var(--fs-xl); font-weight: 500;
-}
+.rec-done { flex: 1; min-height: 112rpx; display: flex; align-items: center; justify-content: center; background: #fff; border-radius: 56rpx; color: var(--c-primary); font-size: var(--fs-xl); font-weight: 500; }
 .rec-done.btn-hover { background: #EAF2F8; transform: scale(0.98); }
 
 /* ============ 分析中（沿用定稿）============ */
-.analyze-mask {
-  position: absolute; left: 0; right: 0; top: 0; bottom: 0; z-index: 30;
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  background: rgba(232,244,251,0.94);
-}
+.analyze-mask { position: absolute; left: 0; right: 0; top: 0; bottom: 0; z-index: 30; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(232,244,251,0.94); }
 .loading-whale { width: 240rpx; height: 160rpx; margin-bottom: 32rpx; }
 .analyze-text { color: var(--c-text); font-size: var(--fs-lg); font-weight: 500; }
 .analyze-sub { color: var(--c-text-2); font-size: var(--fs-sm); margin-top: 12rpx; }
@@ -266,10 +145,9 @@
 .photo-add-text { color: var(--c-primary); font-size: var(--fs-xs); }
 .preview-actions { display: flex; gap: 24rpx; margin-top: 48rpx; }
 
-/* ============ 减少动态效果：全停，静态显示首帧鲸鱼 ============ */
+/* ============ 减少动态效果：全停，静态显示 ============ */
 @media (prefers-reduced-motion: reduce) {
-  .caustic, .cruise, .flip, .wf, .ripples, .bird, .bird-f, .berg, .rec-dot { animation: none !important; }
-  .wf0 { opacity: 1; }
-  .b0 { opacity: 1; }
-  .record-btn.record-hover, .dock-pill.btn-hover, .rec-done.btn-hover, .berg-hover { transform: none; }
+  .caustic, .cruise, .whalebox, .berg, .rec-dot { animation: none !important; }
+  .bg-art { transition: none; }
+  .record-btn.record-hover, .dock-pill.btn-hover, .rec-done.btn-hover { transform: none; }
 }

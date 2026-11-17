@@ -13,23 +13,24 @@ const api = require('../../utils/api')
 const draft = require('../../utils/draft')
 
 // 海面冰山布点（左%、顶%、宽 px、所在深度层）——确定性布局，新回忆循环落位
+// 空灵俯视：冰山小而分散（远小淡、近大），2-3 段回忆时大片留白，多了也不挤
 const BERG_SLOTS = [
-  { l: 9, t: 14, w: 46, layer: 'far' },
-  { l: 66, t: 10, w: 44, layer: 'far' },
-  { l: 41, t: 21, w: 30, layer: 'far' },
-  { l: 22, t: 7, w: 34, layer: 'far' },
-  { l: 82, t: 18, w: 36, layer: 'far' },
-  { l: 0, t: 40, w: 92, layer: 'mid' },
-  { l: 62, t: 36, w: 84, layer: 'mid' },
-  { l: 33, t: 53, w: 58, layer: 'mid' },
-  { l: 48, t: 46, w: 66, layer: 'mid' },
-  { l: 16, t: 48, w: 60, layer: 'mid' },
-  { l: 78, t: 48, w: 70, layer: 'mid' },
-  { l: 55, t: 63, w: 120, layer: 'near' },
-  { l: -6, t: 69, w: 110, layer: 'near' },
-  { l: 28, t: 67, w: 100, layer: 'near' },
-  { l: 72, t: 71, w: 112, layer: 'near' },
-  { l: 40, t: 72, w: 96, layer: 'near' }
+  { l: 12, t: 11, w: 26, layer: 'far' },
+  { l: 70, t: 8, w: 22, layer: 'far' },
+  { l: 45, t: 19, w: 24, layer: 'far' },
+  { l: 24, t: 15, w: 20, layer: 'far' },
+  { l: 84, t: 20, w: 28, layer: 'far' },
+  { l: 7, t: 37, w: 40, layer: 'mid' },
+  { l: 79, t: 32, w: 34, layer: 'mid' },
+  { l: 30, t: 44, w: 38, layer: 'mid' },
+  { l: 55, t: 38, w: 30, layer: 'mid' },
+  { l: 16, t: 52, w: 44, layer: 'mid' },
+  { l: 68, t: 50, w: 36, layer: 'mid' },
+  { l: 29, t: 60, w: 52, layer: 'near' },
+  { l: 63, t: 63, w: 46, layer: 'near' },
+  { l: 14, t: 70, w: 50, layer: 'near' },
+  { l: 80, t: 68, w: 44, layer: 'near' },
+  { l: 46, t: 72, w: 48, layer: 'near' }
 ]
 const SIZE_SCALE = { small: 0.8, medium: 1, large: 1.15 }
 const BERG_DROP = 'bergdrop 0.95s cubic-bezier(0.22,1.2,0.36,1) both'
@@ -37,8 +38,8 @@ const BERG_DROP = 'bergdrop 0.95s cubic-bezier(0.22,1.2,0.36,1) both'
 Page({
   data: {
     capsuleBottom: 88,   // 微信胶囊下沿，顶部元素据此避让
-    // 矢量场景
-    whaleFrames: [0, 1, 2, 3, 4, 5, 6, 7],
+    // 插画场景
+    bgLoaded: false,
     farBergs: [],
     midBergs: [],
     nearBergs: [],
@@ -183,14 +184,13 @@ Page({
     visible.forEach((b, idx) => {
       const s = BERG_SLOTS[idx]
       const seed = hash(b._id)
-      const type = ['a', 'b', 'c'][seed % 3]
       const width = Math.round(s.w * (SIZE_SCALE[b.size] || 1))
       const swayDur = (8 + (seed % 40) / 10).toFixed(1)
       const swayDelay = (-(seed % 80) / 10).toFixed(1)
       const swayAnim = `sway ${swayDur}s ease-in-out ${swayDelay}s infinite`
       const isNew = b._id === this.lastPublishedId
       const berg = {
-        id: b._id, type,
+        id: b._id,
         left: s.l, top: s.t, width,
         opacity: s.layer === 'far' ? 0.82 : 1,
         swayAnim,
@@ -213,6 +213,11 @@ Page({
   },
 
   // ==================== 触摸交互（WXML 事件） ====================
+  // 插画背景加载完成 → 淡入（弱网时渐变兜底已先显示，不白屏）
+  onBgLoad () {
+    if (!this.data.bgLoaded) this.setData({ bgLoaded: true })
+  },
+
   // 手指一落下就定住杭航：移动目标变静止目标，好按多了
   onSceneTouchStart () {
     if (!this.data.whalePaused) this.setData({ whalePaused: true })

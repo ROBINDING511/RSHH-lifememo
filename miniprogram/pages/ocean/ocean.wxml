@@ -1,37 +1,34 @@
-<!--pages/ocean/ocean.wxml — 人生海洋主界面（鸟瞰矢量海面 P0）
-    渲染：独立 SVG 资源 + <image> + WXSS 关键帧 + z-index 深度分层（零位图、零 Canvas）。
-    分层：z3 远冰 → z5 鲸鱼 → z7 中冰 → z9 近冰 → z11/12 水纹 → z13 飞鸟 → z20 UI。
-    鲸鱼从冰山「后面」穿过；只动画 transform/opacity。
+<!--pages/ocean/ocean.wxml — 人生海洋主界面（空灵俯视插画海面）
+    渲染：一张轻量插画空海背景 + 复用的顶视冰山 sprite + 顶视小鲸鱼，CSS transform 动画。
+    冰山=回忆，随波摇曳；鲸鱼杭航在冰山间游弋（自然微动）。弱网先出渐变兜底再淡入插画。
+    分层：z3 远冰 → z5 鲸鱼 → z7 中冰 → z9 近冰 → z20 UI。
     适老化：录音主入口=底部大按钮（点一下开始/说完了再点）；长按鲸鱼=副入口；
-    关键信息用原生 view/text（随微信字体放大、读屏可达）；空态提示压深色胶囊白字。
+    关键信息原生 view/text；空态提示深色胶囊白字；冰山视觉虽小但热区 ≥88rpx。
 -->
 <view class="page" bindtouchend="onSceneTouchEnd">
 
-  <!-- ============ 矢量海面场景 ============ -->
+  <!-- ============ 插画海面场景 ============ -->
   <view class="scene" bindtouchstart="onSceneTouchStart">
-    <view class="bg"></view>
+    <view class="bg-gradient"></view>
+    <image class="bg-art {{bgLoaded ? 'show' : ''}}" src="/images/ocean/sea_bg.jpg"
+      mode="aspectFill" bindload="onBgLoad" />
     <view class="caustic c1"></view>
     <view class="caustic c2"></view>
-    <view class="caustic c3"></view>
 
-    <!-- z3 远冰（小、淡） -->
+    <!-- z3 远冰（小淡） -->
     <view class="layer z-far">
       <view wx:for="{{farBergs}}" wx:key="id" class="berg"
         style="left:{{item.left}}%;top:{{item.top}}%;width:{{item.width}}px;opacity:{{item.opacity}};animation:{{item.anim}}"
         data-id="{{item.id}}" bindtap="onBergTap" hover-class="berg-hover" hover-stay-time="80">
-        <image class="berg-img" src="/images/ocean/berg-{{item.type}}.svg" mode="widthFix" />
+        <image class="berg-img" src="/images/ocean/berg.png" mode="widthFix" />
       </view>
     </view>
 
-    <!-- z5 鲸鱼杭航：巡游 + 转身 + 8 帧行波；长按说话副入口 -->
+    <!-- z5 鲸鱼杭航：在冰山间游弋 + 自然微动；长按说话副入口 -->
     <view class="layer z-whale">
       <view class="cruise {{whalePaused || recording ? 'paused' : ''}}">
-        <view class="flip">
-          <view class="whalebox" bindlongpress="onWhaleLongPress" hover-class="whale-hover" hover-stay-time="80">
-            <image class="wshadow" src="/images/ocean/whale-shadow.svg" mode="aspectFit" />
-            <image wx:for="{{whaleFrames}}" wx:key="*this" class="wf wf{{item}}"
-              src="/images/ocean/whale-f{{item}}.svg" mode="aspectFit" />
-          </view>
+        <view class="whalebox" bindlongpress="onWhaleLongPress" hover-class="whale-hover" hover-stay-time="80">
+          <image class="whale-img" src="/images/ocean/whale.png" mode="aspectFit" />
         </view>
       </view>
     </view>
@@ -41,7 +38,7 @@
       <view wx:for="{{midBergs}}" wx:key="id" class="berg"
         style="left:{{item.left}}%;top:{{item.top}}%;width:{{item.width}}px;opacity:{{item.opacity}};animation:{{item.anim}}"
         data-id="{{item.id}}" bindtap="onBergTap" hover-class="berg-hover" hover-stay-time="80">
-        <image class="berg-img" src="/images/ocean/berg-{{item.type}}.svg" mode="widthFix" />
+        <image class="berg-img" src="/images/ocean/berg.png" mode="widthFix" />
       </view>
     </view>
 
@@ -50,18 +47,8 @@
       <view wx:for="{{nearBergs}}" wx:key="id" class="berg"
         style="left:{{item.left}}%;top:{{item.top}}%;width:{{item.width}}px;opacity:{{item.opacity}};animation:{{item.anim}}"
         data-id="{{item.id}}" bindtap="onBergTap" hover-class="berg-hover" hover-stay-time="80">
-        <image class="berg-img" src="/images/ocean/berg-{{item.type}}.svg" mode="widthFix" />
+        <image class="berg-img" src="/images/ocean/berg.png" mode="widthFix" />
       </view>
-    </view>
-
-    <!-- z11/12 水纹（无缝漂移） -->
-    <image class="ripples r1 z-rip1" src="/images/ocean/ripple-1.svg" mode="scaleToFill" />
-    <image class="ripples r2 z-rip2" src="/images/ocean/ripple-2.svg" mode="scaleToFill" />
-
-    <!-- z13 飞鸟（两帧扇翅 + 掠过） -->
-    <view class="bird z-bird">
-      <image class="bird-f b0" src="/images/ocean/bird-0.svg" mode="aspectFit" />
-      <image class="bird-f b1" src="/images/ocean/bird-1.svg" mode="aspectFit" />
     </view>
   </view>
 
