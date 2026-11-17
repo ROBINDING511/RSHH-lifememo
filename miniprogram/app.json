@@ -3,7 +3,8 @@
     "pages/ocean/ocean",
     "pages/iceberg/iceberg",
     "pages/timeline/timeline",
-    "pages/recycle/recycle"
+    "pages/recycle/recycle",
+    "pages/stages/stages"
   ],
   "subpackages": [
     {

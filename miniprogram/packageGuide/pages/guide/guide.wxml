@@ -5,7 +5,20 @@
 <view class="page wash-bg" style="padding-top:{{safeTop}}px">
   <view class="g-step">第 {{step + 1}} 步 / 共 {{steps.length}} 步</view>
 
-  <image class="g-img" src="{{steps[step].img}}" mode="aspectFit" />
+  <image wx:if="{{!steps[step].type}}" class="g-img" src="{{steps[step].img}}" mode="aspectFit" />
+  <view wx:else class="g-profile">
+    <view class="mode-tabs">
+      <view class="tab {{profileMode==='birthday'?'on':''}}" hover-class="btn-hover" hover-stay-time="80" bindtap="setMode" data-m="birthday">生日</view>
+      <view class="tab {{profileMode==='age'?'on':''}}" hover-class="btn-hover" hover-stay-time="80" bindtap="setMode" data-m="age">年龄</view>
+      <view class="tab {{profileMode==='year'?'on':''}}" hover-class="btn-hover" hover-stay-time="80" bindtap="setMode" data-m="year">出生年份</view>
+    </view>
+    <picker wx:if="{{profileMode==='birthday'}}" mode="date" value="{{profileBirthday||'1960-01-01'}}" start="1900-01-01" end="2020-12-31" bindchange="onBirthdayPick">
+      <view class="prof-input">{{profileBirthday||'点这里选生日'}}</view>
+    </picker>
+    <input wx:elif="{{profileMode==='age'}}" class="prof-input" type="number" value="{{profileAge}}" placeholder="比如 68" bindinput="onAgeInput" />
+    <input wx:else class="prof-input" type="number" value="{{profileYear}}" placeholder="比如 1958" bindinput="onYearInput" />
+    <text class="g-privacy">只存在你自己手机上，不会告诉别人；也可以跳过</text>
+  </view>
 
   <view class="g-text">
     <text class="g-title">{{steps[step].title}}</text>
@@ -14,7 +27,7 @@
 
   <view class="g-dots" aria-hidden="true">
     <view class="dot {{step === index ? 'dot-on' : (step > index ? 'dot-done' : '')}}"
-      wx:for="{{steps}}" wx:key="img"></view>
+      wx:for="{{steps}}" wx:key="title"></view>
   </view>
 
   <view class="g-btns safe-bottom">

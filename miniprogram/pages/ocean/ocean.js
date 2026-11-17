@@ -42,14 +42,12 @@ Page({
     // 插画场景
     bgLoaded: false,
     bergs: [],
-    stages: life.STAGES,
+    stages: life.getStages(),
     worldWidth: 0,
     stageWidth: 0,
     tintGradient: '',
     scrollLeft: 0,
-    birthday: '',
     birthYear: null,
-    showBirthday: false,
     whalePaused: false,
     // 录音（微信式按住说话 + 流式转写）
     recording: false,
@@ -96,10 +94,9 @@ Page({
       return
     }
     this.setupWorld()
-    const birthday = life.getBirthday()
     this.setData({
-      birthday, birthYear: life.getBirthYear(),
-      showBirthday: !birthday,           // 首次先问生日，用于年份→人生阶段
+      birthYear: life.getBirthYear(),
+      stages: life.getStages(),
       drafts: draft.list(), whalePaused: false
     })
     this.refreshData()
@@ -112,23 +109,15 @@ Page({
   // 整片海：世界宽 = 阶段数 × 屏宽；阶段色连续渐变（滚动时海色平滑过渡）
   setupWorld () {
     const w = (wx.getWindowInfo ? wx.getWindowInfo().windowWidth : 375)
-    const n = life.STAGES.length
-    const tint = 'linear-gradient(90deg,' + life.STAGES.map((s, i) => `${s.color} ${(i / (n - 1) * 100).toFixed(1)}%`).join(',') + ')'
+    const n = life.getStages().length
+    const tint = 'linear-gradient(90deg,' + life.getStages().map((s, i) => `${s.color} ${(i / (n - 1) * 100).toFixed(1)}%`).join(',') + ')'
     this.setData({ stageWidth: w, worldWidth: w * n, tintGradient: tint })
   },
 
-  // 生日选择 / 确认 / 跳过
-  onBirthdayPick (e) {
-    const v = e.detail.value
-    life.setBirthday(v)
-    this.setData({ birthday: v, birthYear: life.getBirthYear() })
+  // 点鲸鱼 = 打开人生阶段规划（拖拽 / 语音自定义）
+  onWhaleTap () {
+    wx.navigateTo({ url: '/pages/stages/stages' })
   },
-  confirmBirthday () {
-    if (!this.data.birthday) { wx.showToast({ title: '先选一下生日', icon: 'none' }); return }
-    this.setData({ showBirthday: false })
-    this.refreshData()
-  },
-  skipBirthday () { this.setData({ showBirthday: false }) },
 
   onHide () {
     // 切后台/来电：正在录音就先落地成草稿，回来能找回
@@ -229,9 +218,9 @@ Page({
         const yr = parseInt(b.memoryTime, 10)
         stage = (isFinite(yr) && this.data.birthYear)
           ? life.stageOfYear(yr, this.data.birthYear)
-          : life.STAGES[seed % life.STAGES.length]
+          : life.getStages()[seed % life.getStages().length]
       }
-      const si = life.STAGES.indexOf(stage)
+      const si = life.getStages().indexOf(stage)
       const layer = b.size === 'large' ? 'near' : b.size === 'small' ? 'far' : 'mid'
       const band = layer === 'far' ? { y0: 10, span: 14, w: 25 }
         : layer === 'mid' ? { y0: 34, span: 22, w: 41 }
@@ -482,7 +471,7 @@ Page({
       preview: {
         wavPath, text: text || '', rawText: text || '', audioOnly: !hasText && !!wavPath,
         timeOptions: ['童年', '上学时', '工作时', '结婚后', '近些年', '说不清了'], timeIndex: 5,
-        zoneOptions: life.STAGES.map((s) => s.key), zoneIndex: life.STAGES.length - 1,
+        zoneOptions: life.getStages().map((s) => s.key), zoneIndex: life.getStages().length - 1,
         photos: [], previewVoicePlaying: false
       }
     })
@@ -514,13 +503,13 @@ Page({
     const upd = { 'preview.rawText': finalText, 'preview.audioOnly': !finalText && !!wavPath }
     if (finalText) upd['preview.text'] = (r && r.title) ? `${r.title}\n${finalText}` : finalText
     // 海 = 人生阶段（整片连续海）；"当我14岁" → 出生年+14-1 → 自动归阶段
-    upd['preview.zoneOptions'] = life.STAGES.map((s) => s.key)
+    upd['preview.zoneOptions'] = life.getStages().map((s) => s.key)
     const age = life.parseAge(finalText)
     if (age != null && this.data.birthYear) {
       const yr = life.eventYear(this.data.birthYear, age)
       upd['preview.timeOptions'] = [`${yr}年（${age}岁）`, '说不清了']
       upd['preview.timeIndex'] = 0
-      upd['preview.zoneIndex'] = life.STAGES.indexOf(life.stageOfAge(age))
+      upd['preview.zoneIndex'] = life.getStages().indexOf(life.stageOfAge(age))
       upd['preview._autoYear'] = yr
     } else if (r && r.timeOptions && r.timeOptions.length) {
       upd['preview.timeOptions'] = r.timeOptions.slice(0, 6)
@@ -645,7 +634,7 @@ Page({
       await this.refreshData()
       // 滚到新冰山所在的人生阶段（整片海连续滚动）
       const st = life.stageByKey(p.zoneOptions[p.zoneIndex])
-      if (st) this.setData({ scrollLeft: life.STAGES.indexOf(st) * (this.data.stageWidth || 375) })
+      if (st) this.setData({ scrollLeft: life.getStages().indexOf(st) * (this.data.stageWidth || 375) })
       // 新冰山播完落下动画后切回常态摇曳
       if (this.lastPublishedId) {
         const pid = this.lastPublishedId

@@ -33,24 +33,9 @@
     <!-- 鲸鱼杭航：屏幕层游弋（始终可见）+ 自然微动；长按说话副入口 -->
     <view class="whale-layer">
       <view class="cruise {{whalePaused || recording ? 'paused' : ''}}">
-        <view class="whalebox" bindlongpress="onWhaleLongPress" hover-class="whale-hover" hover-stay-time="80">
+        <view class="whalebox" bindtap="onWhaleTap" bindlongpress="onWhaleLongPress" hover-class="whale-hover" hover-stay-time="80">
           <image class="whale-img" src="/images/ocean/whale.png" mode="aspectFit" />
         </view>
-      </view>
-    </view>
-  </view>
-
-  <!-- ============ 首次：先问生日（年份→人生阶段） ============ -->
-  <view class="bd-mask" wx:if="{{showBirthday}}">
-    <view class="bd-card">
-      <text class="bd-title">先告诉我你的生日</text>
-      <text class="bd-sub">这样你说"当我14岁"，我就知道是哪一年、该漂在哪片海</text>
-      <picker mode="date" value="{{birthday || '1960-01-01'}}" start="1900-01-01" end="2020-12-31" bindchange="onBirthdayPick">
-        <view class="bd-picker">{{birthday || '点这里选生日'}}</view>
-      </picker>
-      <view class="bd-btns">
-        <view class="bd-skip" hover-class="btn-hover" hover-stay-time="80" bindtap="skipBirthday">先不说</view>
-        <view class="bd-ok" hover-class="btn-hover" hover-stay-time="80" bindtap="confirmBirthday">记好了</view>
       </view>
     </view>
   </view>
