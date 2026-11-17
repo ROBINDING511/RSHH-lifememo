@@ -399,8 +399,8 @@ Page({
       content: '点"先存下来"，刚才说的话会放进草稿，回头还能找回来；点"继续说"就接着录。',
       confirmText: '先存下来',
       cancelText: '继续说',
-      confirmColor: '#24648F',
-      cancelColor: '#C0392B',
+      confirmColor: '#1F6478',
+      cancelColor: '#B3402F',
       success: (r) => {
         if (r.confirm) this.saveDraftAndStop()
       }
@@ -421,7 +421,7 @@ Page({
       content: '说话要用到麦克风。点"去设置"，把「人生海海」的麦克风打开，回来就能说了。',
       confirmText: '去设置',
       cancelText: '先不了',
-      confirmColor: '#24648F',
+      confirmColor: '#1F6478',
       success: (r) => { if (r.confirm) wx.openSetting() }
     })
   },
@@ -542,8 +542,8 @@ Page({
       content: '删了就不能找回来了。',
       confirmText: '删掉',
       cancelText: '留着',
-      confirmColor: '#C0392B',
-      cancelColor: '#24648F',
+      confirmColor: '#B3402F',
+      cancelColor: '#1F6478',
       success: (r) => {
         if (!r.confirm) return
         const photos = this.data.preview.photos.slice()
@@ -596,12 +596,12 @@ Page({
         content: '可能是网络不太好。您说的这段已经帮您存下来了，等网络好了点"找回来"就能接着存。',
         showCancel: false,
         confirmText: '知道了',
-        confirmColor: '#24648F'
+        confirmColor: '#1F6478'
       })
     }
   },
 
-  // 不要了：二次确认 + 给"存下来"的台阶
+  // 不要了：二次确认，按钮与文案一致——"存起来"留退路 / "丢掉"真删除
   discardPreview () {
     const p = this.data.preview
     if (!p) return
@@ -610,14 +610,19 @@ Page({
       title: '这段回忆就不要了吗？',
       content: '点"存起来"会放进草稿，回头还能找回来；点"丢掉"才真的不要了。',
       confirmText: '存起来',
-      cancelText: '再想想',
-      confirmColor: '#24648F',
-      cancelColor: '#445A6A',
+      cancelText: '丢掉',
+      confirmColor: '#1F6478',
+      cancelColor: '#B3402F',
       success: (r) => {
-        if (!r.confirm) return
-        draft.save({ wavPath: p.wavPath, text: p.text, reason: '暂未发布' })
-        this.setData({ preview: null, drafts: draft.list() })
-        wx.showToast({ title: '存好了，随时能找回来', icon: 'none', duration: 2400 })
+        if (r.confirm) {
+          draft.save({ wavPath: p.wavPath, text: p.text, reason: '暂未发布' })
+          this.setData({ preview: null, drafts: draft.list() })
+          wx.showToast({ title: '存好了，随时能找回来', icon: 'none', duration: 2400 })
+        } else if (r.cancel) {
+          draft.forgetPath(p.wavPath)   // 真丢掉：回收本地录音
+          this.setData({ preview: null })
+          wx.showToast({ title: '丢掉了', icon: 'none', duration: 2000 })
+        }
       }
     })
   },

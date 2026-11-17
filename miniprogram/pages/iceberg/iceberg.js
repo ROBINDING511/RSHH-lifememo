@@ -149,8 +149,8 @@ Page({
         content: '它会飘到"云朵"里，不会真的消失。想它了，随时可以让它落回海面。',
         confirmText: '化成云',
         cancelText: '再看看',
-        confirmColor: '#C0392B',
-        cancelColor: '#24648F',
+        confirmColor: '#B3402F',
+        cancelColor: '#1F6478',
         success: resolve
       })
     })
