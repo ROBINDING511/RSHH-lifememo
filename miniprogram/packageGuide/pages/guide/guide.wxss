@@ -9,7 +9,7 @@
 .g-img { width: 460rpx; height: 460rpx; margin-top: 24rpx; flex-shrink: 0; }
 .g-text { display: flex; flex-direction: column; align-items: center; margin-top: 24rpx; min-height: 220rpx; }
 .g-title { font-size: var(--fs-xl); font-weight: 600; color: var(--c-text); text-align: center; }
-.g-desc { font-size: var(--fs-md); color: var(--c-text-2); margin-top: 16rpx; line-height: 1.8; text-align: center; }
+.g-desc { align-self: stretch; font-size: var(--fs-md); color: var(--c-text-2); margin-top: 16rpx; line-height: 1.85; text-align: left; letter-spacing: 0.5rpx; }
 
 .g-dots { display: flex; gap: 16rpx; margin-top: 20rpx; }
 .dot { width: 18rpx; height: 18rpx; border-radius: 50%; background: #C9D8D6; }
