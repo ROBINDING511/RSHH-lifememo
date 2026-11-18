@@ -148,11 +148,6 @@
         bindinput="onPreviewInput"
         placeholder="这一刻的想法…（有错字可以直接改）"></textarea>
 
-      <!-- 润色可回退：默认逐字，AI 小标题可选 -->
-      <view class="polish-row">
-        <view class="polish-toggle {{preview.showTitle ? 'on' : ''}}" hover-class="btn-hover" hover-stay-time="80" bindtap="toggleTitle">AI 小标题·{{preview.showTitle ? '开' : '关'}}</view>
-        <view class="polish-revert" hover-class="btn-hover" hover-stay-time="80" bindtap="revertRaw">还原逐字</view>
-      </view>
 
       <!-- 照片：微信式九宫格，裸 + 添加，无多余解释文案 -->
       <view class="photo-grid">

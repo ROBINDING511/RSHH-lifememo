@@ -19,7 +19,7 @@ function buildStages (list) {
   let from = 0
   return list.map((x, i) => {
     const to = Number(x.to)
-    const st = { key: x.name, name: x.name, from, to, dispTo: Math.min(to, 100), color: lerpColor(n === 1 ? 0 : i / (n - 1)) }
+    const st = { key: x.name, name: x.name, from, to, dispTo: Math.min(to, 100), flag: !!x.flag, color: lerpColor(n === 1 ? 0 : i / (n - 1)) }
     from = to + 1
     return st
   })
@@ -35,7 +35,7 @@ function getStages () {
 }
 function setStages (list) {
   // 保证 to 单调递增
-  const b = list.map((x) => ({ name: String(x.name).slice(0, 8), to: Number(x.to) }))
+  const b = list.map((x) => ({ name: String(x.name).slice(0, 8), to: Number(x.to), flag: !!x.flag }))
   for (let i = 1; i < b.length; i++) if (b[i].to <= b[i - 1].to) b[i].to = b[i - 1].to + 1
   try { wx.setStorageSync('lifeStages', b) } catch (e) {}
   return b
@@ -102,19 +102,20 @@ function parseStagesFromText (text) {
 
 // ---- 人生节点 == 海的开端（同一份清单的两种视图）----
 // 节点是转折点(点)，海是它开启的区间；加节点=多一片海，删节点=合并海。
+// 小旗只标"用户自己加的节点"，默认阶段边界不插旗（避免少年13/晚年60都挂旗）
 function getMilestones () {
-  return getStages().slice(1).map((s) => ({ id: s.key, name: s.name, age: s.from }))
+  return getStages().filter((s) => s.flag && s.from > 0).map((s) => ({ id: s.key, name: s.name, age: s.from }))
 }
 function setMilestones (m) { /* 节点即海边界，直接改海即可，此处保留空实现兼容 */ }
 function addMilestone (name, age) {
   const a = Number(age)
   const stages = getStages()
-  const list = stages.map((s) => ({ name: s.name, to: s.to }))
+  const list = stages.map((s) => ({ name: s.name, to: s.to, flag: s.flag }))
   const i = stages.findIndex((s) => a >= s.from && a <= s.to)
   if (i < 0) return getMilestones()
   const oldTo = list[i].to
   list[i].to = a - 1                      // 左半保留原名
-  list.splice(i + 1, 0, { name: String(name).slice(0, 8), to: oldTo })  // 新节点开启新海
+  list.splice(i + 1, 0, { name: String(name).slice(0, 8), to: oldTo, flag: true })  // 新节点开启新海+插旗
   setStages(list)
   return getMilestones()
 }
@@ -122,7 +123,7 @@ function removeMilestone (id) {
   const stages = getStages()
   const i = stages.findIndex((s) => s.key === id)
   if (i <= 0) return getMilestones()
-  const list = stages.map((s) => ({ name: s.name, to: s.to }))
+  const list = stages.map((s) => ({ name: s.name, to: s.to, flag: s.flag }))
   list[i - 1].to = list[i].to             // 合并进前一片海
   list.splice(i, 1)
   setStages(list)

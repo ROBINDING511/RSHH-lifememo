@@ -52,6 +52,7 @@ Page({
   onShow () {
     if (this.data.firstLaunch) {
       this.setData({ firstLaunch: false })
+      getApp().globalData.firstLaunch = false   // 清全局，避免编辑模式新开 ocean 再弹引导
       wx.navigateTo({ url: '/packageGuide/pages/guide/guide' })
       return
     }
@@ -554,7 +555,8 @@ Page({
     const stages = life.getStages()
     // 默认保留讲述者原话（逐字）；AI 小标题可选、可一键还原
     const upd = { 'preview.rawText': finalText, 'preview.audioOnly': !finalText && !!wavPath, 'preview.zoneOptions': stages.map((s) => s.key), 'preview._aiTitle': (r && r.title) || '', 'preview._four': (r && r.four) || '', 'preview.showTitle': false }
-    if (finalText) upd['preview.text'] = finalText
+    // AI 标题直接加在文字上方（不可关，但可在框内直接点改）；四字名字另存 _four
+    if (finalText) upd['preview.text'] = (r && r.title) ? `${r.title}\n${finalText}` : finalText
     // 年份("2017年")或岁数("14岁") → 换算年龄 → 自动归海；不再瞎归晚年
     const ym = finalText.match(/((?:19|20)\d{2})\s*年/)
     const age = life.parseAge(finalText)
@@ -590,19 +592,6 @@ Page({
     this.setData({ 'preview.text': v, 'preview.audioOnly': !v.trim() && !!(p && p.wavPath) })
   },
 
-  // AI 小标题开关 / 一键还原逐字（保住妈妈的原话）
-  toggleTitle () {
-    const p = this.data.preview
-    if (!p) return
-    const on = !p.showTitle
-    this.setData({ 'preview.showTitle': on, 'preview.text': on && p._aiTitle ? `${p._aiTitle}\n${p.rawText}` : p.rawText })
-  },
-  revertRaw () {
-    const p = this.data.preview
-    if (!p) return
-    this.setData({ 'preview.showTitle': false, 'preview.text': p.rawText })
-    ui.toast('已还原逐字')
-  },
 
   pickZoneSheet () {
     const p = this.data.preview

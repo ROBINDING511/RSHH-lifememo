@@ -14,7 +14,7 @@ Page({
   },
   onLoad () {
     const p = life.getProfile() || {}
-    this._draft = life.getStages().map((s) => ({ name: s.name, to: s.to }))
+    this._draft = life.getStages().map((s) => ({ name: s.name, to: s.to, flag: s.flag }))
     this.setData({
       stages: life.getStages(),
       profileMode: p.mode || 'year',
@@ -93,7 +93,7 @@ Page({
     const last = this._draft[this._draft.length - 1]
     const prev = this._draft[this._draft.length - 2]
     const mid = Math.round((prev.to + last.to) / 2)
-    this._draft.splice(this._draft.length - 1, 0, { name: '新海', to: Math.max(prev.to + 1, mid) })
+    this._draft.splice(this._draft.length - 1, 0, { name: '新海', to: Math.max(prev.to + 1, mid), flag: true })
     this.syncDraft()
   },
   removeSea (e) {
@@ -103,7 +103,7 @@ Page({
   },
   resetDefault () {
     life.resetStages()
-    this._draft = life.getStages().map((s) => ({ name: s.name, to: s.to }))
+    this._draft = life.getStages().map((s) => ({ name: s.name, to: s.to, flag: s.flag }))
     this.syncDraft()
     wx.showToast({ title: '恢复默认了', icon: 'none' })
   },
@@ -123,14 +123,14 @@ Page({
     if (!name) return wx.showToast({ title: '写个节点名字', icon: 'none' })
     if (!isFinite(age)) return wx.showToast({ title: '填几岁', icon: 'none' })
     const ms = life.addMilestone(name, age)   // 加节点 = 开启一片新海
-    this._draft = life.getStages().map((s) => ({ name: s.name, to: s.to }))
+    this._draft = life.getStages().map((s) => ({ name: s.name, to: s.to, flag: s.flag }))
     this.setData({ milestones: ms, msName: '', msAge: '' })
     this.syncDraft()
     wx.showToast({ title: '记下了，多了一片海', icon: 'none' })
   },
   removeMs (e) {
     const ms = life.removeMilestone(e.currentTarget.dataset.id)   // 删节点 = 合并海
-    this._draft = life.getStages().map((s) => ({ name: s.name, to: s.to }))
+    this._draft = life.getStages().map((s) => ({ name: s.name, to: s.to, flag: s.flag }))
     this.setData({ milestones: ms })
     this.syncDraft()
   },
@@ -186,7 +186,7 @@ Page({
         const list = life.parseStagesFromText(text)
         if (list) {
           life.setStages(list)
-          this._draft = life.getStages().map((s) => ({ name: s.name, to: s.to }))
+          this._draft = life.getStages().map((s) => ({ name: s.name, to: s.to, flag: s.flag }))
           this.syncDraft()
           this.setData({ voiceText: text })
           wx.showToast({ title: '按你说的设好了', icon: 'none', duration: 2200 })
