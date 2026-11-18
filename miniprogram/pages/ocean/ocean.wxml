@@ -12,8 +12,7 @@
     <view class="bg-gradient"></view>
     <image class="bg-art {{bgLoaded ? 'show' : ''}}" src="/images/ocean/sea_bg.jpg"
       mode="aspectFill" bindload="onBgLoad" />
-    <view class="caustic c1"></view>
-    <view class="caustic c2"></view>
+
 
     <!-- 整片海向四面八方扩展：2D 可拖世界，拖动如滚地球（海面纹理随世界滚过+各阶段海色晕染） -->
     <movable-area class="sea-area">
@@ -23,7 +22,7 @@
         style="width:{{worldWidth}}px;height:{{worldHeight}}px" x="{{movX}}" y="{{movY}}">
         <image class="sea-texture" src="/images/ocean/sea_bg.jpg" mode="scaleToFill"
           style="width:{{worldWidth+120}}px;height:{{worldHeight+120}}px" />
-        <view class="sea-glow"></view>
+
         <view class="sea-tint" style="background:{{tintGradient}}"></view>
         <text wx:for="{{stages}}" wx:key="key" class="stage-label"
           style="left:{{item.cx}}px;top:{{item.cy}}px">{{item.name}}之海</text>
@@ -89,7 +88,7 @@
   <!-- 右上角声音开关（录音时自动静音） -->
   <view class="sound-btn" wx:if="{{!preview}}" style="top: {{capsuleBottom + 16}}px;"
     hover-class="btn-hover" hover-stay-time="80" bindtap="toggleAmbient">
-    <text>{{ambientOn && !recording ? '🔊' : '🔇'}}</text>
+    <text>{{ambientOn && !recording ? '海浪 开' : '海浪 关'}}</text>
   </view>
 
   <!-- 杭航请妈妈试听克隆声音：像→固化；不像→继续克隆 -->

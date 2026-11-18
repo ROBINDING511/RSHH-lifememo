@@ -1,128 +1,121 @@
-/* app.wxss — 全局设计系统：温暖手绘水彩 · 空灵海面（适老化）
- *
- * 视觉语言：暖纸底 + 海青主色 + 纸白卡片 + 柔和圆角，呼应 ocean 的水彩海面/白冰山/小鲸鱼。
- * 配色按 WCAG 2.2 AA 核算：
- *   主色   #1F6478  白字  6.66:1
- *   正文   #33424E  纸白 10.08:1
- *   次要   #5A6B76  纸白  5.39:1 / 暖底 4.94:1
- *   危险   #B3402F  白字  5.69:1
- *   倒计时 #B3261E  白字  6.54:1
+/* app.wxss — 全局设计系统（unslop _redesign 分支）
+ * 方向：安静、温暖、不催促。世界=水彩纸与海。
+ * 铬件（导航/按钮/卡片/文字）全部安静纸面 + 单一墨青强调；
+ * 富色只留在唯一的内容时刻——ocean 的日落水彩海与鲸鱼。
+ * 暖中性阶（warm ramp）+ 发丝描边 + 中性微阴影；无 hue 渐变/无彩 glow/无 emoji。
+ * 适老化保留：正文≥34rpx、触控≥88rpx、字重 400/500。
+ * unslop by @heydamir (CC BY 4.0) 方法适配。
  */
 page {
-  /* ---- 色彩（水彩海面系）---- */
-  --c-primary: #1F6478;        /* 海青主色：按钮底、强调 */
-  --c-primary-deep: #17505F;   /* 按压态 */
-  --c-primary-soft: #E3EEEF;   /* 浅青底（chip、幽灵按钮） */
-  --c-bg: #F5F2EA;             /* 暖纸底 */
-  --c-card: #FDFCF9;           /* 纸白卡片 */
-  --c-soft: #F1EDE3;           /* 暖浅功能底 */
-  --c-sand: #E8DCC8;           /* 沙色点缀 */
-  --c-teal-wash: #E2EDEB;      /* 渐变末端淡海 */
+  /* ---- 暖中性阶（纸）---- */
+  --c-bg: #F7F4EE;             /* 页面底 */
+  --c-card: #FDFBF7;           /* 卡片 */
+  --c-soft: #EFE9DF;           /* raised：输入/次按钮/active */
+  --hairline: rgba(31, 27, 22, 0.08);  /* 发丝描边 = 主文字 8% */
 
-  --c-text: #33424E;           /* 暖墨正文/标题 */
-  --c-text-2: #5A6B76;         /* 暖灰次要 */
+  /* ---- 单一强调（海青，世界=水）---- */
+  --c-primary: #1F6478;        /* 白字 6.66:1 */
+  --c-primary-deep: #17505F;   /* 按压 */
+  --c-primary-soft: #E3EEEF;   /* 强调浅底（选中） */
   --c-on-primary: #FFFFFF;
 
-  --c-danger: #B3402F;         /* 暖珊瑚危险（化成云） */
+  /* ---- 文字三档 ---- */
+  --c-text: #1F1B16;           /* 主 */
+  --c-text-2: #5E554A;         /* 次 */
+  --c-muted: #7B7266;          /* 弱（仅 meta） */
+
+  /* ---- 语义（ toned ）---- */
+  --c-danger: #B3402F;
   --c-danger-soft: #F7E8E4;
   --c-countdown: #B3261E;
 
-  /* ---- 鸟瞰海面场景（ocean 用）---- */
-  --sea-0: #C9E7ED;
-  --sea-1: #ACD7DF;
-  --sea-2: #8CBFCC;
-  --sea-3: #6FA6B8;
-  --sea-4: #548EA4;
-  --sea-5: #417C95;
-  --sea-6: #387089;
+  /* ---- 兼容旧引用 ---- */
+  --c-sand: #E8DCC8;
+  --c-teal-wash: #E2EDEB;
   --sea-warm-rgb: 255, 243, 214;
   --sea-deep-rgb: 20, 56, 76;
   --caustic-rgb: 255, 249, 230;
   --hint-cap-rgb: 16, 48, 66;
   --ripple-rgb: 255, 255, 255;
   --c-bird: #26404F;
+  --sea-0: #C9E7ED; --sea-1: #ACD7DF; --sea-2: #8CBFCC; --sea-3: #6FA6B8;
+  --sea-4: #548EA4; --sea-5: #417C95; --sea-6: #387089;
 
-  /* ---- 字号：对齐微信/WeUI 阶梯（正文17px/次要15px/标题20px），保留适老下限30rpx ---- */
-  --fs-xs: 30rpx;   /* 辅助 15px（适老下限） */
-  --fs-sm: 30rpx;   /* 次要 15px */
-  --fs-md: 34rpx;   /* 正文 17px（WeUI 正文） */
-  --fs-lg: 36rpx;   /* 小标题 18px */
-  --fs-xl: 40rpx;   /* 页面标题 20px */
-  --fs-xxl: 48rpx;  /* 录音转写 24px（朗读级，保留放大） */
+  /* ---- 字号（适老阶梯）---- */
+  --fs-xs: 30rpx;
+  --fs-sm: 30rpx;
+  --fs-md: 34rpx;
+  --fs-lg: 36rpx;
+  --fs-xl: 40rpx;
+  --fs-xxl: 48rpx;
 
-  /* ---- 触控（≥88rpx ≈44px）---- */
+  /* ---- 触控 ---- */
   --tap-min: 88rpx;
   --tap-comfortable: 96rpx;
 
-  /* ---- 间距 ---- */
+  /* ---- 间距（8rpx=4px 网格）---- */
   --sp-1: 8rpx;
   --sp-2: 16rpx;
   --sp-3: 24rpx;
   --sp-4: 32rpx;
   --sp-5: 40rpx;
 
-  /* ---- 圆角（柔和手绘感）---- */
-  --radius-md: 24rpx;
-  --radius-lg: 36rpx;
-  --radius-xl: 52rpx;
+  /* ---- 圆角（控制10px/卡片12px/面板16px，非全 pill）---- */
+  --radius-md: 20rpx;
+  --radius-lg: 24rpx;
+  --radius-xl: 32rpx;
 
   background: var(--c-bg);
   font-family: -apple-system, 'PingFang SC', 'Helvetica Neue', sans-serif;
   font-size: var(--fs-md);
   color: var(--c-text);
   line-height: 1.8;
-  letter-spacing: 0.5rpx;
+  letter-spacing: 0;
 }
 
-/* 子页面共用：暖纸→淡海 柔和渐变底 + 顶部一点晨光 */
-.wash-bg {
-  background:
-    radial-gradient(120% 30% at 50% -6%, rgba(var(--sea-warm-rgb), .35) 0%, rgba(var(--sea-warm-rgb), 0) 60%),
-    linear-gradient(180deg, #F7F3EA 0%, #F0F4F1 50%, var(--c-teal-wash) 100%);
-}
+/* 子页面底：安静纸面（去掉彩色渐变 wash） */
+.wash-bg { background: var(--c-bg); }
 
-/* ============ 按钮 ============ */
+/* ============ 按钮：实心强调 / raised+发丝 / 语义软底 ============ */
 .btn-primary {
   display: flex; align-items: center; justify-content: center;
-  background: linear-gradient(160deg, #2E7C93 0%, #1F6478 55%, #1A5A6C 100%);  /* 同色系微渐变 */
+  background: var(--c-primary);
   color: var(--c-on-primary);
-  border-radius: 48rpx;
+  border-radius: var(--radius-md);
   font-size: var(--fs-lg);
-  height: 96rpx;   /* 48px，WeUI 主按钮 */
+  height: 96rpx;
   line-height: 1;
   font-weight: 500;
-  letter-spacing: 2rpx;
-  box-shadow: 0 6rpx 20rpx rgba(31, 100, 120, 0.22);
+  letter-spacing: 0;
 }
 .btn-primary::after { border: none; }
-.btn-primary.btn-hover { background: linear-gradient(160deg, #256A80 0%, #17505F 100%); transform: scale(0.97); }
+.btn-primary.btn-hover { background: var(--c-primary-deep); transform: scale(0.98); }
 
-/* 次按钮：白底 + 细描边 + 主色字（微信式 secondary，干净不糊） */
 .btn-ghost {
   display: flex; align-items: center; justify-content: center;
-  background: var(--c-card);
-  border: 2rpx solid rgba(31, 100, 120, 0.28);
-  color: var(--c-primary);
-  border-radius: 48rpx;
+  background: var(--c-soft);
+  border: 2rpx solid var(--hairline);
+  color: var(--c-text);
+  border-radius: var(--radius-md);
   font-size: var(--fs-md);
-  height: 88rpx;   /* 44px，WeUI 触控下限 */
+  height: 88rpx;
   line-height: 1;
   font-weight: 500;
   box-sizing: border-box;
 }
 .btn-ghost::after { border: none; }
-.btn-ghost.btn-hover { background: var(--c-primary-soft); transform: scale(0.97); }
+.btn-ghost.btn-hover { background: #E7E0D4; transform: scale(0.98); }
 
-.btn-danger-ghost { background: linear-gradient(160deg, #FBEFEC 0%, #F5DED8 100%); color: var(--c-danger); }
-.btn-danger-ghost.btn-hover { background: linear-gradient(160deg, #F6E3DE 0%, #EFD2CB 100%); transform: scale(0.97); }
+.btn-danger-ghost { background: var(--c-danger-soft); border-color: rgba(179, 64, 47, 0.16); color: var(--c-danger); }
+.btn-danger-ghost.btn-hover { background: #F2DED8; transform: scale(0.98); }
 
-/* ============ 纸卡片 ============ */
+/* ============ 纸卡片：发丝描边 + 中性微阴影 ============ */
 .card {
   background: var(--c-card);
   border-radius: var(--radius-lg);
-  padding: var(--sp-4);
-  border: 2rpx solid rgba(31, 100, 120, 0.06);
-  box-shadow: 0 8rpx 28rpx rgba(31, 100, 120, 0.10);
+  padding: var(--sp-5);
+  border: 2rpx solid var(--hairline);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
 .text-secondary { color: var(--c-text-2); font-size: var(--fs-sm); }

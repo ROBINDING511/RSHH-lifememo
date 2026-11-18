@@ -76,13 +76,13 @@ function layoutBergs (icebergs, regions, birthYear, newId) {
       const rad = (((seed >> 3) % 100) / 100) * r * 0.8
       dx = rad * Math.cos(a); dy = rad * Math.sin(a)
     }
-    const sway = `sway ${(8 + (seed % 40) / 10).toFixed(1)}s ease-in-out ${(-(seed % 80) / 10).toFixed(1)}s infinite`
+    // 冰山静止（去掉无意义循环摇曳）；仅新冰山落海有一次入场动画
     return {
       id: b._id, left: g.cx + dx - width / 2, top: g.cy + dy - width / 2, width,
       opacity: layer === 'far' ? 0.85 : 1,
       // 新冰山插红旗 5 分钟（长辈会回听），到期自动消失
       flag: !!(b.createdAt && Date.now() - b.createdAt < 5 * 60 * 1000),
-      swayAnim: sway, anim: b._id === newId ? BERG_DROP : sway, stage: st.key
+      swayAnim: '', anim: b._id === newId ? BERG_DROP : '', stage: st.key
     }
   })
 }
