@@ -49,6 +49,7 @@ exports.main = async (event) => {
   const prompt = `你是一个温柔的记忆整理助手。用户（一位母亲）刚说了一段自己的人生回忆。
 请分析这段话，严格按 JSON 输出，不要输出任何其他文字：
 {
+  "four": "恰好4个汉字的凝练标题，基于内容意境、有画面感，不照抄原文开头。例：第一次去肯德基→初尝快餐；操场奔跑→操场追风；母亲煮粥→母爱温粥；离家求学→初离家门；站台送别→站台送别",
   "title": "不超过12字的标题，概括这段回忆",
   "timeOptions": ["按内容推断的1-3个可能时间，格式如：1965年前后、1980年代、孩子上小学时，最后一项加上：说不清了"],
   "zoneOptions": ["1-3个人生阶段，从这些词里选或组合：童年、少年、恋爱、结婚、孩子出生、孩子长大、工作、退休、晚年、旅行、新的开始"]
@@ -63,7 +64,10 @@ ${text.slice(0, 1200)}`
     const m = content.match(/\{[\s\S]*\}/)
     if (m) content = m[0]
     const parsed = JSON.parse(content)
+    const fourRaw = String(parsed.four || '').replace(/[^一-鿿]/g, '')
+    const four = fourRaw.slice(0, 4) || String(parsed.title || '').replace(/[^一-鿿]/g, '').slice(0, 4)
     return {
+      four,
       title: parsed.title || '',
       timeOptions: (parsed.timeOptions || []).slice(0, 3),
       zoneOptions: (parsed.zoneOptions || []).slice(0, 3)
@@ -71,6 +75,6 @@ ${text.slice(0, 1200)}`
   } catch (e) {
     console.error('analyze failed', e)
     // 降级：不阻塞发布，给默认选项
-    return { title: '', timeOptions: ['说不清了'], zoneOptions: ['新的开始'] }
+    return { four: '', title: '', timeOptions: ['说不清了'], zoneOptions: ['新的开始'] }
   }
 }

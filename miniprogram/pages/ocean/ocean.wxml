@@ -86,10 +86,9 @@
   </view>
 
   <!-- 右上角声音开关（录音时自动静音） -->
-  <view class="sound-btn" wx:if="{{!preview}}" style="top: {{capsuleBottom + 16}}px;"
-    hover-class="btn-hover" hover-stay-time="80" bindtap="toggleAmbient">
-    <text>{{ambientOn && !recording ? '海浪 开' : '海浪 关'}}</text>
-  </view>
+  <view class="sound-btn {{ambientOn && !recording ? '' : 'muted'}}" wx:if="{{!preview}}"
+    style="top: {{capsuleBottom + 16}}px;"
+    hover-class="btn-hover" hover-stay-time="80" bindtap="toggleAmbient"></view>
 
   <!-- 杭航请妈妈试听克隆声音：像→固化；不像→继续克隆 -->
   <view class="voice-review" wx:if="{{voiceReview && !recording && !preview}}">

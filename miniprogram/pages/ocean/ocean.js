@@ -524,7 +524,7 @@ Page({
       preview: {
         wavPath, text: text || '', rawText: text || '', audioOnly: !hasText && !!wavPath,
         zoneOptions: stages.map((s) => s.key), zoneIndex: Math.floor((stages.length - 1) / 2),
-        timeLabel: '', _autoYear: null, showTitle: false, _aiTitle: '',
+        timeLabel: '', _autoYear: null, showTitle: false, _aiTitle: '', _four: '',
         editId: (opts && opts.editId) || null, extraWavs: [],
         photos: [], previewVoicePlaying: false
       }
@@ -553,7 +553,7 @@ Page({
     if (!p || p.wavPath !== wavPath) return
     const stages = life.getStages()
     // 默认保留讲述者原话（逐字）；AI 小标题可选、可一键还原
-    const upd = { 'preview.rawText': finalText, 'preview.audioOnly': !finalText && !!wavPath, 'preview.zoneOptions': stages.map((s) => s.key), 'preview._aiTitle': (r && r.title) || '', 'preview.showTitle': false }
+    const upd = { 'preview.rawText': finalText, 'preview.audioOnly': !finalText && !!wavPath, 'preview.zoneOptions': stages.map((s) => s.key), 'preview._aiTitle': (r && r.title) || '', 'preview._four': (r && r.four) || '', 'preview.showTitle': false }
     if (finalText) upd['preview.text'] = finalText
     // 年份("2017年")或岁数("14岁") → 换算年龄 → 自动归海；不再瞎归晚年
     const ym = finalText.match(/((?:19|20)\d{2})\s*年/)
@@ -673,7 +673,7 @@ Page({
         // 先落文字记录（秒回），音频/照片后台上传再挂上 → 不再久等"冰山生成中"
         created = await api.createIceberg({
           text: body, audioPath: null, photos: [], timeValue, zoneName,
-          title: (p.rawText && body.startsWith(p.rawText)) ? '' : body.split('\n')[0].slice(0, 12)
+          title: p._four || ((p.rawText && body.startsWith(p.rawText)) ? '' : body.split('\n')[0].slice(0, 12))
         })
       }
       this.lastPublishedId = created && created._id
