@@ -13,11 +13,6 @@ function icebergSizeOf (text) {
   return 'large'
 }
 
-const SIZE_FILE = {
-  small: '/images/watercolor/iceberg-小型.png',
-  medium: '/images/watercolor/iceberg-中型.png',
-  large: '/images/watercolor/iceberg-大型.png'
-}
 
 // ---------- 海域 ----------
 async function listZones () {
@@ -110,7 +105,7 @@ function getAsrConfig () {
 }
 
 module.exports = {
-  icebergSizeOf, SIZE_FILE,
+  icebergSizeOf,
   listZones, ensureZone,
   listIcebergs, listRecycled, createIceberg, updateIceberg, removeIceberg, restoreIceberg,
   analyzeMemory, getAsrConfig

@@ -1,0 +1,99 @@
+// utils/sea.js — 人生之海的纯布局逻辑（无 UI 副作用，便于单测与复用）
+// 世界 = 3×3 屏的 2D 海；人生阶段放射分布；冰山/节点落在所属海域。
+const life = require('./life')
+
+const WORLD_SCREENS = 3
+const SIZE_SCALE = { small: 0.8, medium: 1, large: 1.15 }
+const BASE_W = { far: 25, mid: 41, near: 56 }
+const BERG_DROP = 'bergdrop 0.95s cubic-bezier(0.22,1.2,0.36,1) both'
+
+function windowSize () {
+  const i = wx.getWindowInfo ? wx.getWindowInfo() : { windowWidth: 375, windowHeight: 667 }
+  return { W: i.windowWidth, H: i.windowHeight }
+}
+function clamp (v, a, b) { return Math.max(a, Math.min(b, v)) }
+function hash (s) { let h = 0; for (let i = 0; i < (s || '').length; i++) h = (h * 31 + s.charCodeAt(i)) % 1e9; return h }
+
+// 构建世界：区域中心/半径 + 海色晕染 + 初始居中偏移
+function buildWorld (stages) {
+  const { W, H } = windowSize()
+  const W2 = W * WORLD_SCREENS, H2 = H * WORLD_SCREENS
+  const cx0 = W2 / 2, cy0 = H2 / 2
+  const R = Math.min(W2, H2) * 0.30
+  const n = stages.length
+  const regions = stages.map((s, i) => {
+    if (i === 0) return Object.assign({}, s, { cx: cx0, cy: cy0, r: R * 0.62 })
+    const a = (-90 + (i - 1) * (360 / Math.max(1, n - 1))) * Math.PI / 180
+    return Object.assign({}, s, { cx: cx0 + R * Math.cos(a), cy: cy0 + R * Math.sin(a), r: R * 0.55 })
+  })
+  const tint = regions.map((g) => `radial-gradient(circle at ${g.cx}px ${g.cy}px, ${g.color} 0%, ${g.color}00 ${g.r}px)`).join(',')
+  return { regions, tint, worldWidth: W2, worldHeight: H2, movX: -(W2 - W) / 2, movY: -(H2 - H) / 2 }
+}
+
+// 视口居中到某海域
+function centerOn (g, world) {
+  const { W, H } = windowSize()
+  return {
+    movX: clamp(-(g.cx - W / 2), -(world.worldWidth - W), 0),
+    movY: clamp(-(g.cy - H / 2), -(world.worldHeight - H), 0)
+  }
+}
+
+// 触点落在哪片海（超出半径容差返回 null）
+function regionAt (regions, x, y) {
+  let best = null, bd = Infinity
+  for (const g of regions) {
+    const d = Math.hypot(x - g.cx, y - g.cy)
+    if (d < bd) { bd = d; best = g }
+  }
+  return best && bd <= (best.r || 120) * 1.25 ? best : null
+}
+
+// 回忆归属海域：优先 zoneName，其次年份+生日，最后哈希兜底
+function stageOfMemory (b, birthYear) {
+  const byName = life.stageByKey(b.zoneName)
+  if (byName) return byName
+  const yr = parseInt(b.memoryTime, 10)
+  if (isFinite(yr) && birthYear) return life.stageOfYear(yr, birthYear)
+  const all = life.getStages()
+  return all[hash(b._id) % all.length]
+}
+
+// 回忆 → 冰山（拖拽过的用保存偏移，否则极坐标散点）
+function layoutBergs (icebergs, regions, birthYear, newId) {
+  return (icebergs || []).map((b) => {
+    const seed = hash(b._id)
+    const st = stageOfMemory(b, birthYear)
+    const g = regions.find((x) => x.key === st.key) || regions[0]
+    const r = g.r || 120
+    const layer = b.size === 'large' ? 'near' : b.size === 'small' ? 'far' : 'mid'
+    const width = Math.round(BASE_W[layer] * (SIZE_SCALE[b.size] || 1))
+    let dx, dy
+    if (b.offX != null && b.offY != null) { dx = b.offX * r; dy = b.offY * r }
+    else {
+      const a = (seed % 360) * Math.PI / 180
+      const rad = (((seed >> 3) % 100) / 100) * r * 0.8
+      dx = rad * Math.cos(a); dy = rad * Math.sin(a)
+    }
+    const sway = `sway ${(8 + (seed % 40) / 10).toFixed(1)}s ease-in-out ${(-(seed % 80) / 10).toFixed(1)}s infinite`
+    return {
+      id: b._id, left: g.cx + dx - width / 2, top: g.cy + dy - width / 2, width,
+      opacity: layer === 'far' ? 0.85 : 1,
+      swayAnim: sway, anim: b._id === newId ? BERG_DROP : sway, stage: st.key
+    }
+  })
+}
+
+// 人生节点 → 海域内小旗
+function layoutMilestones (regions) {
+  return life.getMilestones().map((m) => {
+    const st = life.stageOfAge(m.age)
+    const g = regions.find((x) => x.key === st.key) || regions[0]
+    const r = g.r || 120
+    const span = Math.max(1, st.to - st.from + 1)
+    const f = clamp((m.age - st.from) / span, 0, 1)
+    return { id: m.id, name: m.name, age: m.age, left: g.cx + (f - 0.5) * r, top: g.cy - r * 0.6 }
+  })
+}
+
+module.exports = { buildWorld, centerOn, regionAt, stageOfMemory, layoutBergs, layoutMilestones, windowSize, hash }

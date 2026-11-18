@@ -75,7 +75,7 @@
   </view>
 
   <!-- ============ 底部操作区（拇指区） ============ -->
-  <view class="dock safe-bottom" wx:if="{{!analyzing && !preview}}">
+  <view class="dock safe-bottom" wx:if="{{!preview}}">
     <view class="dock-row" wx:if="{{!recording}}">
       <view class="dock-pill" hover-class="btn-hover" hover-stay-time="80" bindtap="goTimeline">
         <image src="/images/pixel/flag-blue.png" class="dock-icon" mode="aspectFit" />
@@ -115,13 +115,6 @@
       </view>
       <text class="live-hint">{{cancelArmed ? '松开即取消，话会存进草稿' : '上滑取消 · 松手发送'}}</text>
     </view>
-  </view>
-
-  <!-- ============ 分析中 ============ -->
-  <view class="analyze-mask" wx:if="{{analyzing}}">
-    <image class="loading-whale" src="/images/animation/whale-loading-1.png" mode="aspectFit" />
-    <text class="analyze-text">杭航正在听懂这段回忆…</text>
-    <text class="analyze-sub">大概要几秒钟，别急</text>
   </view>
 
   <!-- ============ 发布卡片 ============ -->
