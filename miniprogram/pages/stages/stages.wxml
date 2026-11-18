@@ -51,6 +51,12 @@
       </view>
 
       <view class="card">
+        <text class="prof-title">二级 · 怎么称呼你</text>
+        <input class="field" type="nickname" value="{{nickname}}" placeholder="点一下可填微信昵称，或自己写" bindinput="onNick" />
+        <view class="prof-save" hover-class="btn-hover" hover-stay-time="80" bindtap="saveNick">记好了</view>
+      </view>
+
+      <view class="card">
         <text class="prof-title">二级 · 你的年纪（把"…岁"换算成年份）</text>
         <view class="mode-tabs">
           <view class="tab {{profileMode==='birthday'?'on':''}}" hover-class="btn-hover" hover-stay-time="80" bindtap="setMode" data-m="birthday">生日</view>

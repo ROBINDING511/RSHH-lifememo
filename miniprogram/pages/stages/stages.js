@@ -10,7 +10,7 @@ Page({
     milestones: life.getMilestones(), msName: '', msAge: '',
     inviteCode: '', bindCode: '', feedQ: '',
     polishStyle: 'light',
-    openMenu: 'sea', cloneConsent: false,
+    openMenu: 'sea', cloneConsent: false, nickname: '',
     voiceState: '', voiceSampleUrl: '',
     listening: false, voiceText: ''
   },
@@ -24,7 +24,14 @@ Page({
     })
     this.recorder = createRecorder()
     this.refreshVoice()
-    this.setData({ polishStyle: wx.getStorageSync('polishStyle') || 'light', cloneConsent: wx.getStorageSync('cloneConsent') === '1' })
+    this.setData({ polishStyle: wx.getStorageSync('polishStyle') || 'light', cloneConsent: wx.getStorageSync('cloneConsent') === '1', nickname: life.getNickname() })
+  },
+  onNick (e) { this.setData({ nickname: e.detail.value }) },
+  saveNick () {
+    const n = (this.data.nickname || '').trim()
+    if (!n) return wx.showToast({ title: '先写个称呼', icon: 'none' })
+    life.setNickname(n)
+    wx.showToast({ title: `好了，${n}`, icon: 'none' })
   },
   // 声纹=敏感个人信息：单独同意开关（默认关）
   toggleCloneConsent () {

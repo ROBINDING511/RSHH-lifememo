@@ -26,12 +26,14 @@
 .sea-foam { position: absolute; left: 0; top: 0; width: 100%; height: 100%; overflow: hidden; animation: seaDrift 30s ease-in-out infinite; }
 .foam { position: absolute; border-radius: 50%; background: rgba(255, 250, 235, 0.10); }
 @keyframes seaDrift { 0%, 100% { transform: translate(0, 0); } 50% { transform: translate(30px, 16px); } }
-/* 引导字幕（非弹窗） */
-.whale-caption { position: absolute; left: 40rpx; right: 40rpx; bottom: calc(env(safe-area-inset-bottom) + 190rpx); z-index: 24; text-align: center; pointer-events: none; }
-.whale-caption text { display: block; font-size: var(--fs-lg); line-height: 1.7; color: var(--c-text); text-shadow: 0 1px 0 rgba(255,255,255,.6); }
-.whale-caption-hint { margin-top: 8rpx; font-size: var(--fs-sm); color: var(--c-text-2); }
-.whale-caption { pointer-events: none; }
-.caption-ok { pointer-events: auto; margin: 16rpx auto 0; min-height: 88rpx; padding: 0 40rpx; display: flex; align-items: center; justify-content: center; background: var(--c-primary); color: #fff; border-radius: var(--radius-md); font-size: var(--fs-md); }
+/* 鲸鱼口中的气泡：生日引导+回答建议（随鲸鱼移动） */
+.whale-bubble { position: absolute; left: 50%; bottom: 100%; transform: translateX(-50%); width: 480rpx; margin-bottom: 20rpx; background: rgba(253,252,249,.97); border: 2rpx solid var(--hairline); border-radius: var(--radius-lg); padding: 24rpx; box-shadow: 0 8px 24px rgba(0,0,0,.10); pointer-events: auto; }
+.wb-q { display: block; font-size: var(--fs-md); font-weight: 500; color: var(--c-text); line-height: 1.6; }
+.wb-chips { display: flex; flex-wrap: wrap; gap: 12rpx; margin-top: 16rpx; }
+.wb-chip { padding: 10rpx 24rpx; border-radius: 24rpx; background: var(--c-primary-soft); color: var(--c-primary); font-size: var(--fs-sm); }
+.wb-picker { margin-top: 16rpx; min-height: 72rpx; display: flex; align-items: center; justify-content: center; border-radius: var(--radius-md); background: var(--c-soft); color: var(--c-text); font-size: var(--fs-sm); }
+.wb-skip { margin-top: 12rpx; text-align: center; color: var(--c-text-2); font-size: var(--fs-xs); text-decoration: underline; }
+.wb-tail { position: absolute; left: 50%; bottom: -14rpx; transform: translateX(-50%); width: 0; height: 0; border-left: 14rpx solid transparent; border-right: 14rpx solid transparent; border-top: 16rpx solid rgba(253,252,249,.97); }
 .sea-tint { position: absolute; left: 0; top: 0; width: 100%; height: 100%; opacity: .35; pointer-events: none; }
 .stage-label { position: absolute; transform: translate(-50%, -50%); color: rgba(18,58,72,.85); background: rgba(255,255,255,.55); padding: 8rpx 28rpx; border-radius: 12rpx; font-size: var(--fs-sm); font-weight: 500; letter-spacing: 0; pointer-events: none; }
 .sea-curve { position: absolute; left: 0; top: 0; right: 0; bottom: 0; pointer-events: none; background: radial-gradient(ellipse at 50% 45%, rgba(20,56,76,0) 58%, rgba(20,56,76,.20) 100%); }
@@ -60,12 +62,12 @@
 .whale-hover { opacity: .85; }
 .cruise.paused, .cruise.paused .whalebox, .cruise.paused .wf { animation-play-state: paused; }
 @keyframes cruise {
-  0% { transform: translate(300rpx, 520rpx); }
-  20% { transform: translate(480rpx, 640rpx); }
-  40% { transform: translate(200rpx, 700rpx); }
-  60% { transform: translate(420rpx, 820rpx); }
-  80% { transform: translate(160rpx, 600rpx); }
-  100% { transform: translate(300rpx, 520rpx); }
+  0% { transform: translate(300rpx, 780rpx); }
+  20% { transform: translate(480rpx, 880rpx); }
+  40% { transform: translate(200rpx, 940rpx); }
+  60% { transform: translate(420rpx, 1000rpx); }
+  80% { transform: translate(160rpx, 840rpx); }
+  100% { transform: translate(300rpx, 780rpx); }
 }
 /* 只平移+微摆头，绝不缩放（避免忽大忽小） */
 @keyframes whalebob {

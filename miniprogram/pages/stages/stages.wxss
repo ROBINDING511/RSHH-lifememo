@@ -59,4 +59,4 @@
 .voice-text { display: block; margin-top: 12rpx; font-size: var(--fs-sm); color: var(--c-text); background: var(--c-card); border-radius: var(--radius-md); padding: 16rpx 20rpx; }
 .btns { display: flex; gap: 24rpx; margin-top: 32rpx; }
 .btn-reset { flex: 1; min-height: 88rpx; display: flex; align-items: center; justify-content: center; background: var(--c-soft); color: var(--c-text-2); border-radius: 44rpx; font-size: var(--fs-md); }
-.btn-save { flex: 1; min-height: 88rpx; display: flex; align-items: center; justify-content: center; background: var(--c-primary); color: #fff; border-radius: var(--radius-md); font-size: var(--fs-md); font-weight: 500; }
+.btn-save { flex: 1; min-height: 88rpx; display: flex; align-items: center; justify-content: center; background: var(--c-primary); color: #fff; border-radius: var(--radius-md); font-size: var(--fs-md); font-weight: 500; }.field { min-height: 88rpx; background: var(--c-soft); border: 2rpx solid var(--hairline); border-radius: var(--radius-md); padding: 0 24rpx; font-size: var(--fs-md); color: var(--c-text); box-sizing: border-box; }

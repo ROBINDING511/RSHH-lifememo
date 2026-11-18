@@ -10,8 +10,7 @@
     {
       "root": "packageGuide",
       "pages": [
-        "pages/guide/guide",
-        "pages/setup/setup"
+        "pages/guide/guide"
       ]
     }
   ],

@@ -38,7 +38,9 @@ Page({
     recConsent: false,
     liveBig: false, liveExpanded: false, liveFollow: true, liveTail: '',
     previewStatus: '', previewEmotion: false,
-    // 引导对话：杭航"说"出来→按住答→提炼→生成海
+    // 生日引导：鲸鱼气泡+回答建议（称呼在杭航菜单设置）
+    birthSkipped: false,
+    birthYears: (() => { const a = []; for (let y = 2010; y >= 1920; y--) a.push(y + '年'); return a })()
   },
 
   onLoad (query) {
@@ -60,7 +62,7 @@ Page({
     if (this.data.firstLaunch) {
       this.setData({ firstLaunch: false })
       getApp().globalData.firstLaunch = false   // 清全局，避免编辑模式新开 ocean 再弹引导
-      wx.navigateTo({ url: '/packageGuide/pages/setup/setup' })   // 首次=设置指引(填空+滚轮)，非追问
+      // 首次进入：生日由鲸鱼气泡引导（称呼在杭航菜单里设置），不跳设置页
       return
     }
     // 视角(pan+zoom)=用户自己的：返回时不碰 movable-view 内部状态，仅重建数据；
@@ -497,6 +499,22 @@ Page({
   onWhaleTap () {
     wx.navigateTo({ url: '/pages/stages/stages' })
   },
+  // 生日引导：点建议年份 / 滚轮选 / 跳过
+  pickBirthYear (e) {
+    const y = Number(e.currentTarget.dataset.y)
+    const p = life.getProfile() || {}
+    life.setProfile(Object.assign({}, p, { mode: 'year', year: y }))
+    this.setData({ birthYear: y })
+    ui.toast(`记下了，${y}年`, 2000)
+  },
+  onBirthPick (e) {
+    const y = 2010 - Number(e.detail.value)
+    const p = life.getProfile() || {}
+    life.setProfile(Object.assign({}, p, { mode: 'year', year: y }))
+    this.setData({ birthYear: y })
+    ui.toast(`记下了，${y}年`, 2000)
+  },
+  skipBirth () { this.setData({ birthSkipped: true }) },
   onBergTap (e) {
     const id = e.currentTarget.dataset.id
     if (id) wx.navigateTo({ url: `/pages/iceberg/iceberg?id=${id}` })
@@ -838,6 +856,7 @@ Page({
   },
   // 按压轻震（无超调回弹）
   tapHaptic () { if (wx.vibrateShort) wx.vibrateShort({ type: 'light' }) },
+  noop () {},
 
   // 存草稿：点了就存，不弹窗
   saveDraftNow () {

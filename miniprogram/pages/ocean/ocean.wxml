@@ -50,6 +50,19 @@
       <view class="cruise {{whalePaused || recording ? 'paused' : ''}}">
         <view class="whalebox" bindtap="onWhaleTap" bindlongpress="onWhaleLongPress" hover-class="whale-hover" hover-stay-time="80">
           <image class="wf wf-straight" src="/images/ocean/whale.png" mode="aspectFit" />
+          <!-- 鲸鱼口中的气泡：生日引导+回答建议 -->
+          <view class="whale-bubble" wx:if="{{!birthYear && !birthSkipped && !recording && !preview}}" catchtap="noop">
+            <text class="wb-q">请问您出生于哪一年？</text>
+            <view class="wb-chips">
+              <view class="wb-chip" wx:for="{{[1950, 1960, 1970, 1980, 1990]}}" wx:key="*this"
+                hover-class="btn-hover" hover-stay-time="80" data-y="{{item}}" catchtap="pickBirthYear">{{item}}年</view>
+            </view>
+            <picker mode="selector" range="{{birthYears}}" bindchange="onBirthPick">
+              <view class="wb-picker">滚轮选年份</view>
+            </picker>
+            <view class="wb-skip" catchtap="skipBirth">跳过</view>
+            <view class="wb-tail"></view>
+          </view>
         </view>
       </view>
     </view>
@@ -63,7 +76,7 @@
   </view>
 
   <!-- ============ 空态提示（深色胶囊白字，压在任何水色上都看得清） ============ -->
-  <view class="empty-hint" wx:if="{{icebergCount === 0 && !recording && !preview && !drafts.length}}">
+  <view class="empty-hint" wx:if="{{icebergCount === 0 && !recording && !preview && !drafts.length && (birthYear || birthSkipped)}}">
     <view class="hint-card">
       <text class="hint-title">{{prompt || '想说什么，就说给杭航听'}}</text>
       <text class="hint-sub">按住下面的青色按钮，说说看</text>
