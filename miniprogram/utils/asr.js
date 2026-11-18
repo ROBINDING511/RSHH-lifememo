@@ -108,6 +108,7 @@ class AsrStream {
     for (const id of this.order) this.retired.add(id)
     this.items = new Map()
     this.order = []
+    this._segStart = Date.now()   // B1 句级时间戳基准（录音段起点）
     this.pending = []
     this.pendingBytes = 0
     this.reconnects = 0
@@ -130,6 +131,21 @@ class AsrStream {
       out += it.done ? (it.transcript || (it.text + it.stash)) : (it.text + it.stash)
     }
     return out.trim()
+  }
+
+  /** B1 行号化转写 + 句级时间戳（墙钟估算，estimated:true；realtime 无精确音频时间字段） */
+  getLines (seg) {
+    const start = this._segStart || Date.now()
+    return this.order.map((id, i) => {
+      const it = this.items.get(id) || {}
+      return {
+        n: i,
+        t: it.t0 ? +(((it.t0 - start) / 1000).toFixed(2)) : null,
+        seg: seg || '初录',
+        text: (it.done ? (it.transcript || (it.text + it.stash)) : (it.text + it.stash)).trim(),
+        estimated: true
+      }
+    }).filter((l) => l.text)
   }
 
   /** 建连 + 下发会话配置。resolve(true)=实时流可用；resolve(false)=不可用，上层走兜底 */
@@ -305,7 +321,7 @@ class AsrStream {
     if (this.retired && this.retired.has(id)) return null
     let it = this.items.get(id)
     if (!it) {
-      it = { text: '', stash: '', done: false, transcript: '' }
+      it = { text: '', stash: '', done: false, transcript: '', t0: Date.now() }
       this.items.set(id, it)
       this.order.push(id)
     }

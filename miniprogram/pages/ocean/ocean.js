@@ -721,6 +721,34 @@ Page({
     this.setData({ 'preview.photos': photos })
   },
 
+  // B1/B2：发布后后台跑证据链 refine，落 sentences/doubts/versions/blanks；失败不阻塞
+  runRefine (id, rawText, blanks) {
+    let lines = (this.asr && this.asr.getLines) ? this.asr.getLines() : []
+    if (!lines.length) {
+      const segs = String(rawText || '').split(/(?<=[。！？!?；;])/).filter(Boolean)
+      const dur = (this._lastDuration || 10000) / 1000
+      lines = segs.map((t, i) => ({ n: i, t: +((i / Math.max(1, segs.length)) * dur).toFixed(2), seg: '初录', text: t, estimated: true }))
+    }
+    const knownTitles = (this._icebergs || []).map((b) => b.title).filter(Boolean)
+    wx.cloud.callFunction({
+      name: 'refine',
+      data: { lines, birthYear: this.data.birthYear, stageKeys: life.getStages().map((s) => s.key), knownTitles, blanks: (blanks || []).map((b) => b.topic) }
+    }).then((r) => {
+      const res = (r && r.result) || {}
+      return wx.cloud.database().collection('icebergs').doc(id).update({
+        data: {
+          rawText, lines,
+          sentences: res.sentences || [], doubts: res.doubts || [],
+          corrections: [], blanks: blanks || [],
+          versions: [{ at: Date.now(), text: rawText, note: '逐字稿' }],
+          refineState: res.refineState || 'failed'
+        }
+      })
+    }).catch(() => {
+      wx.cloud.database().collection('icebergs').doc(id).update({ data: { refineState: 'failed' } }).catch(() => {})
+    })
+  },
+
   async publish () {
     if (this.data.publishing) return
     const p = this.data.preview
@@ -769,6 +797,8 @@ Page({
       if (p.editId) this.feedVoiceSample(created.audioFileID)
       else api.attachMedia(created._id, { audioPath, photos: p.photos })
         .then((r) => this.feedVoiceSample(r.audioFileID)).catch(() => {})
+      // B2 证据链后台跑，不阻塞发布；失败=逐字照常用
+      this.runRefine(created._id, p.rawText || body, p.blanks)
     } catch (e) {
       wx.hideLoading()
       this.setData({ publishing: false })
