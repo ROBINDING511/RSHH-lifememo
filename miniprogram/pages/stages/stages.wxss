@@ -25,7 +25,7 @@
 .stage-name { flex: 1; font-size: var(--fs-md); color: var(--c-text); font-weight: 500; }
 .name-box { flex: 1; min-height: 80rpx; background: var(--c-soft); border: 2rpx solid rgba(31,100,120,.15); border-radius: var(--radius-md); padding: 0 16rpx; font-size: var(--fs-md); color: var(--c-text); font-weight: 500; box-sizing: border-box; }
 .range-from { flex: 0 0 64rpx; text-align: right; font-size: var(--fs-sm); color: var(--c-text-2); }
-.add-sea { margin-top: 16rpx; min-height: 80rpx; display: flex; align-items: center; justify-content: center; border: 2rpx dashed rgba(31,100,120,.35); border-radius: var(--radius-md); color: var(--c-primary); font-size: var(--fs-sm); }
+.add-sea { margin-top: 16rpx; min-height: 88rpx; display: flex; align-items: center; justify-content: center; background: var(--c-card); border: 2rpx solid rgba(31,100,120,.28); border-radius: 48rpx; color: var(--c-primary); font-size: var(--fs-sm); box-sizing: border-box; }
 
 /* 自定义人生节点 */
 .ms-invite { display: block; font-size: var(--fs-xs); color: var(--c-text-2); line-height: 1.6; margin-bottom: 16rpx; }

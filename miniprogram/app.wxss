@@ -97,18 +97,21 @@ page {
 .btn-primary::after { border: none; }
 .btn-primary.btn-hover { background: linear-gradient(160deg, #256A80 0%, #17505F 100%); transform: scale(0.97); }
 
+/* 次按钮：白底 + 细描边 + 主色字（微信式 secondary，干净不糊） */
 .btn-ghost {
   display: flex; align-items: center; justify-content: center;
-  background: linear-gradient(160deg, #EAF2F3 0%, #DCE9EA 100%);
+  background: var(--c-card);
+  border: 2rpx solid rgba(31, 100, 120, 0.28);
   color: var(--c-primary);
   border-radius: 48rpx;
   font-size: var(--fs-md);
   height: 88rpx;   /* 44px，WeUI 触控下限 */
   line-height: 1;
   font-weight: 500;
+  box-sizing: border-box;
 }
 .btn-ghost::after { border: none; }
-.btn-ghost.btn-hover { background: linear-gradient(160deg, #DDE9EA 0%, #CFE0E1 100%); transform: scale(0.97); }
+.btn-ghost.btn-hover { background: var(--c-primary-soft); transform: scale(0.97); }
 
 .btn-danger-ghost { background: linear-gradient(160deg, #FBEFEC 0%, #F5DED8 100%); color: var(--c-danger); }
 .btn-danger-ghost.btn-hover { background: linear-gradient(160deg, #F6E3DE 0%, #EFD2CB 100%); transform: scale(0.97); }

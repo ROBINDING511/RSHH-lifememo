@@ -50,15 +50,15 @@
     </view>
   </view>
 
-  <view class="continue-entry" hover-class="btn-hover" hover-stay-time="80" bindtap="continueRecord">
-    继续说 / 补录这段
-  </view>
-
   <view class="actions safe-bottom">
-    <button class="btn-ghost flex1" hover-class="btn-hover" hover-stay-time="80"
-      bindtap="onShowIconMenu">放个标记</button>
-    <button class="btn-ghost btn-danger-ghost flex1" hover-class="btn-hover" hover-stay-time="80"
-      bindtap="meltIceberg">化成云</button>
+    <button class="btn-primary" hover-class="btn-hover" hover-stay-time="80"
+      bindtap="continueRecord">继续说 / 补录这段</button>
+    <view class="actions-row">
+      <button class="btn-ghost flex1" hover-class="btn-hover" hover-stay-time="80"
+        bindtap="onShowIconMenu">放个标记</button>
+      <button class="btn-ghost btn-danger-ghost flex1" hover-class="btn-hover" hover-stay-time="80"
+        bindtap="meltIceberg">化成云</button>
+    </view>
   </view>
 
   <!-- 标记选择 -->

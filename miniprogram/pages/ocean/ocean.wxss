@@ -163,7 +163,7 @@
 .vc-on { background: var(--c-danger); }
 .vc-on::after { border: none; width: 18rpx; height: 22rpx; background: #fff; top: 50%; left: 50%; transform: translate(-50%,-50%); border-radius: 3rpx; }
 .vc-text { color: var(--c-primary); font-size: var(--fs-sm); font-weight: 500; }
-.continue-hold { margin-top: 24rpx; min-height: 88rpx; display: flex; align-items: center; justify-content: center; border: 2rpx dashed rgba(31,100,120,.4); border-radius: 44rpx; color: var(--c-primary); font-size: var(--fs-md); }
+.continue-hold { margin-top: 24rpx; min-height: 88rpx; display: flex; align-items: center; justify-content: center; background: var(--c-card); border: 2rpx solid rgba(31,100,120,.28); border-radius: 48rpx; color: var(--c-primary); font-size: var(--fs-md); box-sizing: border-box; }
 .preview-actions { display: flex; gap: 24rpx; margin-top: 24rpx; }
 
 /* 提示脚手架 / 那年今日 / 润色回退 */
