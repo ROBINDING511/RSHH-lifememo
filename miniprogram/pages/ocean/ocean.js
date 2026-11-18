@@ -40,7 +40,7 @@ Page({
     liveBig: false, liveExpanded: false, liveFollow: true, liveTail: '',
     previewStatus: '', previewEmotion: false,
     // 引导对话：杭航"说"出来→按住答→提炼→生成海
-    onboardStep: -1, onboardQ: '', nickname: '', whaleSpeaking: false
+    onboardStep: -1, onboardQ: '', nickname: ''
   },
 
   onLoad (query) {
@@ -392,26 +392,8 @@ Page({
   },
   // ==================== 引导对话：杭航问→按住答→提炼→生成海 ====================
   startOnboard () {
+    // 引导=鲸鱼的问题以字幕呈现（鲸鱼不发语音），不弹窗
     this.setData({ onboardStep: 0, onboardQ: '能告诉我怎么称呼你吗？', nickname: life.getNickname() })
-    this.speakQuestion('能告诉我怎么称呼你吗？')
-  },
-  // 杭航用语音"说"出问题（TTS），不弹窗；点鲸鱼可重听
-  speakQuestion (text) {
-    if (!text) return
-    wx.cloud.callFunction({ name: 'voiceclone', data: { action: 'speak', text } })
-      .then((r) => {
-        const res = (r && r.result) || {}
-        if (!res.ok || !res.url) return
-        if (this._whaleAudio) { this._whaleAudio.stop(); this._whaleAudio.destroy() }
-        const a = wx.createInnerAudioContext()
-        a.obeyMuteSwitch = false
-        a.src = String(res.url).replace(/^http:/, 'https:')   // 真机要求 https 音频
-        a.onPlay(() => this.setData({ whaleSpeaking: true }))
-        a.onEnded(() => { this.setData({ whaleSpeaking: false }); a.destroy() })
-        a.onError(() => this.setData({ whaleSpeaking: false }))
-        this._whaleAudio = a
-        a.play()
-      }).catch(() => {})
   },
   async handleOnboard (text) {
     const step = this.data.onboardStep
@@ -442,7 +424,6 @@ Page({
       this.finishOnboard()
       return
     }
-    if (this.data.onboardStep >= 0) this.speakQuestion(this.data.onboardQ)
   },
   finishOnboard () {
     this._pendingEvent = null
@@ -450,7 +431,7 @@ Page({
     this.setupWorld(false)
     this._worldInited = true
     this.refreshData()
-    this.speakQuestion(`${this.data.nickname || '你'}，你的海铺好了。想记什么，按住跟我说。`)
+    ui.toast(`${this.data.nickname || '你'}，你的海铺好了`, 2400)
   },
 
   onHoldMove (e) {
@@ -566,7 +547,7 @@ Page({
     if (!this.data.recording && this.data.whalePaused) this.setData({ whalePaused: false })
   },
   onWhaleTap () {
-    if (this.data.onboardStep >= 0) { this.speakQuestion(this.data.onboardQ); return }   // 引导期点鲸鱼=重听问题
+    if (this.data.onboardStep >= 0) return   // 引导期字幕已在，点鲸鱼不进菜单
     wx.navigateTo({ url: '/pages/stages/stages' })
   },
   onBergTap (e) {

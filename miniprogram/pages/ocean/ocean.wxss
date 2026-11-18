@@ -157,14 +157,7 @@
 .continue-hold { margin-top: 24rpx; min-height: 88rpx; display: flex; align-items: center; justify-content: center; background: var(--c-card); border: 2rpx solid rgba(31,100,120,.28); border-radius: 48rpx; color: var(--c-primary); font-size: var(--fs-md); box-sizing: border-box; }
 .preview-actions { display: flex; gap: 24rpx; margin-top: 24rpx; }
 
-/* 杭航"说话"指示（声波条），引导靠语音不靠弹窗 */
-.whale-voice { position: absolute; left: 50%; top: -36rpx; transform: translateX(-50%); display: flex; gap: 6rpx; align-items: flex-end; height: 32rpx; }
-.wv-bar { width: 6rpx; background: var(--c-primary); border-radius: 3rpx; animation: wv 0.9s ease-in-out infinite; }
-.wv-bar:nth-child(1) { height: 14rpx; }
-.wv-bar:nth-child(2) { height: 26rpx; animation-delay: .15s; }
-.wv-bar:nth-child(3) { height: 18rpx; animation-delay: .3s; }
-@keyframes wv { 0%, 100% { transform: scaleY(0.5); } 50% { transform: scaleY(1); } }
-.whale-speaking { animation: whalebob 1.2s ease-in-out infinite; }
+
 
 /* 右上角声音开关 */
 /* 音量图标：正常=有声；加斜杠=静音（线性 icon，非 emoji） */
