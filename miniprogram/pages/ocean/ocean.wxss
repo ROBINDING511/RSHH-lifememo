@@ -155,13 +155,14 @@
 .continue-hold { margin-top: 24rpx; min-height: 88rpx; display: flex; align-items: center; justify-content: center; background: var(--c-card); border: 2rpx solid rgba(31,100,120,.28); border-radius: 48rpx; color: var(--c-primary); font-size: var(--fs-md); box-sizing: border-box; }
 .preview-actions { display: flex; gap: 24rpx; margin-top: 24rpx; }
 
-/* 引导对话卡 */
-.onboard { position: absolute; left: 32rpx; right: 32rpx; bottom: calc(env(safe-area-inset-bottom) + 200rpx); z-index: 24; display: flex; flex-direction: column; align-items: center; pointer-events: none; }
-.onboard-card { width: 100%; background: rgba(253,252,249,.96); border: 2rpx solid var(--hairline); border-radius: var(--radius-lg); padding: 28rpx; box-shadow: 0 8px 24px rgba(0,0,0,.08); }
-.onboard-q { display: block; font-size: var(--fs-lg); line-height: 1.7; color: var(--c-text); font-weight: 500; }
-.onboard-hint { display: block; margin-top: 12rpx; font-size: var(--fs-sm); color: var(--c-text-2); }
-.onboard-arrow { margin-top: 8rpx; font-size: 44rpx; color: var(--c-primary); animation: onboardBob 1.6s ease-in-out infinite; }
-@keyframes onboardBob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(10rpx); } }
+/* 杭航"说话"指示（声波条），引导靠语音不靠弹窗 */
+.whale-voice { position: absolute; left: 50%; top: -36rpx; transform: translateX(-50%); display: flex; gap: 6rpx; align-items: flex-end; height: 32rpx; }
+.wv-bar { width: 6rpx; background: var(--c-primary); border-radius: 3rpx; animation: wv 0.9s ease-in-out infinite; }
+.wv-bar:nth-child(1) { height: 14rpx; }
+.wv-bar:nth-child(2) { height: 26rpx; animation-delay: .15s; }
+.wv-bar:nth-child(3) { height: 18rpx; animation-delay: .3s; }
+@keyframes wv { 0%, 100% { transform: scaleY(0.5); } 50% { transform: scaleY(1); } }
+.whale-speaking { animation: whalebob 1.2s ease-in-out infinite; }
 
 /* 右上角声音开关 */
 /* 音量图标：正常=有声；加斜杠=静音（线性 icon，非 emoji） */

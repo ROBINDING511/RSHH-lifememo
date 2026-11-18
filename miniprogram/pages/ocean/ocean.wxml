@@ -44,8 +44,11 @@
     <!-- 鲸鱼杭航：屏幕层游弋（始终可见）+ 自然微动；长按说话副入口 -->
     <view class="whale-layer">
       <view class="cruise {{whalePaused || recording ? 'paused' : ''}}">
-        <view class="whalebox" bindtap="onWhaleTap" bindlongpress="onWhaleLongPress" hover-class="whale-hover" hover-stay-time="80">
+        <view class="whalebox {{whaleSpeaking ? 'whale-speaking' : ''}}" bindtap="onWhaleTap" bindlongpress="onWhaleLongPress" hover-class="whale-hover" hover-stay-time="80">
           <image class="wf wf-straight" src="/images/ocean/whale.png" mode="aspectFit" />
+          <view class="whale-voice" wx:if="{{whaleSpeaking}}">
+            <view class="wv-bar"></view><view class="wv-bar"></view><view class="wv-bar"></view>
+          </view>
         </view>
       </view>
     </view>
@@ -100,14 +103,6 @@
     </view>
   </view>
 
-  <!-- 引导：杭航提问 + 指向按住说话按钮 -->
-  <view class="onboard" wx:if="{{onboardStep >= 0 && !preview}}">
-    <view class="onboard-card">
-      <text class="onboard-q">{{onboardQ}}</text>
-      <text class="onboard-hint">按住下面的青色按钮回答杭航</text>
-    </view>
-    <view class="onboard-arrow">↓</view>
-  </view>
 
   <!-- ============ 底部操作区（拇指区） ============ -->
   <view class="dock safe-bottom" wx:if="{{!preview}}">

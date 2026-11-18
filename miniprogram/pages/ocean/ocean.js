@@ -40,8 +40,8 @@ Page({
     recConsent: false,
     liveBig: false, liveExpanded: false, liveFollow: true, liveTail: '',
     previewStatus: '', previewEmotion: false,
-    // 引导对话：杭航问→按住答→提炼→生成海
-    onboardStep: -1, onboardQ: '', nickname: ''
+    // 引导对话：杭航"说"出来→按住答→提炼→生成海
+    onboardStep: -1, onboardQ: '', nickname: '', whaleSpeaking: false
   },
 
   onLoad (query) {
@@ -420,6 +420,25 @@ Page({
   // ==================== 引导对话：杭航问→按住答→提炼→生成海 ====================
   startOnboard () {
     this.setData({ onboardStep: 0, onboardQ: '能告诉我怎么称呼你吗？', nickname: life.getNickname() })
+    this.speakQuestion('能告诉我怎么称呼你吗？')
+  },
+  // 杭航用语音"说"出问题（TTS），不弹窗；点鲸鱼可重听
+  speakQuestion (text) {
+    if (!text) return
+    wx.cloud.callFunction({ name: 'voiceclone', data: { action: 'speak', text } })
+      .then((r) => {
+        const res = (r && r.result) || {}
+        if (!res.ok || !res.url) return
+        if (this._whaleAudio) { this._whaleAudio.stop(); this._whaleAudio.destroy() }
+        const a = wx.createInnerAudioContext()
+        a.obeyMuteSwitch = false
+        a.src = res.url
+        a.onPlay(() => this.setData({ whaleSpeaking: true }))
+        a.onEnded(() => { this.setData({ whaleSpeaking: false }); a.destroy() })
+        a.onError(() => this.setData({ whaleSpeaking: false }))
+        this._whaleAudio = a
+        a.play()
+      }).catch(() => {})
   },
   async handleOnboard (text) {
     const step = this.data.onboardStep
@@ -448,7 +467,9 @@ Page({
       if (age == null || age < 0) { ui.toast('没听清时间，按住再说一次', 2000); return }
       life.addMilestone(this._pendingEvent, age)   // 事件+时间 → 新的一片海
       this.finishOnboard()
+      return
     }
+    if (this.data.onboardStep >= 0) this.speakQuestion(this.data.onboardQ)
   },
   finishOnboard () {
     this._pendingEvent = null
@@ -457,7 +478,7 @@ Page({
     this._worldInited = true
     this.refreshData()
     this.startAmbient()
-    ui.toast(`${this.data.nickname || '你'}，你的海铺好了`, 2400)
+    this.speakQuestion(`${this.data.nickname || '你'}，你的海铺好了。想记什么，按住跟我说。`)
   },
 
   onHoldMove (e) {
@@ -574,7 +595,10 @@ Page({
     if (this.data.recording && this._holdSource === 'whale') return this.finishRecording()
     if (!this.data.recording && this.data.whalePaused) this.setData({ whalePaused: false })
   },
-  onWhaleTap () { wx.navigateTo({ url: '/pages/stages/stages' }) },
+  onWhaleTap () {
+    if (this.data.onboardStep >= 0) { this.speakQuestion(this.data.onboardQ); return }   // 引导期点鲸鱼=重听问题
+    wx.navigateTo({ url: '/pages/stages/stages' })
+  },
   onBergTap (e) {
     const id = e.currentTarget.dataset.id
     if (id) wx.navigateTo({ url: `/pages/iceberg/iceberg?id=${id}` })

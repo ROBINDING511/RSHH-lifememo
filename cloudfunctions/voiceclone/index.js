@@ -60,6 +60,24 @@ exports.main = async (event) => {
   const { OPENID } = cloud.getWXContext()
   const a = event.action
   try {
+    if (a === 'speak') {
+      // 杭航"说"出来（TTS），不是画面弹窗
+      const key = await getKey()
+      if (!key) return { ok: false, error: 'no key' }
+      const voice = event.voice || 'Cherry'
+      const r = await post('/api/v1/services/aigc/multimodal-generation/generation', {
+        model: 'qwen3-tts-flash',
+        input: { text: String(event.text || '').slice(0, 200), voice }
+      }, key).catch(() => null)
+      let url = r && r.output && r.output.audio && r.output.audio.url
+      if (!url) {
+        const r2 = await post('/api/v1/services/aigc/multimodal-generation/generation', {
+          model: 'qwen3-tts-flash', input: { text: String(event.text || '').slice(0, 200), voice: 'Serena' }
+        }, key).catch(() => null)
+        url = r2 && r2.output && r2.output.audio && r2.output.audio.url
+      }
+      return url ? { ok: true, url } : { ok: false, error: 'tts failed' }
+    }
     if (a === 'setKey') {
       await db.collection('secrets').doc('voiceclone').set({ data: { key: event.key } }).catch(async () => {
         await db.createCollection('secrets').catch(() => {})
