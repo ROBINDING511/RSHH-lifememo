@@ -9,7 +9,6 @@
   <view class="hub-row">
     <view class="hub-pill" hover-class="btn-hover" hover-stay-time="80" bindtap="goTimeline">时间轴</view>
     <view class="hub-pill" hover-class="btn-hover" hover-stay-time="80" bindtap="goRecycle">云朵</view>
-    <view class="hub-pill" hover-class="btn-hover" hover-stay-time="80" bindtap="toggleAmbient">海浪声·{{ambientOn ? '开' : '关'}}</view>
   </view>
 
   <view class="card">

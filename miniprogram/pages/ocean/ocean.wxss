@@ -162,6 +162,9 @@
 .continue-hold { margin-top: 24rpx; min-height: 88rpx; display: flex; align-items: center; justify-content: center; background: var(--c-card); border: 2rpx solid rgba(31,100,120,.28); border-radius: 48rpx; color: var(--c-primary); font-size: var(--fs-md); box-sizing: border-box; }
 .preview-actions { display: flex; gap: 24rpx; margin-top: 24rpx; }
 
+/* 右上角声音开关 */
+.sound-btn { position: absolute; right: 24rpx; z-index: 22; width: 76rpx; height: 76rpx; display: flex; align-items: center; justify-content: center; background: rgba(253,252,249,.92); border: 2rpx solid rgba(31,100,120,.2); border-radius: 50%; font-size: 36rpx; box-shadow: 0 4rpx 16rpx rgba(31,100,120,.14); }
+
 /* 新冰山红旗（5 分钟，回听提示） */
 .berg-flag { position: absolute; top: -20rpx; left: 50%; width: 3rpx; height: 30rpx; background: #8A2B20; }
 .berg-flag::after { content: ''; position: absolute; left: 3rpx; top: 0; border-left: 20rpx solid #D64533; border-top: 8rpx solid transparent; border-bottom: 8rpx solid transparent; }

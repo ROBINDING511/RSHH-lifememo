@@ -29,10 +29,11 @@ Page({
     // 复核 / 发布
     preview: null, previewVoicePlaying: false, publishing: false,
     drafts: [], icebergCount: 0,
-    // 提示脚手架 / 那年今日 / 家人 / 声音克隆
+    // 提示脚手架 / 那年今日 / 家人 / 声音克隆 / 环境音
     prompt: '', todayMemory: null,
     familyOwner: null, familyReactCount: 0,
-    voiceReview: null, voiceState: 'collecting'
+    voiceReview: null, voiceState: 'collecting',
+    ambientOn: true
   },
 
   onLoad (query) {
@@ -55,7 +56,7 @@ Page({
     }
     this.setupWorld(this._worldInited)   // 首次居中；之后保留上次游到的位置
     this._worldInited = true
-    this.setData({ birthYear: life.getBirthYear(), drafts: draft.list(), whalePaused: false })
+    this.setData({ birthYear: life.getBirthYear(), drafts: draft.list(), whalePaused: false, ambientOn: wx.getStorageSync('ambientOn') !== '0' })
     this.refreshData()
     this.refreshPrompt()
     this.refreshToday()
@@ -180,6 +181,14 @@ Page({
   },
   stopAmbient () {
     if (this._ambient) { this._ambient.stop(); this._ambient.destroy(); this._ambient = null }
+  },
+  // 右上角声音开关
+  toggleAmbient () {
+    const on = !this.data.ambientOn
+    wx.setStorageSync('ambientOn', on ? '1' : '0')
+    this.setData({ ambientOn: on })
+    if (on && !this.data.recording) this.startAmbient()
+    else this.stopAmbient()
   },
 
   safeTop () {
@@ -365,6 +374,7 @@ Page({
     if (this.data.preview && appendBase == null) return   // 复核卡开着只允许续录
     this._appendBase = appendBase != null ? appendBase : null
     this.setData({ recording: true, recordMode: mode, transcript: this._appendBase || '', elapsed: 0, countdown: 0, cancelArmed: false, asrHint: '' })
+    this.stopAmbient()   // 录音时关闭环境音，避免干扰识别
     this._pendingText = null
     this._frameBuf = []
     if (wx.vibrateShort) wx.vibrateShort({ type: 'medium' })
@@ -379,6 +389,7 @@ Page({
       onStop: async (wavPath, durationMs, err) => {
         this._lastDuration = durationMs
         this.setData({ recording: false, countdown: 0, elapsed: 0, recordMode: '', whalePaused: false, cancelArmed: false })
+        this.startAmbient()   // 录完恢复环境音（若开关为开）
         this.applyTranscript()
         if (this.cancelRequested) {
           this.cancelRequested = false
