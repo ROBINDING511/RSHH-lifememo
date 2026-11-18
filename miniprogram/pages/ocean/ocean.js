@@ -711,20 +711,37 @@ Page({
   // 阻尼抽屉：下拉关闭（高阻尼橡皮筋 + 速度吸附，无超调）；关闭自动存草稿不丢话
   onSheetStart (e) {
     this._sheetY0 = e.touches[0].clientY
-    this._sheetT0 = Date.now()
+    this._sheetSamples = [{ t: Date.now(), y: e.touches[0].clientY }]
     this.setData({ sheetSettle: false, sheetDy: 0 })
+    // 量一次卡高，用于"拖过 1/3 即提交"阈值
+    wx.createSelectorQuery().select('.preview-card').boundingClientRect((r) => {
+      if (r) this._sheetH = r.height
+    }).exec()
   },
   onSheetMove (e) {
-    const dy = e.touches[0].clientY - this._sheetY0
+    const y = e.touches[0].clientY
+    const dy = y - this._sheetY0
+    // 滑动窗口采样（~100ms），供松手时算窗口速度
+    const now = Date.now()
+    this._sheetSamples.push({ t: now, y })
+    while (this._sheetSamples.length > 2 && now - this._sheetSamples[0].t > 100) this._sheetSamples.shift()
     this.setData({ sheetDy: dy >= 0 ? dy : dy * 0.25 })   // 上拉橡皮筋阻尼
   },
   onSheetEnd () {
     const dy = this.data.sheetDy
-    const dt = Math.max(1, Date.now() - this._sheetT0)
-    const v = dy / dt
+    // 窗口速度（末 ~100ms），不用整段平均（会把 flick 平均掉）
+    const s = this._sheetSamples || []
+    let v = 0
+    if (s.length >= 2) {
+      const a = s[0], b = s[s.length - 1]
+      const dt = Math.max(1, b.t - a.t)
+      v = (b.y - a.y) / dt
+    }
+    const far = dy > (this._sheetH || 400) / 3
+    const fast = v > 0.55
     this.setData({ sheetSettle: true })
-    if (dy > 120 || v > 0.5) this.dismissSheet()
-    else this.setData({ sheetDy: 0 })
+    if (far || fast) this.dismissSheet()   // 双条件 OR：拖够 或 甩够
+    else this.setData({ sheetDy: 0 })      // 否则回弹到 resting，不停在半路
   },
   dismissSheet () {
     const p = this.data.preview

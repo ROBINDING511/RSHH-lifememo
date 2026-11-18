@@ -1,4 +1,6 @@
-/* app.wxss — 全局设计系统（unslop _redesign 分支）
+/* finesse · register=h5 · morph=A-app-shell · A=warm-paper+teal · B=400/500 · C=bottom-thumb+sheet
+ * D=CSS-only · E=watercolor-sea · SOUL=6 SPECTACLE=2 DENSITY=4 · unslop+brief aligned
+ * app.wxss — 全局设计系统（unslop _redesign 分支）
  * 方向：安静、温暖、不催促。世界=水彩纸与海。
  * 铬件（导航/按钮/卡片/文字）全部安静纸面 + 单一墨青强调；
  * 富色只留在唯一的内容时刻——ocean 的日落水彩海与鲸鱼。
@@ -71,7 +73,9 @@ page {
   color: var(--c-text);
   line-height: 1.8;
   letter-spacing: 0;
+  -webkit-tap-highlight-color: transparent;   /* h5 触摸法则：去掉点按灰闪 */
 }
+view, button, input, textarea { -webkit-tap-highlight-color: transparent; }
 
 /* 子页面底：安静纸面（去掉彩色渐变 wash） */
 .wash-bg { background: var(--c-bg); }
