@@ -51,12 +51,12 @@
 
 /* ============ 鲸鱼杭航（冰山间游弋 + 自然微动）============ */
 .cruise { position: absolute; left: 0; top: 0; width: 0; height: 0; animation: cruise 38s ease-in-out infinite; will-change: transform; }
-.whalebox { position: absolute; left: -70rpx; top: -115rpx; width: 140rpx; height: 230rpx; pointer-events: auto; transform-origin: 50% 22%; animation: whalebob 2.4s ease-in-out infinite; }
+.whalebox { position: absolute; left: -70rpx; top: -115rpx; width: 140rpx; height: 230rpx; pointer-events: auto; transform-origin: 50% 22%; animation: whalebob 3.2s ease-in-out infinite; }
 /* 摆尾游动：尾姿之间用 ease-in-out 交叉渐变（逐渐弯曲、无硬切），叠加身体连续起伏 → 灵动不机械 */
 .wf { position: absolute; left: 0; top: 0; width: 100%; height: 100%; opacity: 0; }
-.wf-straight { animation: wfs 2.4s ease-in-out infinite; }
-.wf-left { animation: wfl 2.4s ease-in-out infinite; }
-.wf-right { animation: wfr 2.4s ease-in-out infinite; }
+.wf-straight { animation: wfs 3.2s ease-in-out infinite; }
+.wf-left { animation: wfl 3.2s ease-in-out infinite; }
+.wf-right { animation: wfr 3.2s ease-in-out infinite; }
 @keyframes wfs { 0% { opacity: 1; } 25% { opacity: 0; } 50% { opacity: 1; } 75% { opacity: 0; } 100% { opacity: 1; } }
 @keyframes wfl { 0% { opacity: 0; } 25% { opacity: 1; } 50% { opacity: 0; } 100% { opacity: 0; } }
 @keyframes wfr { 0% { opacity: 0; } 50% { opacity: 0; } 75% { opacity: 1; } 100% { opacity: 0; } }
@@ -70,11 +70,10 @@
   80% { transform: translate(160rpx, 600rpx); }
   100% { transform: translate(300rpx, 520rpx); }
 }
+/* 只平移+微摆头，绝不缩放（避免忽大忽小） */
 @keyframes whalebob {
-  0%, 100% { transform: rotate(-3deg) translateY(0) scaleX(1); }
-  25% { transform: rotate(0deg) translateY(-4rpx) scaleX(0.98); }
-  50% { transform: rotate(3deg) translateY(-7rpx) scaleX(0.96); }
-  75% { transform: rotate(0deg) translateY(-4rpx) scaleX(0.98); }
+  0%, 100% { transform: rotate(-2deg) translateY(0); }
+  50% { transform: rotate(2deg) translateY(-6rpx); }
 }
 
 /* ============ 空态提示（深色胶囊白字，全渐变达标）============ */
