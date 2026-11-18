@@ -21,11 +21,9 @@
         out-of-bounds="{{false}}" disabled="{{movableDisabled}}" bindchange="onSeaChange"
         style="width:{{worldWidth}}px;height:{{worldHeight}}px" x="{{movX}}" y="{{movY}}">
         <image class="sea-texture" src="/images/ocean/sea_bg.jpg" mode="scaleToFill"
-          style="width:{{worldWidth}}px;height:{{worldHeight}}px" />
+          style="width:{{worldWidth+120}}px;height:{{worldHeight+120}}px" />
+        <view class="sea-glow"></view>
         <view class="sea-tint" style="background:{{tintGradient}}"></view>
-        <!-- 浪：两层极淡的波光缓慢漂移，轻轻的水动 -->
-        <view class="sea-ripple r1"></view>
-        <view class="sea-ripple r2"></view>
         <text wx:for="{{stages}}" wx:key="key" class="stage-label"
           style="left:{{item.cx}}px;top:{{item.cy}}px">{{item.name}}之海</text>
         <view wx:for="{{bergs}}" wx:key="id" class="berg"
