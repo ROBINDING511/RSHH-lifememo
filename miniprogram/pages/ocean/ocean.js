@@ -8,6 +8,7 @@ const draft = require('../../utils/draft')
 const life = require('../../utils/life')
 const sea = require('../../utils/sea')
 const ui = require('../../utils/ui')
+const prompts = require('../../utils/prompts')
 
 Page({
   data: {
@@ -27,14 +28,21 @@ Page({
     transcript: '', asrHint: '', elapsed: 0, countdown: 0,
     // 复核 / 发布
     preview: null, previewVoicePlaying: false, publishing: false,
-    drafts: [], icebergCount: 0
+    drafts: [], icebergCount: 0,
+    // 提示脚手架 / 那年今日 / 家人
+    prompt: '', todayMemory: null,
+    familyOwner: null, familyReactCount: 0
   },
 
   onLoad (query) {
     this.asr = null
     this.previewAudio = null
     this.recorder = createRecorder()
-    this.setData({ firstLaunch: getApp().globalData.firstLaunch, capsuleBottom: this.safeTop() })
+    this.setData({
+      firstLaunch: getApp().globalData.firstLaunch,
+      capsuleBottom: this.safeTop(),
+      familyOwner: wx.getStorageSync('familyOwner') || null
+    })
     if (query && query.edit) this.loadForEdit(query.edit)
   },
 
@@ -47,8 +55,53 @@ Page({
     this.setupWorld()
     this.setData({ birthYear: life.getBirthYear(), drafts: draft.list(), whalePaused: false })
     this.refreshData()
+    this.refreshPrompt()
+    this.refreshToday()
+    this.refreshReactions()
     this.preheatAsr()                                   // 预热连接：开口即出字
     wx.authorize({ scope: 'scope.record' }).catch(() => {})  // 预热授权：0 延迟开口
+  },
+
+  // 提示脚手架：一次一个问题（家人投喂的优先）
+  async refreshPrompt () {
+    let fed = null
+    if (!this.data.familyOwner) {
+      try {
+        const r = (await wx.cloud.callFunction({ name: 'family', data: { action: 'questions' } })).result || {}
+        if (r.data && r.data.length) {
+          fed = r.data[0].text
+          wx.cloud.callFunction({ name: 'family', data: { action: 'useQuestion', id: r.data[0]._id } }).catch(() => {})
+        }
+      } catch (e) { /* 未部署 family 时静默 */ }
+    }
+    this.setData({ prompt: fed || prompts.pick(null, this.data.prompt) })
+  },
+  nextPrompt () { this.setData({ prompt: prompts.pick(null, this.data.prompt) }) },
+
+  // 家人反应回流计数（长辈侧）
+  async refreshReactions () {
+    if (this.data.familyOwner) return
+    try {
+      const r = (await wx.cloud.callFunction({ name: 'family', data: { action: 'myReactions' } })).result || {}
+      this.setData({ familyReactCount: r.count || 0 })
+    } catch (e) { /* 未部署静默 */ }
+  },
+
+  // 那年今日：托起一座旧冰山
+  refreshToday () {
+    const now = new Date()
+    const md = (now.getMonth() + 1) + '-' + now.getDate()
+    const hit = (this._icebergs || []).find((b) => {
+      if (!b.createdAt) return false
+      const d = new Date(b.createdAt)
+      return (d.getMonth() + 1) + '-' + d.getDate() === md && d.getFullYear() < now.getFullYear()
+    })
+    this.setData({
+      todayMemory: hit ? { id: hit._id, title: hit.title || '一段回忆', yearsAgo: now.getFullYear() - new Date(hit.createdAt).getFullYear() } : null
+    })
+  },
+  openToday () {
+    if (this.data.todayMemory) wx.navigateTo({ url: `/pages/iceberg/iceberg?id=${this.data.todayMemory.id}` })
   },
 
   onHide () {
@@ -84,8 +137,12 @@ Page({
 
   async refreshData () {
     let icebergs = []
-    try { icebergs = await api.listIcebergs() }
-    catch (e) { console.warn('数据加载失败（可能未创建集合）', e) }
+    try {
+      if (this.data.familyOwner) {
+        const r = (await wx.cloud.callFunction({ name: 'family', data: { action: 'list', owner: this.data.familyOwner } })).result || {}
+        icebergs = r.data || []
+      } else icebergs = await api.listIcebergs()
+    } catch (e) { console.warn('数据加载失败（可能未创建集合）', e) }
     this._icebergs = icebergs
     this.setData({
       icebergCount: icebergs.length,
@@ -374,7 +431,7 @@ Page({
       preview: {
         wavPath, text: text || '', rawText: text || '', audioOnly: !hasText && !!wavPath,
         zoneOptions: stages.map((s) => s.key), zoneIndex: stages.length - 1,
-        timeLabel: '', _autoYear: null,
+        timeLabel: '', _autoYear: null, showTitle: false, _aiTitle: '',
         editId: (opts && opts.editId) || null, extraWavs: [],
         photos: [], previewVoicePlaying: false
       }
@@ -402,8 +459,9 @@ Page({
     p = this.data.preview
     if (!p || p.wavPath !== wavPath) return
     const stages = life.getStages()
-    const upd = { 'preview.rawText': finalText, 'preview.audioOnly': !finalText && !!wavPath, 'preview.zoneOptions': stages.map((s) => s.key) }
-    if (finalText) upd['preview.text'] = (r && r.title) ? `${r.title}\n${finalText}` : finalText
+    // 默认保留讲述者原话（逐字）；AI 小标题可选、可一键还原
+    const upd = { 'preview.rawText': finalText, 'preview.audioOnly': !finalText && !!wavPath, 'preview.zoneOptions': stages.map((s) => s.key), 'preview._aiTitle': (r && r.title) || '', 'preview.showTitle': false }
+    if (finalText) upd['preview.text'] = finalText
     const age = life.parseAge(finalText)
     if (age != null && this.data.birthYear) {
       const yr = life.eventYear(this.data.birthYear, age)
@@ -429,6 +487,20 @@ Page({
     const v = e.detail.value
     const p = this.data.preview
     this.setData({ 'preview.text': v, 'preview.audioOnly': !v.trim() && !!(p && p.wavPath) })
+  },
+
+  // AI 小标题开关 / 一键还原逐字（保住妈妈的原话）
+  toggleTitle () {
+    const p = this.data.preview
+    if (!p) return
+    const on = !p.showTitle
+    this.setData({ 'preview.showTitle': on, 'preview.text': on && p._aiTitle ? `${p._aiTitle}\n${p.rawText}` : p.rawText })
+  },
+  revertRaw () {
+    const p = this.data.preview
+    if (!p) return
+    this.setData({ 'preview.showTitle': false, 'preview.text': p.rawText })
+    ui.toast('已还原逐字')
   },
 
   pickZoneSheet () {

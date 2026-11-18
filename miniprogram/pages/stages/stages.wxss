@@ -37,6 +37,7 @@
 .ms-name-input { flex: 1; }
 .ms-age-input { flex: 0 0 140rpx; text-align: center; }
 .ms-add-btn { flex: 0 0 120rpx; min-height: 80rpx; display: flex; align-items: center; justify-content: center; background: linear-gradient(160deg,#2E7C93,#1F6478); color: #fff; border-radius: var(--radius-md); font-size: var(--fs-sm); }
+.invite-code { flex: 1; text-align: center; font-size: var(--fs-md); color: var(--c-primary); font-weight: 600; letter-spacing: 2rpx; }
 
 .voice-hold { margin: 8rpx 0 12rpx; min-height: 96rpx; display: flex; align-items: center; justify-content: center; background: linear-gradient(160deg,#2E7C93,#1F6478); color: #fff; border-radius: 48rpx; font-size: var(--fs-md); font-weight: 500; }
 .voice-hold.on { background: linear-gradient(160deg,#C4574A,#B3402F); }

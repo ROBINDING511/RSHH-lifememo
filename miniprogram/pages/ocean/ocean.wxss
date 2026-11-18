@@ -166,6 +166,16 @@
 .continue-hold { margin-top: 24rpx; min-height: 88rpx; display: flex; align-items: center; justify-content: center; border: 2rpx dashed rgba(31,100,120,.4); border-radius: 44rpx; color: var(--c-primary); font-size: var(--fs-md); }
 .preview-actions { display: flex; gap: 24rpx; margin-top: 24rpx; }
 
+/* 提示脚手架 / 那年今日 / 润色回退 */
+.hint-next { pointer-events: auto; margin-top: 16rpx; padding: 6rpx 24rpx; border-radius: 28rpx; background: rgba(255,255,255,.18); color: #fff; font-size: var(--fs-xs); }
+.today-bar { position: absolute; left: 24rpx; right: 140rpx; z-index: 21; background: rgba(253,252,249,.92); border: 2rpx solid rgba(31,100,120,.15); border-radius: 32rpx; padding: 14rpx 24rpx; color: var(--c-primary); font-size: var(--fs-sm); box-shadow: 0 4rpx 16rpx rgba(31,100,120,.12); }
+.today-bar text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: block; }
+.react-chip { background: rgba(247,232,228,.95); border-color: rgba(179,64,47,.25); color: var(--c-danger); }
+.polish-row { display: flex; gap: 16rpx; margin-top: 16rpx; }
+.polish-toggle { padding: 8rpx 24rpx; border-radius: 28rpx; background: var(--c-soft); color: var(--c-text-2); font-size: var(--fs-xs); }
+.polish-toggle.on { background: var(--c-primary-soft); color: var(--c-primary); }
+.polish-revert { padding: 8rpx 24rpx; border-radius: 28rpx; background: var(--c-soft); color: var(--c-text-2); font-size: var(--fs-xs); text-decoration: underline; }
+
 /* ============ 减少动态效果：全停，静态显示 ============ */
 @media (prefers-reduced-motion: reduce) {
   .caustic, .cruise, .whalebox, .wf, .berg, .live-dot, .sea-ripple { animation: none !important; }

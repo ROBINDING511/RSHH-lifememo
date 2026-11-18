@@ -8,6 +8,7 @@ Page({
     stages: [],
     profileMode: 'year', profileBirthday: '', profileAge: '', profileYear: '',
     milestones: life.getMilestones(), msName: '', msAge: '',
+    inviteCode: '', bindCode: '', feedQ: '',
     listening: false, voiceText: ''
   },
   onLoad () {
@@ -97,6 +98,35 @@ Page({
     this._draft = life.getStages().map((s) => ({ name: s.name, to: s.to }))
     this.setData({ milestones: ms })
     this.syncDraft()
+  },
+
+  // ---- 家人共建 ----
+  async inviteFamily () {
+    try {
+      const r = (await wx.cloud.callFunction({ name: 'family', data: { action: 'invite' } })).result || {}
+      if (r.ok) this.setData({ inviteCode: r.code })
+      else wx.showToast({ title: r.error || '生成失败', icon: 'none' })
+    } catch (e) { wx.showToast({ title: '需先部署 family 云函数', icon: 'none' }) }
+  },
+  onBindCode (e) { this.setData({ bindCode: e.detail.value }) },
+  async bindFamily () {
+    try {
+      const r = (await wx.cloud.callFunction({ name: 'family', data: { action: 'bind', code: this.data.bindCode } })).result || {}
+      if (r.ok) {
+        wx.setStorageSync('familyOwner', r.owner)
+        wx.showToast({ title: '绑定好了，回海洋看家人的海', icon: 'none', duration: 2400 })
+      } else wx.showToast({ title: r.error || '绑定失败', icon: 'none' })
+    } catch (e) { wx.showToast({ title: '需先部署 family 云函数', icon: 'none' }) }
+  },
+  onFeedQ (e) { this.setData({ feedQ: e.detail.value }) },
+  async feedQuestion () {
+    const t = (this.data.feedQ || '').trim()
+    if (!t) return wx.showToast({ title: '写个问题', icon: 'none' })
+    try {
+      const r = (await wx.cloud.callFunction({ name: 'family', data: { action: 'addQuestion', text: t } })).result || {}
+      if (r.ok) { this.setData({ feedQ: '' }); wx.showToast({ title: '投喂好了', icon: 'none' }) }
+      else wx.showToast({ title: r.error || '投喂失败', icon: 'none' })
+    } catch (e) { wx.showToast({ title: '需先部署 family 云函数', icon: 'none' }) }
   },
 
   // ---- 语音：按住跟杭航说 ----

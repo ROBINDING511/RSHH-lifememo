@@ -26,11 +26,14 @@ Page({
     showIconMenu: false,
     loadFailed: false,
     viewCount: 0,
-    playing: false
+    playing: false,
+    sentences: [],
+    familyMode: false
   },
 
   onLoad (query) {
     this.id = query.id
+    this.setData({ familyMode: !!wx.getStorageSync('familyOwner') })
   },
 
   onShow () {
@@ -57,8 +60,14 @@ Page({
     this._audioLocal = null
     wx.showLoading({ title: '正在打开…', mask: true })
     try {
-      const res = await wx.cloud.database().collection('icebergs').doc(this.id).get()
-      const b = res.data
+      let b
+      if (this.data.familyMode) {
+        const r = await wx.cloud.callFunction({ name: 'family', data: { action: 'get', id: this.id } })
+        b = (r.result && r.result.ok) ? r.result.data : null
+        if (!b) throw new Error('family get failed')
+      } else {
+        b = (await wx.cloud.database().collection('icebergs').doc(this.id).get()).data
+      }
       // 云存储 fileID 换 https 临时链接：音频播放、图片预览在部分机型/基础库上不认 cloud://
       const fileIDs = [...(b.photos || []), ...(b.audioFileID ? [b.audioFileID] : [])]
         .filter((id) => id && id.startsWith('cloud://'))
@@ -70,7 +79,7 @@ Page({
       b.photos = (b.photos || []).map((p) => urlMap[p] || p)
       b.audioURL = b.audioFileID ? (urlMap[b.audioFileID] || b.audioFileID) : ''
       const icon = ICONS.find((i) => i.key === b.icon)
-      this.setData({ b, iconFile: icon ? icon.file : '', loadFailed: false })
+      this.setData({ b, iconFile: icon ? icon.file : '', loadFailed: false, sentences: splitSentences(b.text) })
       wx.setNavigationBarTitle({ title: b.zoneName || '一座冰山' })
     } catch (e) {
       console.error('冰山加载失败', e)
@@ -85,38 +94,68 @@ Page({
   // 继续说/补录：回海洋以编辑模式打开这段回忆
   continueRecord () { wx.navigateTo({ url: '/pages/ocean/ocean?edit=' + this.id }) },
 
-  // 播放妈妈的原声（再点一次暂停）。下载到本地再播 + 关静音键跟随，避免"听不到"。
+  // 音频上下文：本地优先 + 关静音键跟随；canplay 时支持按句 seek
+  async ensureAudio () {
+    if (this.audio) return this.audio
+    const b = this.data.b
+    let src = this._audioLocal
+    if (!src) {
+      try { src = (await wx.cloud.downloadFile({ fileID: b.audioFileID })).tempFilePath; this._audioLocal = src }
+      catch (e) { src = b.audioURL || '' }
+    }
+    if (!src) return null
+    this.audio = wx.createInnerAudioContext()
+    this.audio.obeyMuteSwitch = false
+    this.audio.src = src
+    this.audio.onCanplay(() => {
+      this._dur = this.audio.duration || 0
+      if (this._seekFrac != null && this._dur) {
+        this.audio.seek(this._seekFrac * this._dur)
+        this._seekFrac = null
+        this.audio.play()
+        this.setData({ playing: true })
+      }
+    })
+    this.audio.onEnded(() => this.setData({ playing: false }))
+    this.audio.onError(() => { this.setData({ playing: false }); wx.showToast({ title: '声音放不出来，换个网络试试', icon: 'none', duration: 2600 }) })
+    return this.audio
+  },
+
+  // 整段播放（再点暂停）
   async playVoice () {
     const b = this.data.b
     if (!b || !b.audioFileID) return
-    if (this.data.playing) {
-      this.audio && this.audio.stop()
-      this.setData({ playing: false })
-      return
-    }
-    let src = this._audioLocal
-    if (!src) {
-      try {
-        const d = await wx.cloud.downloadFile({ fileID: b.audioFileID })
-        src = d.tempFilePath
-        this._audioLocal = src
-      } catch (e) {
-        src = b.audioURL || ''   // 下载失败回退 https 临时链
-      }
-    }
-    if (!src) { wx.showToast({ title: '这段没有录音', icon: 'none' }); return }
-    if (!this.audio) {
-      this.audio = wx.createInnerAudioContext()
-      this.audio.obeyMuteSwitch = false   // iOS 静音键下也出声
-      this.audio.onEnded(() => this.setData({ playing: false }))
-      this.audio.onError(() => {
-        this.setData({ playing: false })
-        wx.showToast({ title: '声音放不出来，换个网络试试', icon: 'none', duration: 2600 })
-      })
-    }
-    this.audio.src = src
-    this.audio.play()
+    if (this.data.playing) { this.audio && this.audio.stop(); this.setData({ playing: false }); return }
+    this._seekFrac = 0
+    const a = await this.ensureAudio()
+    if (!a) return wx.showToast({ title: '这段没有录音', icon: 'none' })
+    if (this._dur) a.seek(0)
+    a.play()
     this.setData({ playing: true })
+  },
+
+  // 点某一句 → 估算定位到该句原声（文字是音频的索引）
+  async playSentence (e) {
+    const b = this.data.b
+    if (!b || !b.audioFileID) return
+    const i = Number(e.currentTarget.dataset.i)
+    const total = (b.text || '').length || 1
+    let before = 0
+    for (let k = 0; k < i; k++) before += (this.data.sentences[k] || '').length
+    this._seekFrac = before / total
+    const a = await this.ensureAudio()
+    if (!a) return
+    if (this._dur) { a.seek(this._seekFrac * this._dur); this._seekFrac = null; a.play(); this.setData({ playing: true }) }
+    else a.play()   // canplay 回调里 seek
+  },
+
+  // 家人反应回流（想听/抱抱）
+  async react (e) {
+    const t = e.currentTarget.dataset.t
+    try {
+      await wx.cloud.callFunction({ name: 'family', data: { action: 'react', id: this.id, type: t } })
+      wx.showToast({ title: t === 'hug' ? '抱抱已送达' : '告诉妈妈你想听', icon: 'none' })
+    } catch (err) { wx.showToast({ title: '没送出去', icon: 'none' }) }
   },
 
   previewPhoto (e) {
@@ -171,3 +210,8 @@ Page({
     }
   }
 })
+
+// 按句切分（供"点句听原声"）
+function splitSentences (text) {
+  return String(text || '').split(/(?<=[。！？!?；;])/).map((s) => s.trim()).filter(Boolean)
+}

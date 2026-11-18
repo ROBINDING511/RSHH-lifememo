@@ -67,11 +67,25 @@
   <!-- ============ 空态提示（深色胶囊白字，压在任何水色上都看得清） ============ -->
   <view class="empty-hint" wx:if="{{icebergCount === 0 && !recording && !preview && !drafts.length}}">
     <view class="hint-card">
-      <text class="hint-title">想说什么，就说给杭航听</text>
-      <text class="hint-sub">点下面的蓝色按钮，或者长按小鲸鱼</text>
-      <text class="hint-sub2">您说的每一句话，都会变成一座冰山</text>
+      <text class="hint-title">{{prompt || '想说什么，就说给杭航听'}}</text>
+      <text class="hint-sub">按住下面的青色按钮，说说看</text>
+      <view class="hint-next" hover-class="btn-hover" hover-stay-time="80" bindtap="nextPrompt">换一个问题</view>
     </view>
     <view class="hint-arrow"></view>
+  </view>
+
+  <!-- 那年今日：托起一座旧冰山 -->
+  <view class="today-bar" wx:if="{{todayMemory && !recording && !preview}}"
+    style="top: {{capsuleBottom + 16}}px;" hover-class="btn-hover" hover-stay-time="80" bindtap="openToday">
+    <text>{{todayMemory.yearsAgo}}年前的今天 · {{todayMemory.title}}</text>
+  </view>
+
+  <!-- 家人视角 / 反应回流 -->
+  <view class="today-bar" wx:if="{{familyOwner && !recording && !preview}}" style="top: {{capsuleBottom + 16}}px;">
+    <text>你在看家人的海 · 点冰山可"想听/抱抱"</text>
+  </view>
+  <view class="today-bar react-chip" wx:if="{{familyReactCount > 0 && !familyOwner && !recording && !preview && !todayMemory}}" style="top: {{capsuleBottom + 16}}px;">
+    <text>杭航想听/抱抱了 {{familyReactCount}} 次</text>
   </view>
 
   <!-- ============ 底部操作区（拇指区） ============ -->
@@ -124,6 +138,12 @@
         auto-height cursor-spacing="120" show-confirm-bar="{{false}}"
         bindinput="onPreviewInput"
         placeholder="这一刻的想法…（有错字可以直接改）"></textarea>
+
+      <!-- 润色可回退：默认逐字，AI 小标题可选 -->
+      <view class="polish-row">
+        <view class="polish-toggle {{preview.showTitle ? 'on' : ''}}" hover-class="btn-hover" hover-stay-time="80" bindtap="toggleTitle">AI 小标题·{{preview.showTitle ? '开' : '关'}}</view>
+        <view class="polish-revert" hover-class="btn-hover" hover-stay-time="80" bindtap="revertRaw">还原逐字</view>
+      </view>
 
       <!-- 照片：微信式九宫格，裸 + 添加，无多余解释文案 -->
       <view class="photo-grid">

@@ -15,6 +15,11 @@
   white-space: pre-wrap; word-break: break-word;
 }
 
+.sentence { /*  inline 文本，可点 */ }
+.sentence-hint { display: block; margin-top: 12rpx; font-size: var(--fs-xs); color: var(--c-text-2); }
+.react-row { display: flex; gap: 16rpx; margin-top: 20rpx; }
+.react-btn { padding: 12rpx 36rpx; border-radius: 36rpx; background: var(--c-primary-soft); color: var(--c-primary); font-size: var(--fs-sm); font-weight: 500; }
+
 /* ============ 播放原声 ============ */
 .voice-row {
   display: flex; align-items: center; gap: 24rpx;

@@ -17,7 +17,16 @@
   </view>
 
   <view class="berg-body card">
-    <text class="berg-text" selectable="{{true}}">{{b.text}}</text>
+    <view class="berg-text">
+      <text wx:for="{{sentences}}" wx:key="index" class="sentence" data-i="{{index}}" bindtap="playSentence">{{item}}</text>
+    </view>
+    <text class="sentence-hint" wx:if="{{b.audioFileID}}">点某一句，听那一句的原声</text>
+
+    <!-- 家人视角：反应回流 -->
+    <view class="react-row" wx:if="{{familyMode}}">
+      <view class="react-btn" hover-class="btn-hover" hover-stay-time="80" data-t="want" bindtap="react">想听</view>
+      <view class="react-btn" hover-class="btn-hover" hover-stay-time="80" data-t="hug" bindtap="react">抱抱</view>
+    </view>
 
     <view class="voice-row" wx:if="{{b.audioFileID}}"
       hover-class="voice-hover" hover-stay-time="80" bindtap="playVoice">
