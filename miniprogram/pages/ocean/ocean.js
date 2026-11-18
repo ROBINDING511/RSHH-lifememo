@@ -46,10 +46,13 @@ Page({
     this.asr = null
     this.previewAudio = null
     this.recorder = createRecorder()
+    // 视角缩放=用户自己的，会话内持久（仅重启重置）
+    this._scale = getApp().globalData.seaScale || 1
     this.setData({
       firstLaunch: getApp().globalData.firstLaunch,
       capsuleBottom: this.safeTop(),
-      familyOwner: wx.getStorageSync('familyOwner') || null
+      familyOwner: wx.getStorageSync('familyOwner') || null,
+      seaScale: this._scale
     })
     if (query && query.edit) this.loadForEdit(query.edit)
   },
@@ -61,8 +64,15 @@ Page({
       wx.navigateTo({ url: '/packageGuide/pages/guide/guide' })
       return
     }
-    this.setupWorld(this._worldInited)   // 首次居中；之后保留上次游到的位置
-    this._worldInited = true
+    // 视角(pan+zoom)=用户自己的：返回时不碰 movable-view 内部状态，仅重建数据；
+    // 只有首次/重启才设定视角（onLoad 从 globalData 恢复）。
+    if (!this._worldInited) {
+      this.setupWorld(false)
+      this._worldInited = true
+    } else {
+      this.setData({ milestones: sea.layoutMilestones(this._regions || life.getStages()) })
+      this.updateSeaBg()
+    }
     this.setData({ birthYear: life.getBirthYear(), drafts: draft.list(), whalePaused: false, ambientOn: wx.getStorageSync('ambientOn') !== '0', recConsent: wx.getStorageSync('recConsent') === '1' })
     if (!this.data.recConsent) this.askConsent()   // C 门控放在进页时，按住说话手势不被弹窗打断
     this.refreshData()
@@ -210,6 +220,8 @@ Page({
   // ==================== 世界 / 布局 ====================
   // keepPosition=true 时保留上次游到的位置（从详情返回不回到中央）
   setupWorld (keepPosition) {
+    this._suppressScale = true
+    setTimeout(() => { this._suppressScale = false }, 400)
     const w = sea.buildWorld(life.getStages())
     this._world = w
     this._regions = w.regions
@@ -224,7 +236,8 @@ Page({
     }
     this.setData({
       worldWidth: w.worldWidth, worldHeight: w.worldHeight,
-      movX: mx, movY: my, tintGradient: w.tint, stages: w.regions
+      movX: mx, movY: my, tintGradient: w.tint, stages: w.regions,
+      seaScale: this._scale || 1   // 重应用用户视角，绝不自动重置
     })
     this.setData({ milestones: sea.layoutMilestones(w.regions) })
     this.updateSeaBg()
@@ -525,8 +538,9 @@ Page({
 
   // ==================== 场景触摸 ====================
   onBgLoad () { if (!this.data.bgLoaded) this.setData({ bgLoaded: true }) },
-  onSceneTouchStart () { if (!this.data.whalePaused) this.setData({ whalePaused: true }) },
+  onSceneTouchStart () { this._seaTouching = true; if (!this.data.whalePaused) this.setData({ whalePaused: true }) },
   onSceneTouchEnd () {
+    this._seaTouching = false
     if (this.data.recording && this._holdSource === 'whale') return this.finishRecording()
     if (!this.data.recording && this.data.whalePaused) this.setData({ whalePaused: false })
   },
@@ -537,7 +551,14 @@ Page({
   },
   onSeaChange (e) { this._movX = e.detail.x; this._movY = e.detail.y; this.updateSeaBg() },
   // 双指捏合缩放（聚拢缩小 / 打开放大）
-  onSeaScale (e) { this._scale = e.detail.scale; this.setData({ seaScale: e.detail.scale }); this.updateSeaBg() },
+  onSeaScale (e) {
+    // 只认用户双指捏合（有触摸）；页面重排的伪 scale 事件一律忽略
+    if (this._suppressScale || !this._seaTouching) return
+    this._scale = e.detail.scale
+    getApp().globalData.seaScale = e.detail.scale   // 会话内记住用户视角
+    this.setData({ seaScale: e.detail.scale })
+    this.updateSeaBg()
+  },
 
   onBergDragStart (e) {
     this._dragId = e.currentTarget.dataset.id
