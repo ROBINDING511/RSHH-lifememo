@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>人生海海 · 鸟瞰活场景 v4</title>
+<style>
+:root{--ink:#2C3E50;--sub:#44525F;--main:#24648F;--danger:#C0392B;--count:#B3261E;--paper:#F2F5F6}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{background:var(--paper);font-family:-apple-system,"PingFang SC",sans-serif;color:var(--ink);
+  padding:24px 18px 46px;user-select:none}
+h1{font-size:19px;text-align:center;margin-bottom:3px;color:#1F3340}
+.sub{font-size:12.5px;color:#5A6B76;text-align:center;margin-bottom:20px}
+.wrap{display:flex;gap:24px;justify-content:center;align-items:flex-start;flex-wrap:wrap}
+.phone{width:360px;height:748px;border-radius:36px;overflow:hidden;position:relative;flex:0 0 auto;
+  box-shadow:0 12px 36px rgba(40,60,80,.24);border:6px solid #22333E}
+.scene{position:absolute;inset:0;overflow:hidden}
+.bg{position:absolute;inset:0;background:
+  radial-gradient(120% 34% at 50% -4%, rgba(255,243,214,.5) 0%, rgba(255,243,214,.16) 42%, rgba(255,243,214,0) 68%),
+  radial-gradient(80% 28% at 26% 92%, rgba(20,56,76,.32), rgba(20,56,76,0) 70%),
+  linear-gradient(180deg,#C9E7ED 0%,#ACD7DF 10%,#8CBFCC 26%,#6FA6B8 48%,#548EA4 68%,#417C95 86%,#387089 100%)}
+.caustic{position:absolute;border-radius:50%;filter:blur(14px);opacity:.12;
+  background:radial-gradient(circle,#FFF9E6 0%,rgba(255,249,230,0) 70%)}
+.c1{left:8%;top:22%;width:150px;height:70px;animation:caust 19s ease-in-out infinite}
+.c2{left:56%;top:38%;width:190px;height:80px;animation:caust 26s ease-in-out -6s infinite}
+.c3{left:18%;top:64%;width:170px;height:74px;animation:caust 22s ease-in-out -12s infinite}
+@keyframes caust{0%,100%{transform:translateX(0) scaleX(1);opacity:.09}50%{transform:translateX(16px) scaleX(1.12);opacity:.15}}
+.layer{position:absolute;inset:0;pointer-events:none}
+.z-far{z-index:3}.z-whale{z-index:5}.z-mid{z-index:7}.z-near{z-index:9}
+.z-rip1{z-index:11}.z-rip2{z-index:12}.z-bird{z-index:13}
+.ui{position:absolute;inset:0;z-index:20;display:flex;flex-direction:column;pointer-events:none}
+.berg{position:absolute;transform-origin:50% 55%;will-change:transform}
+.berg svg{display:block;width:100%;height:auto}
+@keyframes sway{0%,100%{transform:rotate(-1.6deg) translate(0,0)}50%{transform:rotate(1.6deg) translate(2px,3px)}}
+.berg.new{animation:bergdrop .95s cubic-bezier(.22,1.2,.36,1) both}
+@keyframes bergdrop{0%{transform:scale(2.1);opacity:0}55%{transform:scale(.93);opacity:1}100%{transform:scale(1)}}
+.cruise{position:absolute;left:0;top:0;width:0;height:0;animation:cruise 34s ease-in-out infinite;will-change:transform}
+@keyframes cruise{
+  0%{transform:translate(250px,300px)}16%{transform:translate(176px,344px)}
+  40%{transform:translate(48px,308px)}50%{transform:translate(34px,304px)}
+  66%{transform:translate(140px,382px)}88%{transform:translate(258px,338px)}
+  100%{transform:translate(250px,300px)}}
+.flip{transform-origin:0 0;animation:flip 34s ease-in-out infinite}
+@keyframes flip{0%,40%{transform:perspective(420px) rotateY(0deg)}
+  50%,88%{transform:perspective(420px) rotateY(180deg)}98%,100%{transform:perspective(420px) rotateY(360deg)}}
+.whalebox{position:absolute;left:-52px;top:-30px;width:104px;height:60px}
+.whalebox svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.wf{opacity:0}
+.wf0{animation:wff0 2.6s steps(1,end) infinite}
+.wf1{animation:wff1 2.6s steps(1,end) infinite}
+.wf2{animation:wff2 2.6s steps(1,end) infinite}
+.wf3{animation:wff3 2.6s steps(1,end) infinite}
+.wf4{animation:wff4 2.6s steps(1,end) infinite}
+.wf5{animation:wff5 2.6s steps(1,end) infinite}
+.wf6{animation:wff6 2.6s steps(1,end) infinite}
+.wf7{animation:wff7 2.6s steps(1,end) infinite}
+@keyframes wff0{0%{opacity:1}0.000%{opacity:1}7.143%{opacity:0} }
+@keyframes wff1{0%{opacity:0}7.143%{opacity:1}14.286%{opacity:0}92.857%{opacity:1}100.000%{opacity:0} }
+@keyframes wff2{0%{opacity:0}14.286%{opacity:1}21.429%{opacity:0}85.714%{opacity:1}92.857%{opacity:0} }
+@keyframes wff3{0%{opacity:0}21.429%{opacity:1}28.571%{opacity:0}78.571%{opacity:1}85.714%{opacity:0} }
+@keyframes wff4{0%{opacity:0}28.571%{opacity:1}35.714%{opacity:0}71.429%{opacity:1}78.571%{opacity:0} }
+@keyframes wff5{0%{opacity:0}35.714%{opacity:1}42.857%{opacity:0}64.286%{opacity:1}71.429%{opacity:0} }
+@keyframes wff6{0%{opacity:0}42.857%{opacity:1}50.000%{opacity:0}57.143%{opacity:1}64.286%{opacity:0} }
+@keyframes wff7{0%{opacity:0}50.000%{opacity:1}57.143%{opacity:0} }
+.ripples{position:absolute;left:0;width:200%;pointer-events:none}
+.r1{top:0;height:100%;animation:drift 46s linear infinite;opacity:.45}
+.r2{top:0;height:100%;animation:drift 74s linear infinite reverse;opacity:.28}
+@keyframes drift{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+.bird{position:absolute;top:16%;left:-10%;width:26px;animation:fly 34s linear infinite;animation-delay:5s}
+.bird svg{display:block;width:100%}
+.bwing{transform-origin:50% 100%;animation:flap 1.1s ease-in-out infinite alternate}
+@keyframes fly{0%{left:-10%;top:17%}45%{top:11%}100%{left:110%;top:15%}}
+@keyframes flap{from{transform:scaleY(1)}to{transform:scaleY(.5)}}
+.head{padding:24px 20px 0;text-align:center}
+.head h2{font-size:22px;letter-spacing:3px;color:#16303E;text-shadow:0 1px 0 rgba(255,255,255,.5)}
+.head p{font-size:12.5px;color:#2C4A5C;margin-top:5px;text-shadow:0 1px 0 rgba(255,255,255,.45)}
+.spacer{flex:1}
+.recbox{margin:0 20px 12px;background:rgba(255,255,255,.95);border-radius:16px;padding:14px 16px;
+  box-shadow:0 5px 18px rgba(30,58,78,.18);display:none}
+.recbox.on{display:block}
+.recbox .tt{font-size:24px;line-height:1.6;min-height:76px;color:var(--ink)}
+.recbox .tm{font-size:18px;color:var(--count);font-weight:700;margin-top:6px}
+.dot{display:inline-block;width:12px;height:12px;border-radius:50%;background:var(--count);
+  margin-right:8px;animation:blink 1s steps(2) infinite;vertical-align:2px}
+@keyframes blink{50%{opacity:.15}}
+.btn{pointer-events:auto;margin:0 24px 22px;height:88px;border:none;border-radius:22px;
+  background:var(--main);color:#fff;font-size:24px;font-weight:700;letter-spacing:2px;
+  box-shadow:0 6px 18px rgba(18,52,78,.38);transition:transform .18s,background .18s;touch-action:none;cursor:pointer}
+.btn:active{transform:scale(.96)}
+.btn.rec{background:var(--danger);letter-spacing:1px}
+.hint{display:block;width:max-content;margin:-8px auto 14px;background:rgba(16,48,66,.68);color:#fff;
+  font-size:15px;font-weight:600;letter-spacing:.5px;padding:9px 20px;border-radius:999px;pointer-events:none}
+.mask{position:absolute;inset:0;background:rgba(20,38,52,.45);display:none;align-items:center;justify-content:center;pointer-events:auto}
+.mask.on{display:flex}
+.card{width:86%;background:#fff;border-radius:20px;padding:22px 20px;box-shadow:0 14px 40px rgba(0,0,0,.28)}
+.card h3{font-size:21px;margin-bottom:10px}
+.card .tx{font-size:22px;line-height:1.7;color:var(--ink);border-right:3px solid var(--main);
+  display:inline;padding-right:2px;animation:caret 1s steps(2) infinite}
+@keyframes caret{50%{border-color:transparent}}
+.card .ops{margin-top:20px;display:flex;flex-direction:column;gap:12px}
+.op{height:80px;border-radius:18px;font-size:24px;font-weight:700;border:none;transition:transform .18s;cursor:pointer}
+.op:active{transform:scale(.96)}
+.op.ok{background:var(--main);color:#fff}
+.op.no{background:#fff;color:var(--sub);border:2px solid #c9d4dc}
+.toast{position:absolute;left:50%;bottom:150px;transform:translateX(-50%) translateY(10px);
+  background:rgba(24,40,54,.93);color:#fff;font-size:19px;padding:13px 22px;border-radius:14px;
+  opacity:0;transition:opacity .3s,transform .3s;pointer-events:none;max-width:82%;text-align:center}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+.panel{width:372px;flex:0 0 auto}
+.panel h4{font-size:16px;margin:14px 0 8px}
+.panel ul,.panel ol{padding-left:20px;font-size:13px;line-height:1.85;color:var(--sub)}
+.tagb{display:inline-block;background:var(--main);color:#fff;border-radius:6px;padding:1px 8px;font-size:12px;margin-right:6px}
+@media (prefers-reduced-motion: reduce){*{animation:none !important;transition:none !important}
+  .wf0{opacity:1}}
+</style></head><body>
+<h1>人生海海 · 鸟瞰活场景</h1>
+<div class="sub">安静的清晨海面 · 行波游动 · 提示文字可读 · 零位图</div>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><filter id="bglow" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="5"/></filter><filter id="bgsoft" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="2.4"/></filter><symbol id="wf0" viewBox="0 0 210 120">
+<path d="M272.1 153.1 L273.4 158.0 L288.7 161.2 L309.6 163.8 L314.0 171.2 L303.7 174.5 L293.1 175.0 L289.3 179.7 L291.2 190.1 L290.3 200.9 L282.2 198.3 L275.0 178.4 L268.4 164.2 L263.4 164.1 Z" fill="#24496A"/>
+<path d="M54.0 42.5 L64.0 37.5 L78.0 30.5 L92.0 25.5 L97.0 27.5 L89.0 34.5 L74.0 41.5 L60.0 45.5 Z" fill="#2A557A"/>
+<path d="M54.0 80.2 L64.0 85.2 L78.0 92.2 L92.0 97.2 L97.0 95.2 L89.0 88.2 L74.0 81.2 L60.0 77.2 Z" fill="#2A557A"/>
+<path d="M16.0 35.3 L17.9 34.7 L19.8 34.3 L21.7 36.4 L23.7 36.2 L25.6 35.9 L27.5 35.7 L29.4 35.5 L31.3 35.3 L33.2 35.2 L35.2 35.0 L37.1 34.9 L39.0 34.8 L40.9 34.8 L42.8 34.8 L44.7 34.8 L46.6 34.8 L48.6 34.9 L50.5 34.9 L52.4 35.0 L54.3 35.1 L56.2 35.3 L58.1 35.4 L60.1 35.5 L62.0 35.6 L63.9 35.8 L65.8 33.2 L67.7 33.0 L69.6 32.8 L71.5 32.7 L73.5 32.5 L75.4 32.4 L77.3 32.3 L79.2 32.2 L81.1 32.1 L83.0 32.0 L85.0 32.0 L86.9 32.0 L88.8 32.0 L90.7 32.0 L92.6 32.1 L94.5 32.2 L96.5 32.4 L98.4 32.6 L100.3 32.8 L102.2 33.1 L104.1 33.4 L106.0 33.8 L107.9 34.3 L109.9 34.8 L111.8 35.3 L113.7 35.9 L115.6 36.6 L117.5 37.4 L119.4 38.1 L121.4 39.0 L123.3 39.9 L125.2 40.9 L127.1 41.9 L129.0 43.0 L130.9 44.1 L132.8 45.3 L134.8 46.5 L136.7 47.7 L138.6 49.0 L140.5 50.3 L142.4 51.6 L144.3 52.9 L146.3 54.2 L148.2 55.5 L150.1 56.8 L152.0 58.1 L152.0 74.6 L150.1 74.7 L148.2 74.6 L146.3 74.6 L144.3 74.5 L142.4 74.4 L140.5 74.3 L138.6 74.3 L136.7 74.2 L134.8 74.1 L132.8 74.0 L130.9 74.0 L129.0 74.0 L127.1 74.0 L125.2 74.0 L123.3 74.1 L121.4 74.2 L119.4 74.4 L117.5 74.6 L115.6 74.8 L113.7 75.1 L111.8 75.4 L109.9 75.7 L107.9 76.1 L106.0 76.5 L104.1 76.9 L102.2 77.4 L100.3 77.9 L98.4 78.4 L96.5 78.9 L94.5 79.5 L92.6 80.0 L90.7 80.6 L88.8 81.2 L86.9 81.8 L85.0 82.4 L83.0 82.9 L81.1 83.5 L79.2 84.1 L77.3 84.6 L75.4 85.1 L73.5 85.6 L71.5 86.0 L69.6 86.4 L67.7 86.8 L65.8 87.1 L63.9 85.0 L62.0 85.6 L60.1 86.1 L58.1 86.6 L56.2 87.1 L54.3 87.5 L52.4 87.8 L50.5 88.1 L48.6 88.4 L46.6 88.6 L44.7 88.7 L42.8 88.8 L40.9 88.8 L39.0 88.7 L37.1 88.6 L35.2 88.4 L33.2 88.2 L31.3 87.9 L29.4 87.6 L27.5 87.2 L25.6 86.8 L23.7 86.4 L21.7 86.0 L19.8 87.9 L17.9 87.3 L16.0 86.5 Z" fill="#2E5C7E"/>
+<path d="M26.0 50.7 L30.9 50.6 L35.8 50.5 L40.6 50.4 L45.5 50.4 L50.4 50.4 L55.3 50.3 L60.2 50.2 L65.0 48.9 L69.9 48.3 L74.8 47.7 L79.7 47.2 L84.6 46.6 L89.4 46.2 L94.3 45.9 L99.2 45.9 L104.1 46.0 L109.0 46.5 L113.8 47.3 L118.7 48.5 L123.6 49.9 L128.5 51.8 L133.4 53.8 L138.2 56.1 L143.1 58.5 L148.0 61.0" fill="none" stroke="#C6DEEA" stroke-width="4" stroke-linecap="round" opacity=".6"/>
+<ellipse cx="37" cy="61.8" rx="15" ry="10.5" fill="#5F8CA8" opacity=".45"/>
+<ellipse cx="42" cy="61.8" rx="1.7" ry="2.6" fill="#16303E" opacity=".85"/>
+</symbol><symbol id="wf1" viewBox="0 0 210 120">
+<path d="M283.8 135.7 L285.8 140.3 L301.4 141.2 L322.5 140.6 L328.0 147.2 L318.3 152.0 L307.9 154.1 L304.9 159.3 L308.3 169.3 L309.1 180.1 L300.6 178.7 L290.5 160.2 L281.8 147.2 L276.9 147.8 Z" fill="#24496A"/>
+<path d="M54.0 41.6 L64.1 36.8 L78.2 30.1 L92.3 25.4 L97.3 27.5 L89.2 34.3 L74.0 41.0 L59.9 44.8 Z" fill="#2A557A"/>
+<path d="M54.0 79.4 L64.1 84.2 L78.2 90.9 L92.3 95.6 L97.3 93.5 L89.2 86.7 L74.0 80.0 L59.9 76.2 Z" fill="#2A557A"/>
+<path d="M16.0 35.6 L17.9 34.9 L19.8 34.5 L21.7 36.6 L23.7 36.3 L25.6 36.0 L27.5 35.8 L29.4 35.5 L31.3 35.3 L33.2 35.1 L35.2 34.9 L37.1 34.7 L39.0 34.5 L40.9 34.4 L42.8 34.3 L44.7 34.3 L46.6 34.2 L48.6 34.2 L50.5 34.2 L52.4 34.3 L54.3 34.3 L56.2 34.4 L58.1 34.4 L60.1 34.5 L62.0 34.6 L63.9 34.7 L65.8 32.1 L67.7 31.9 L69.6 31.7 L71.5 31.6 L73.5 31.4 L75.4 31.3 L77.3 31.3 L79.2 31.2 L81.1 31.2 L83.0 31.2 L85.0 31.2 L86.9 31.3 L88.8 31.5 L90.7 31.6 L92.6 31.8 L94.5 32.1 L96.5 32.4 L98.4 32.7 L100.3 33.1 L102.2 33.6 L104.1 34.1 L106.0 34.7 L107.9 35.3 L109.9 36.0 L111.8 36.7 L113.7 37.5 L115.6 38.4 L117.5 39.3 L119.4 40.2 L121.4 41.2 L123.3 42.2 L125.2 43.3 L127.1 44.4 L129.0 45.6 L130.9 46.8 L132.8 47.9 L134.8 49.2 L136.7 50.4 L138.6 51.6 L140.5 52.8 L142.4 54.1 L144.3 55.3 L146.3 56.4 L148.2 57.6 L150.1 58.7 L152.0 59.8 L152.0 76.3 L150.1 76.5 L148.2 76.7 L146.3 76.8 L144.3 76.9 L142.4 76.9 L140.5 76.9 L138.6 76.9 L136.7 76.8 L134.8 76.8 L132.8 76.7 L130.9 76.6 L129.0 76.6 L127.1 76.5 L125.2 76.5 L123.3 76.4 L121.4 76.4 L119.4 76.4 L117.5 76.5 L115.6 76.5 L113.7 76.6 L111.8 76.8 L109.9 76.9 L107.9 77.1 L106.0 77.3 L104.1 77.6 L102.2 77.9 L100.3 78.2 L98.4 78.6 L96.5 78.9 L94.5 79.3 L92.6 79.8 L90.7 80.2 L88.8 80.7 L86.9 81.1 L85.0 81.6 L83.0 82.1 L81.1 82.6 L79.2 83.1 L77.3 83.6 L75.4 84.0 L73.5 84.5 L71.5 84.9 L69.6 85.3 L67.7 85.7 L65.8 86.0 L63.9 84.0 L62.0 84.6 L60.1 85.1 L58.1 85.7 L56.2 86.2 L54.3 86.6 L52.4 87.1 L50.5 87.4 L48.6 87.7 L46.6 88.0 L44.7 88.2 L42.8 88.3 L40.9 88.4 L39.0 88.4 L37.1 88.3 L35.2 88.2 L33.2 88.1 L31.3 87.8 L29.4 87.6 L27.5 87.3 L25.6 86.9 L23.7 86.6 L21.7 86.2 L19.8 88.2 L17.9 87.6 L16.0 86.8 Z" fill="#2E5C7E"/>
+<path d="M26.0 50.8 L30.9 50.5 L35.8 50.3 L40.6 50.1 L45.5 49.9 L50.4 49.6 L55.3 49.4 L60.2 49.2 L65.0 47.8 L69.9 47.2 L74.8 46.7 L79.7 46.2 L84.6 45.9 L89.4 45.7 L94.3 45.8 L99.2 46.1 L104.1 46.7 L109.0 47.7 L113.8 48.9 L118.7 50.5 L123.6 52.3 L128.5 54.3 L133.4 56.5 L138.2 58.8 L143.1 61.0 L148.0 63.1" fill="none" stroke="#C6DEEA" stroke-width="4" stroke-linecap="round" opacity=".6"/>
+<ellipse cx="37" cy="61.5" rx="15" ry="10.5" fill="#5F8CA8" opacity=".45"/>
+<ellipse cx="42" cy="61.5" rx="1.7" ry="2.6" fill="#16303E" opacity=".85"/>
+</symbol><symbol id="wf2" viewBox="0 0 210 120">
+<path d="M296.0 103.5 L299.0 107.5 L314.4 104.7 L334.7 99.3 L341.6 104.4 L333.3 111.3 L323.6 115.8 L321.9 121.6 L327.6 130.5 L330.9 140.9 L322.3 141.5 L308.2 125.9 L296.7 115.2 L292.0 116.9 Z" fill="#24496A"/>
+<path d="M54.0 40.7 L64.2 36.1 L78.4 29.6 L92.6 25.1 L97.5 27.3 L89.3 34.0 L74.0 40.5 L59.9 43.9 Z" fill="#2A557A"/>
+<path d="M54.0 78.5 L64.2 83.1 L78.4 89.6 L92.6 94.0 L97.5 91.9 L89.3 85.2 L74.0 78.7 L59.9 75.2 Z" fill="#2A557A"/>
+<path d="M16.0 35.7 L17.9 35.0 L19.8 34.6 L21.7 36.6 L23.7 36.2 L25.6 35.9 L27.5 35.6 L29.4 35.3 L31.3 35.0 L33.2 34.7 L35.2 34.4 L37.1 34.2 L39.0 34.0 L40.9 33.8 L42.8 33.7 L44.7 33.5 L46.6 33.5 L48.6 33.4 L50.5 33.4 L52.4 33.4 L54.3 33.4 L56.2 33.4 L58.1 33.5 L60.1 33.6 L62.0 33.6 L63.9 33.7 L65.8 31.1 L67.7 31.0 L69.6 30.8 L71.5 30.7 L73.5 30.7 L75.4 30.6 L77.3 30.6 L79.2 30.7 L81.1 30.8 L83.0 30.9 L85.0 31.0 L86.9 31.3 L88.8 31.5 L90.7 31.8 L92.6 32.2 L94.5 32.6 L96.5 33.1 L98.4 33.6 L100.3 34.1 L102.2 34.8 L104.1 35.4 L106.0 36.2 L107.9 36.9 L109.9 37.8 L111.8 38.6 L113.7 39.5 L115.6 40.5 L117.5 41.5 L119.4 42.5 L121.4 43.6 L123.3 44.7 L125.2 45.8 L127.1 46.9 L129.0 48.0 L130.9 49.1 L132.8 50.3 L134.8 51.4 L136.7 52.5 L138.6 53.6 L140.5 54.7 L142.4 55.7 L144.3 56.7 L146.3 57.7 L148.2 58.6 L150.1 59.5 L152.0 60.3 L152.0 76.8 L150.1 77.3 L148.2 77.7 L146.3 78.1 L144.3 78.3 L142.4 78.6 L140.5 78.8 L138.6 78.9 L136.7 79.0 L134.8 79.0 L132.8 79.0 L130.9 79.0 L129.0 79.0 L127.1 79.0 L125.2 78.9 L123.3 78.9 L121.4 78.8 L119.4 78.7 L117.5 78.7 L115.6 78.7 L113.7 78.7 L111.8 78.7 L109.9 78.7 L107.9 78.7 L106.0 78.8 L104.1 78.9 L102.2 79.1 L100.3 79.2 L98.4 79.4 L96.5 79.6 L94.5 79.9 L92.6 80.1 L90.7 80.4 L88.8 80.7 L86.9 81.1 L85.0 81.4 L83.0 81.8 L81.1 82.2 L79.2 82.5 L77.3 82.9 L75.4 83.3 L73.5 83.7 L71.5 84.1 L69.6 84.4 L67.7 84.8 L65.8 85.1 L63.9 83.0 L62.0 83.6 L60.1 84.2 L58.1 84.7 L56.2 85.2 L54.3 85.7 L52.4 86.2 L50.5 86.6 L48.6 86.9 L46.6 87.2 L44.7 87.5 L42.8 87.7 L40.9 87.8 L39.0 87.9 L37.1 87.9 L35.2 87.8 L33.2 87.7 L31.3 87.5 L29.4 87.3 L27.5 87.1 L25.6 86.8 L23.7 86.5 L21.7 86.2 L19.8 88.2 L17.9 87.7 L16.0 86.9 Z" fill="#2E5C7E"/>
+<path d="M26.0 50.6 L30.9 50.3 L35.8 49.9 L40.6 49.5 L45.5 49.1 L50.4 48.8 L55.3 48.5 L60.2 48.2 L65.0 46.9 L69.9 46.3 L74.8 45.9 L79.7 45.7 L84.6 45.7 L89.4 45.8 L94.3 46.3 L99.2 47.0 L104.1 48.0 L109.0 49.4 L113.8 50.9 L118.7 52.7 L123.6 54.7 L128.5 56.8 L133.4 58.8 L138.2 60.8 L143.1 62.6 L148.0 64.1" fill="none" stroke="#C6DEEA" stroke-width="4" stroke-linecap="round" opacity=".6"/>
+<ellipse cx="37" cy="61.0" rx="15" ry="10.5" fill="#5F8CA8" opacity=".45"/>
+<ellipse cx="42" cy="61.0" rx="1.7" ry="2.6" fill="#16303E" opacity=".85"/>
+</symbol><symbol id="wf3" viewBox="0 0 210 120">
+<path d="M300.0 61.1 L304.0 64.1 L318.0 57.1 L336.1 46.2 L344.1 49.2 L338.0 58.2 L330.0 65.1 L330.0 71.1 L338.0 78.2 L343.9 87.2 L335.9 90.2 L318.0 79.1 L304.0 72.1 L300.0 75.1 Z" fill="#24496A"/>
+<path d="M54.0 39.9 L64.2 35.4 L78.6 29.0 L92.8 24.7 L97.7 27.0 L89.3 33.6 L74.0 39.8 L59.8 43.2 Z" fill="#2A557A"/>
+<path d="M54.0 77.6 L64.2 82.1 L78.6 88.4 L92.8 92.7 L97.7 90.5 L89.3 83.9 L74.0 77.6 L59.8 74.3 Z" fill="#2A557A"/>
+<path d="M16.0 35.6 L17.9 34.9 L19.8 34.4 L21.7 36.3 L23.7 36.0 L25.6 35.6 L27.5 35.2 L29.4 34.8 L31.3 34.5 L33.2 34.2 L35.2 33.8 L37.1 33.6 L39.0 33.3 L40.9 33.1 L42.8 32.9 L44.7 32.8 L46.6 32.7 L48.6 32.6 L50.5 32.5 L52.4 32.5 L54.3 32.5 L56.2 32.6 L58.1 32.7 L60.1 32.8 L62.0 32.9 L63.9 33.0 L65.8 30.5 L67.7 30.4 L69.6 30.3 L71.5 30.3 L73.5 30.3 L75.4 30.4 L77.3 30.5 L79.2 30.7 L81.1 30.9 L83.0 31.1 L85.0 31.4 L86.9 31.8 L88.8 32.2 L90.7 32.6 L92.6 33.1 L94.5 33.7 L96.5 34.3 L98.4 34.9 L100.3 35.6 L102.2 36.4 L104.1 37.2 L106.0 38.0 L107.9 38.9 L109.9 39.8 L111.8 40.7 L113.7 41.7 L115.6 42.7 L117.5 43.7 L119.4 44.7 L121.4 45.8 L123.3 46.8 L125.2 47.8 L127.1 48.9 L129.0 49.9 L130.9 50.9 L132.8 51.9 L134.8 52.8 L136.7 53.8 L138.6 54.7 L140.5 55.5 L142.4 56.3 L144.3 57.0 L146.3 57.7 L148.2 58.3 L150.1 58.9 L152.0 59.4 L152.0 75.9 L150.1 76.7 L148.2 77.4 L146.3 78.1 L144.3 78.7 L142.4 79.1 L140.5 79.6 L138.6 79.9 L136.7 80.2 L134.8 80.5 L132.8 80.7 L130.9 80.8 L129.0 80.9 L127.1 81.0 L125.2 81.0 L123.3 81.0 L121.4 81.0 L119.4 81.0 L117.5 80.9 L115.6 80.9 L113.7 80.8 L111.8 80.8 L109.9 80.7 L107.9 80.7 L106.0 80.7 L104.1 80.7 L102.2 80.7 L100.3 80.7 L98.4 80.8 L96.5 80.9 L94.5 81.0 L92.6 81.1 L90.7 81.2 L88.8 81.4 L86.9 81.6 L85.0 81.8 L83.0 82.0 L81.1 82.3 L79.2 82.5 L77.3 82.8 L75.4 83.1 L73.5 83.4 L71.5 83.6 L69.6 83.9 L67.7 84.2 L65.8 84.4 L63.9 82.3 L62.0 82.8 L60.1 83.4 L58.1 83.9 L56.2 84.4 L54.3 84.9 L52.4 85.3 L50.5 85.7 L48.6 86.1 L46.6 86.4 L44.7 86.7 L42.8 86.9 L40.9 87.1 L39.0 87.2 L37.1 87.2 L35.2 87.2 L33.2 87.2 L31.3 87.1 L29.4 86.9 L27.5 86.7 L25.6 86.5 L23.7 86.2 L21.7 86.0 L19.8 88.0 L17.9 87.6 L16.0 86.9 Z" fill="#2E5C7E"/>
+<path d="M26.0 50.3 L30.9 49.8 L35.8 49.3 L40.6 48.8 L45.5 48.3 L50.4 48.0 L55.3 47.7 L60.2 47.4 L65.0 46.2 L69.9 45.8 L74.8 45.7 L79.7 45.7 L84.6 46.0 L89.4 46.5 L94.3 47.4 L99.2 48.4 L104.1 49.8 L109.0 51.4 L113.8 53.1 L118.7 55.0 L123.6 56.9 L128.5 58.7 L133.4 60.4 L138.2 61.9 L143.1 63.1 L148.0 63.9" fill="none" stroke="#C6DEEA" stroke-width="4" stroke-linecap="round" opacity=".6"/>
+<ellipse cx="37" cy="60.3" rx="15" ry="10.5" fill="#5F8CA8" opacity=".45"/>
+<ellipse cx="42" cy="60.3" rx="1.7" ry="2.6" fill="#16303E" opacity=".85"/>
+</symbol><symbol id="wf4" viewBox="0 0 210 120">
+<path d="M292.3 18.1 L297.0 19.9 L308.6 9.3 L322.8 -6.2 L331.3 -5.5 L328.1 4.8 L322.3 13.7 L323.9 19.5 L333.6 24.0 L341.8 31.0 L334.9 36.1 L314.6 30.5 L299.2 27.6 L296.2 31.6 Z" fill="#24496A"/>
+<path d="M54.0 39.2 L64.2 34.7 L78.6 28.5 L92.8 24.2 L97.7 26.5 L89.4 33.1 L74.0 39.3 L59.8 42.5 Z" fill="#2A557A"/>
+<path d="M54.0 77.0 L64.2 81.4 L78.6 87.7 L92.8 91.9 L97.7 89.7 L89.4 83.1 L74.0 76.9 L59.8 73.6 Z" fill="#2A557A"/>
+<path d="M16.0 35.4 L17.9 34.6 L19.8 34.0 L21.7 35.9 L23.7 35.5 L25.6 35.1 L27.5 34.7 L29.4 34.3 L31.3 33.9 L33.2 33.5 L35.2 33.2 L37.1 32.9 L39.0 32.6 L40.9 32.4 L42.8 32.2 L44.7 32.0 L46.6 31.9 L48.6 31.8 L50.5 31.8 L52.4 31.8 L54.3 31.9 L56.2 32.0 L58.1 32.1 L60.1 32.3 L62.0 32.4 L63.9 32.6 L65.8 30.2 L67.7 30.2 L69.6 30.2 L71.5 30.3 L73.5 30.4 L75.4 30.6 L77.3 30.9 L79.2 31.2 L81.1 31.5 L83.0 31.9 L85.0 32.3 L86.9 32.8 L88.8 33.3 L90.7 33.9 L92.6 34.5 L94.5 35.2 L96.5 35.9 L98.4 36.6 L100.3 37.4 L102.2 38.2 L104.1 39.1 L106.0 40.0 L107.9 40.9 L109.9 41.8 L111.8 42.7 L113.7 43.7 L115.6 44.6 L117.5 45.6 L119.4 46.5 L121.4 47.4 L123.3 48.4 L125.2 49.3 L127.1 50.1 L129.0 51.0 L130.9 51.8 L132.8 52.6 L134.8 53.3 L136.7 54.0 L138.6 54.6 L140.5 55.2 L142.4 55.7 L144.3 56.1 L146.3 56.5 L148.2 56.9 L150.1 57.2 L152.0 57.4 L152.0 73.9 L150.1 75.0 L148.2 76.0 L146.3 76.9 L144.3 77.8 L142.4 78.5 L140.5 79.2 L138.6 79.9 L136.7 80.4 L134.8 80.9 L132.8 81.3 L130.9 81.7 L129.0 82.0 L127.1 82.2 L125.2 82.4 L123.3 82.6 L121.4 82.7 L119.4 82.7 L117.5 82.8 L115.6 82.8 L113.7 82.8 L111.8 82.8 L109.9 82.7 L107.9 82.7 L106.0 82.6 L104.1 82.6 L102.2 82.5 L100.3 82.5 L98.4 82.5 L96.5 82.5 L94.5 82.5 L92.6 82.5 L90.7 82.5 L88.8 82.5 L86.9 82.6 L85.0 82.7 L83.0 82.8 L81.1 82.9 L79.2 83.0 L77.3 83.2 L75.4 83.3 L73.5 83.5 L71.5 83.7 L69.6 83.8 L67.7 84.0 L65.8 84.2 L63.9 81.9 L62.0 82.4 L60.1 82.9 L58.1 83.3 L56.2 83.8 L54.3 84.2 L52.4 84.6 L50.5 85.0 L48.6 85.4 L46.6 85.7 L44.7 86.0 L42.8 86.2 L40.9 86.3 L39.0 86.5 L37.1 86.5 L35.2 86.6 L33.2 86.5 L31.3 86.4 L29.4 86.3 L27.5 86.2 L25.6 86.0 L23.7 85.8 L21.7 85.5 L19.8 87.6 L17.9 87.2 L16.0 86.6 Z" fill="#2E5C7E"/>
+<path d="M26.0 49.8 L30.9 49.2 L35.8 48.6 L40.6 48.0 L45.5 47.6 L50.4 47.3 L55.3 47.0 L60.2 46.9 L65.0 45.9 L69.9 45.8 L74.8 45.9 L79.7 46.2 L84.6 46.9 L89.4 47.7 L94.3 48.8 L99.2 50.2 L104.1 51.7 L109.0 53.4 L113.8 55.1 L118.7 56.8 L123.6 58.4 L128.5 59.8 L133.4 61.0 L138.2 61.9 L143.1 62.4 L148.0 62.4" fill="none" stroke="#C6DEEA" stroke-width="4" stroke-linecap="round" opacity=".6"/>
+<ellipse cx="37" cy="59.6" rx="15" ry="10.5" fill="#5F8CA8" opacity=".45"/>
+<ellipse cx="42" cy="59.6" rx="1.7" ry="2.6" fill="#16303E" opacity=".85"/>
+</symbol><symbol id="wf5" viewBox="0 0 210 120">
+<path d="M277.5 -16.0 L282.5 -15.3 L291.2 -28.3 L301.5 -46.7 L309.9 -48.1 L309.1 -37.3 L305.6 -27.2 L308.5 -22.0 L319.0 -19.8 L328.6 -14.9 L323.1 -8.4 L302.0 -9.2 L286.4 -8.4 L284.4 -3.8 Z" fill="#24496A"/>
+<path d="M54.0 38.8 L64.2 34.3 L78.6 28.0 L92.8 23.7 L97.7 25.9 L89.3 32.5 L74.0 38.8 L59.8 42.1 Z" fill="#2A557A"/>
+<path d="M54.0 76.6 L64.2 81.1 L78.6 87.4 L92.8 91.7 L97.7 89.5 L89.3 82.9 L74.0 76.6 L59.8 73.3 Z" fill="#2A557A"/>
+<path d="M16.0 34.9 L17.9 34.1 L19.8 33.5 L21.7 35.4 L23.7 35.0 L25.6 34.5 L27.5 34.1 L29.4 33.6 L31.3 33.2 L33.2 32.9 L35.2 32.5 L37.1 32.2 L39.0 32.0 L40.9 31.7 L42.8 31.6 L44.7 31.4 L46.6 31.4 L48.6 31.3 L50.5 31.3 L52.4 31.4 L54.3 31.5 L56.2 31.7 L58.1 31.9 L60.1 32.1 L62.0 32.4 L63.9 32.7 L65.8 30.4 L67.7 30.4 L69.6 30.6 L71.5 30.8 L73.5 31.0 L75.4 31.3 L77.3 31.7 L79.2 32.1 L81.1 32.5 L83.0 33.0 L85.0 33.6 L86.9 34.2 L88.8 34.8 L90.7 35.4 L92.6 36.1 L94.5 36.9 L96.5 37.6 L98.4 38.4 L100.3 39.2 L102.2 40.0 L104.1 40.9 L106.0 41.7 L107.9 42.6 L109.9 43.4 L111.8 44.3 L113.7 45.1 L115.6 46.0 L117.5 46.8 L119.4 47.6 L121.4 48.4 L123.3 49.1 L125.2 49.8 L127.1 50.4 L129.0 51.1 L130.9 51.6 L132.8 52.2 L134.8 52.6 L136.7 53.1 L138.6 53.4 L140.5 53.7 L142.4 54.0 L144.3 54.2 L146.3 54.3 L148.2 54.4 L150.1 54.5 L152.0 54.5 L152.0 71.0 L150.1 72.3 L148.2 73.5 L146.3 74.7 L144.3 75.8 L142.4 76.9 L140.5 77.8 L138.6 78.7 L136.7 79.5 L134.8 80.3 L132.8 80.9 L130.9 81.5 L129.0 82.1 L127.1 82.5 L125.2 82.9 L123.3 83.3 L121.4 83.6 L119.4 83.8 L117.5 84.0 L115.6 84.2 L113.7 84.3 L111.8 84.3 L109.9 84.4 L107.9 84.4 L106.0 84.4 L104.1 84.4 L102.2 84.3 L100.3 84.3 L98.4 84.2 L96.5 84.2 L94.5 84.1 L92.6 84.1 L90.7 84.0 L88.8 84.0 L86.9 84.0 L85.0 84.0 L83.0 83.9 L81.1 84.0 L79.2 84.0 L77.3 84.0 L75.4 84.0 L73.5 84.1 L71.5 84.1 L69.6 84.2 L67.7 84.3 L65.8 84.3 L63.9 82.0 L62.0 82.3 L60.1 82.7 L58.1 83.1 L56.2 83.5 L54.3 83.9 L52.4 84.2 L50.5 84.6 L48.6 84.9 L46.6 85.1 L44.7 85.4 L42.8 85.6 L40.9 85.7 L39.0 85.8 L37.1 85.9 L35.2 85.9 L33.2 85.9 L31.3 85.8 L29.4 85.7 L27.5 85.6 L25.6 85.4 L23.7 85.2 L21.7 85.0 L19.8 87.2 L17.9 86.8 L16.0 86.2 Z" fill="#2E5C7E"/>
+<path d="M26.0 49.2 L30.9 48.6 L35.8 47.9 L40.6 47.4 L45.5 47.0 L50.4 46.8 L55.3 46.7 L60.2 46.8 L65.0 46.0 L69.9 46.2 L74.8 46.6 L79.7 47.2 L84.6 48.1 L89.4 49.2 L94.3 50.5 L99.2 52.0 L104.1 53.5 L109.0 55.0 L113.8 56.5 L118.7 57.9 L123.6 59.1 L128.5 60.0 L133.4 60.5 L138.2 60.7 L143.1 60.6 L148.0 60.0" fill="none" stroke="#C6DEEA" stroke-width="4" stroke-linecap="round" opacity=".6"/>
+<ellipse cx="37" cy="59.0" rx="15" ry="10.5" fill="#5F8CA8" opacity=".45"/>
+<ellipse cx="42" cy="59.0" rx="1.7" ry="2.6" fill="#16303E" opacity=".85"/>
+</symbol><symbol id="wf6" viewBox="0 0 210 120">
+<path d="M263.9 -37.6 L268.9 -37.7 L275.6 -51.9 L282.9 -71.7 L291.1 -74.3 L291.9 -63.5 L290.0 -53.0 L293.7 -48.3 L304.3 -47.8 L314.6 -44.4 L310.2 -37.1 L289.2 -34.6 L273.9 -31.4 L272.6 -26.6 Z" fill="#24496A"/>
+<path d="M54.0 38.8 L64.2 34.2 L78.4 27.7 L92.6 23.2 L97.5 25.4 L89.3 32.1 L74.0 38.6 L59.9 42.1 Z" fill="#2A557A"/>
+<path d="M54.0 76.6 L64.2 81.2 L78.4 87.7 L92.6 92.1 L97.5 90.0 L89.3 83.3 L74.0 76.8 L59.9 73.3 Z" fill="#2A557A"/>
+<path d="M16.0 34.4 L17.9 33.6 L19.8 33.0 L21.7 34.9 L23.7 34.4 L25.6 33.9 L27.5 33.5 L29.4 33.1 L31.3 32.7 L33.2 32.3 L35.2 32.0 L37.1 31.7 L39.0 31.5 L40.9 31.3 L42.8 31.2 L44.7 31.1 L46.6 31.1 L48.6 31.1 L50.5 31.2 L52.4 31.3 L54.3 31.5 L56.2 31.8 L58.1 32.1 L60.1 32.4 L62.0 32.8 L63.9 33.2 L65.8 30.9 L67.7 31.1 L69.6 31.4 L71.5 31.7 L73.5 32.0 L75.4 32.4 L77.3 32.9 L79.2 33.3 L81.1 33.9 L83.0 34.4 L85.0 35.0 L86.9 35.7 L88.8 36.3 L90.7 37.0 L92.6 37.7 L94.5 38.5 L96.5 39.2 L98.4 40.0 L100.3 40.7 L102.2 41.5 L104.1 42.3 L106.0 43.0 L107.9 43.8 L109.9 44.5 L111.8 45.2 L113.7 45.9 L115.6 46.6 L117.5 47.2 L119.4 47.8 L121.4 48.4 L123.3 48.9 L125.2 49.3 L127.1 49.8 L129.0 50.2 L130.9 50.5 L132.8 50.8 L134.8 51.0 L136.7 51.2 L138.6 51.3 L140.5 51.4 L142.4 51.5 L144.3 51.5 L146.3 51.5 L148.2 51.4 L150.1 51.3 L152.0 51.2 L152.0 67.7 L150.1 69.1 L148.2 70.5 L146.3 71.8 L144.3 73.1 L142.4 74.3 L140.5 75.5 L138.6 76.6 L136.7 77.7 L134.8 78.6 L132.8 79.5 L130.9 80.4 L129.0 81.2 L127.1 81.9 L125.2 82.5 L123.3 83.1 L121.4 83.6 L119.4 84.0 L117.5 84.4 L115.6 84.7 L113.7 85.0 L111.8 85.3 L109.9 85.4 L107.9 85.6 L106.0 85.7 L104.1 85.8 L102.2 85.8 L100.3 85.8 L98.4 85.8 L96.5 85.8 L94.5 85.7 L92.6 85.7 L90.7 85.6 L88.8 85.6 L86.9 85.5 L85.0 85.4 L83.0 85.3 L81.1 85.3 L79.2 85.2 L77.3 85.2 L75.4 85.1 L73.5 85.1 L71.5 85.0 L69.6 85.0 L67.7 84.9 L65.8 84.9 L63.9 82.4 L62.0 82.7 L60.1 83.0 L58.1 83.3 L56.2 83.6 L54.3 83.9 L52.4 84.1 L50.5 84.4 L48.6 84.6 L46.6 84.8 L44.7 85.0 L42.8 85.2 L40.9 85.3 L39.0 85.3 L37.1 85.4 L35.2 85.4 L33.2 85.3 L31.3 85.3 L29.4 85.1 L27.5 85.0 L25.6 84.8 L23.7 84.7 L21.7 84.5 L19.8 86.6 L17.9 86.3 L16.0 85.7 Z" fill="#2E5C7E"/>
+<path d="M26.0 48.6 L30.9 48.0 L35.8 47.4 L40.6 47.0 L45.5 46.7 L50.4 46.6 L55.3 46.7 L60.2 47.1 L65.0 46.5 L69.9 46.9 L74.8 47.6 L79.7 48.5 L84.6 49.5 L89.4 50.8 L94.3 52.1 L99.2 53.5 L104.1 54.9 L109.0 56.2 L113.8 57.3 L118.7 58.2 L123.6 58.8 L128.5 59.1 L133.4 59.1 L138.2 58.7 L143.1 58.0 L148.0 57.0" fill="none" stroke="#C6DEEA" stroke-width="4" stroke-linecap="round" opacity=".6"/>
+<ellipse cx="37" cy="58.5" rx="15" ry="10.5" fill="#5F8CA8" opacity=".45"/>
+<ellipse cx="42" cy="58.5" rx="1.7" ry="2.6" fill="#16303E" opacity=".85"/>
+</symbol><symbol id="wf7" viewBox="0 0 210 120">
+<path d="M258.4 -46.9 L263.4 -47.3 L269.2 -61.8 L275.5 -81.9 L283.4 -85.0 L284.9 -74.3 L283.5 -63.7 L287.5 -59.2 L298.1 -59.3 L308.6 -56.5 L304.6 -48.9 L283.8 -45.3 L268.7 -41.3 L267.6 -36.4 Z" fill="#24496A"/>
+<path d="M54.0 39.2 L64.1 34.4 L78.2 27.6 L92.3 22.9 L97.3 25.0 L89.2 31.9 L74.0 38.6 L59.9 42.3 Z" fill="#2A557A"/>
+<path d="M54.0 76.9 L64.1 81.7 L78.2 88.4 L92.3 93.1 L97.3 91.0 L89.2 84.2 L74.0 77.5 L59.9 73.8 Z" fill="#2A557A"/>
+<path d="M16.0 33.9 L17.9 33.1 L19.8 32.5 L21.7 34.4 L23.7 33.9 L25.6 33.5 L27.5 33.0 L29.4 32.6 L31.3 32.3 L33.2 32.0 L35.2 31.7 L37.1 31.4 L39.0 31.3 L40.9 31.1 L42.8 31.1 L44.7 31.0 L46.6 31.1 L48.6 31.2 L50.5 31.4 L52.4 31.6 L54.3 31.9 L56.2 32.2 L58.1 32.6 L60.1 33.0 L62.0 33.5 L63.9 34.0 L65.8 31.8 L67.7 32.1 L69.6 32.4 L71.5 32.8 L73.5 33.2 L75.4 33.7 L77.3 34.2 L79.2 34.7 L81.1 35.3 L83.0 35.8 L85.0 36.5 L86.9 37.1 L88.8 37.7 L90.7 38.4 L92.6 39.1 L94.5 39.8 L96.5 40.4 L98.4 41.1 L100.3 41.8 L102.2 42.4 L104.1 43.0 L106.0 43.7 L107.9 44.2 L109.9 44.8 L111.8 45.3 L113.7 45.8 L115.6 46.3 L117.5 46.7 L119.4 47.1 L121.4 47.4 L123.3 47.7 L125.2 48.0 L127.1 48.2 L129.0 48.4 L130.9 48.5 L132.8 48.6 L134.8 48.6 L136.7 48.7 L138.6 48.6 L140.5 48.6 L142.4 48.5 L144.3 48.4 L146.3 48.3 L148.2 48.2 L150.1 48.1 L152.0 48.0 L152.0 64.5 L150.1 65.9 L148.2 67.3 L146.3 68.7 L144.3 70.1 L142.4 71.4 L140.5 72.7 L138.6 73.9 L136.7 75.1 L134.8 76.3 L132.8 77.4 L130.9 78.4 L129.0 79.4 L127.1 80.3 L125.2 81.2 L123.3 81.9 L121.4 82.7 L119.4 83.3 L117.5 83.9 L115.6 84.5 L113.7 85.0 L111.8 85.4 L109.9 85.7 L107.9 86.1 L106.0 86.3 L104.1 86.5 L102.2 86.7 L100.3 86.8 L98.4 86.9 L96.5 87.0 L94.5 87.0 L92.6 87.0 L90.7 87.0 L88.8 87.0 L86.9 86.9 L85.0 86.8 L83.0 86.8 L81.1 86.7 L79.2 86.6 L77.3 86.5 L75.4 86.4 L73.5 86.2 L71.5 86.1 L69.6 86.0 L67.7 85.9 L65.8 85.8 L63.9 83.2 L62.0 83.4 L60.1 83.6 L58.1 83.8 L56.2 84.0 L54.3 84.2 L52.4 84.4 L50.5 84.6 L48.6 84.7 L46.6 84.9 L44.7 85.0 L42.8 85.1 L40.9 85.1 L39.0 85.1 L37.1 85.1 L35.2 85.0 L33.2 85.0 L31.3 84.9 L29.4 84.7 L27.5 84.6 L25.6 84.4 L23.7 84.2 L21.7 84.0 L19.8 86.1 L17.9 85.7 L16.0 85.2 Z" fill="#2E5C7E"/>
+<path d="M26.0 48.2 L30.9 47.6 L35.8 47.1 L40.6 46.8 L45.5 46.7 L50.4 46.8 L55.3 47.1 L60.2 47.7 L65.0 47.4 L69.9 48.0 L74.8 48.8 L79.7 49.8 L84.6 51.0 L89.4 52.2 L94.3 53.4 L99.2 54.6 L104.1 55.6 L109.0 56.5 L113.8 57.2 L118.7 57.6 L123.6 57.7 L128.5 57.4 L133.4 56.9 L138.2 56.0 L143.1 55.0 L148.0 53.8" fill="none" stroke="#C6DEEA" stroke-width="4" stroke-linecap="round" opacity=".6"/>
+<ellipse cx="37" cy="58.2" rx="15" ry="10.5" fill="#5F8CA8" opacity=".45"/>
+<ellipse cx="42" cy="58.2" rx="1.7" ry="2.6" fill="#16303E" opacity=".85"/>
+</symbol><symbol id="berg-a" viewBox="0 0 120 110">
+<g filter="url(#bglow)" fill="#DFF2F4" opacity=".55"><circle cx="58" cy="52" r="44"/><circle cx="36" cy="68" r="26"/><circle cx="78" cy="70" r="21"/></g>
+<clipPath id="cb-a"><g><circle cx="58" cy="52" r="35"/><circle cx="36" cy="68" r="20"/><circle cx="78" cy="70" r="17"/></g></clipPath>
+<g fill="#FFFFFF" stroke="#A9C9D6" stroke-width="2.5"><circle cx="58" cy="52" r="35"/><circle cx="36" cy="68" r="20"/><circle cx="78" cy="70" r="17"/></g>
+<g clip-path="url(#cb-a)">
+  <rect x="0" y="0" width="120" height="110" fill="#A6C4D6" opacity=".7"/>
+  <g transform="translate(-7,-6)" fill="#FFFFFF"><circle cx="58" cy="52" r="35"/><circle cx="36" cy="68" r="20"/><circle cx="78" cy="70" r="17"/></g>
+  <g filter="url(#bgsoft)" opacity=".45"><ellipse cx="60" cy="96" rx="58" ry="16" fill="#46809A"/></g>
+</g>
+</symbol><symbol id="berg-b" viewBox="0 0 120 110">
+<g filter="url(#bglow)" fill="#DFF2F4" opacity=".55"><circle cx="50" cy="56" r="37"/><circle cx="80" cy="64" r="23"/></g>
+<clipPath id="cb-b"><g><circle cx="50" cy="56" r="29"/><circle cx="80" cy="64" r="18"/></g></clipPath>
+<g fill="#FFFFFF" stroke="#A9C9D6" stroke-width="2.5"><circle cx="50" cy="56" r="29"/><circle cx="80" cy="64" r="18"/></g>
+<g clip-path="url(#cb-b)">
+  <rect x="0" y="0" width="120" height="110" fill="#A6C4D6" opacity=".7"/>
+  <g transform="translate(-7,-6)" fill="#FFFFFF"><circle cx="50" cy="56" r="29"/><circle cx="80" cy="64" r="18"/></g>
+  <g filter="url(#bgsoft)" opacity=".45"><ellipse cx="60" cy="96" rx="58" ry="16" fill="#46809A"/></g>
+</g>
+</symbol><symbol id="berg-c" viewBox="0 0 120 110">
+<g filter="url(#bglow)" fill="#DFF2F4" opacity=".55"><circle cx="56" cy="58" r="28"/></g>
+<clipPath id="cb-c"><g><circle cx="56" cy="58" r="22"/></g></clipPath>
+<g fill="#FFFFFF" stroke="#A9C9D6" stroke-width="2.5"><circle cx="56" cy="58" r="22"/></g>
+<g clip-path="url(#cb-c)">
+  <rect x="0" y="0" width="120" height="110" fill="#A6C4D6" opacity=".7"/>
+  <g transform="translate(-7,-6)" fill="#FFFFFF"><circle cx="56" cy="58" r="22"/></g>
+  <g filter="url(#bgsoft)" opacity=".45"><ellipse cx="60" cy="96" rx="58" ry="16" fill="#46809A"/></g>
+</g>
+</symbol></defs></svg>
+<div class="wrap">
+ <div class="phone"><div class="scene">
+  <div class="bg"></div>
+  <div class="caustic c1"></div><div class="caustic c2"></div><div class="caustic c3"></div>
+  <div class="layer z-far">
+    <div class="berg" style="left:9%;top:14%;width:46px;opacity:.85;animation:sway 9s ease-in-out infinite"><svg><use href="#berg-c"/></svg></div>
+    <div class="berg" style="left:66%;top:10%;width:44px;opacity:.82;animation:sway 11.5s ease-in-out -3s infinite"><svg><use href="#berg-b"/></svg></div>
+    <div class="berg" style="left:41%;top:21%;width:30px;opacity:.78;animation:sway 8s ease-in-out -5s infinite"><svg><use href="#berg-c"/></svg></div>
+  </div>
+  <div class="layer z-whale"><div class="cruise"><div class="flip"><div class="whalebox"><svg class="wshadow" viewBox="0 0 210 120" aria-hidden="true"><ellipse cx="103" cy="66" rx="74" ry="20" fill="#0C2E44" opacity=".35" filter="url(#bgsoft)"/></svg><svg class="wf wf0" viewBox="0 0 210 120" aria-hidden="true"><use href="#wf0"/></svg><svg class="wf wf1" viewBox="0 0 210 120" aria-hidden="true"><use href="#wf1"/></svg><svg class="wf wf2" viewBox="0 0 210 120" aria-hidden="true"><use href="#wf2"/></svg><svg class="wf wf3" viewBox="0 0 210 120" aria-hidden="true"><use href="#wf3"/></svg><svg class="wf wf4" viewBox="0 0 210 120" aria-hidden="true"><use href="#wf4"/></svg><svg class="wf wf5" viewBox="0 0 210 120" aria-hidden="true"><use href="#wf5"/></svg><svg class="wf wf6" viewBox="0 0 210 120" aria-hidden="true"><use href="#wf6"/></svg><svg class="wf wf7" viewBox="0 0 210 120" aria-hidden="true"><use href="#wf7"/></svg></div></div></div></div>
+  <div class="layer z-mid" id="iceMid">
+    <div class="berg" style="left:0%;top:40%;width:92px;animation:sway 10s ease-in-out -1s infinite"><svg><use href="#berg-a"/></svg></div>
+    <div class="berg" style="left:62%;top:36%;width:84px;animation:sway 12s ease-in-out -4s infinite"><svg><use href="#berg-b"/></svg></div>
+    <div class="berg" style="left:33%;top:53%;width:58px;animation:sway 8.5s ease-in-out -6s infinite"><svg><use href="#berg-c"/></svg></div>
+  </div>
+  <div class="layer z-near">
+    <div class="berg" style="left:55%;top:63%;width:120px;animation:sway 11s ease-in-out -2s infinite"><svg><use href="#berg-a"/></svg></div>
+    <div class="berg" style="left:-8%;top:69%;width:110px;animation:sway 13s ease-in-out -7s infinite"><svg><use href="#berg-b"/></svg></div>
+  </div>
+  <svg class="ripples r1" viewBox="0 0 720 748" preserveAspectRatio="none" aria-hidden="true">
+    <g fill="none" stroke="#FFFFFF" stroke-linecap="round">
+      <path d="M0 96 q48 -12 96 0 t96 0 t96 0 t96 0 t96 0 t96 0 t96 0" stroke-width="2" opacity=".38"/>
+      <path d="M0 214 q48 -10 96 0 t96 0 t96 0 t96 0 t96 0 t96 0 t96 0" stroke-width="1.6" opacity=".30"/>
+      <path d="M0 372 q48 -14 96 0 t96 0 t96 0 t96 0 t96 0 t96 0 t96 0" stroke-width="2.2" opacity=".26"/>
+      <path d="M0 520 q48 -11 96 0 t96 0 t96 0 t96 0 t96 0 t96 0 t96 0" stroke-width="1.8" opacity=".22"/>
+      <path d="M0 654 q48 -13 96 0 t96 0 t96 0 t96 0 t96 0 t96 0 t96 0" stroke-width="2" opacity=".18"/>
+    </g></svg>
+  <svg class="ripples r2" viewBox="0 0 720 748" preserveAspectRatio="none" aria-hidden="true">
+    <g fill="none" stroke="#FFFFFF" stroke-linecap="round">
+      <path d="M0 152 q60 -16 120 0 t120 0 t120 0 t120 0 t120 0 t120 0" stroke-width="2.6" opacity=".22"/>
+      <path d="M0 300 q60 -14 120 0 t120 0 t120 0 t120 0 t120 0 t120 0" stroke-width="2.2" opacity=".18"/>
+      <path d="M0 452 q60 -18 120 0 t120 0 t120 0 t120 0 t120 0 t120 0" stroke-width="2.8" opacity=".16"/>
+      <path d="M0 596 q60 -15 120 0 t120 0 t120 0 t120 0 t120 0 t120 0" stroke-width="2.4" opacity=".13"/>
+    </g></svg>
+  <div class="bird" aria-hidden="true"><svg viewBox="0 0 30 14"><g class="bwing">
+    <path d="M1 12 Q8 1 15 7 Q22 1 29 12" fill="none" stroke="#26404F" stroke-width="2" stroke-linecap="round" opacity=".8"/>
+  </g></svg></div>
+  <div class="ui">
+    <div class="head"><h2>人生海海</h2><p>每一段回忆，都是海面上的一座冰山</p></div>
+    <div class="spacer"></div>
+    <div class="recbox" id="recbox" role="status" aria-live="polite">
+      <div class="tt" id="rectext"></div>
+      <div class="tm"><span class="dot"></span>正在听您说 · <span id="rectime">0.0</span> 秒</div>
+    </div>
+    <div class="hint" id="hint">按住下面大按钮说话</div>
+    <button class="btn" id="btn" aria-label="按住说话">按住 说话</button>
+  </div>
+  <div class="mask" id="mask" role="dialog" aria-modal="true" aria-label="复核转写内容">
+    <div class="card"><h3>听听看，说得对吗？</h3>
+      <div><span class="tx" id="cardtext"></span></div>
+      <div class="ops">
+        <button class="op ok" id="opOk">对，化成冰山</button>
+        <button class="op no" id="opNo">先存起来，再想想</button>
+      </div></div>
+  </div>
+  <div class="toast" id="toast" role="status"></div>
+ </div></div>
+ <div class="panel">
+  <h4><span class="tagb">这一版</span>视觉全面重调</h4>
+  <ul>
+    <li><b>去掉大色块</b>：日落金渐变整块撤掉，换成安静的清晨海——浅青到深蓝的柔和渐变，顶部只留一点淡光，光斑更轻。</li>
+    <li><b>文字收敛</b>：标题 30px→22px、字距 6px→3px；按钮 30px→24px；卡片文字同步降一档。提示语改成<b>深色胶囊白字</b>，压在任何水色上都看得清（对比约 9:1）。</li>
+    <li><b>元素提对比</b>：鲸鱼体色加深一号、水下投影加重——在浅色海面上"浮"出来；冰山改纯白+泡沫晕；飞鸟剪影加深。</li>
+  </ul>
+  <h4><span class="tagb">怎么玩</span></h4>
+  <ol>
+    <li>看 10 秒：鲸鱼摆动波从身前传到尾巴尖，中段侧身掉头，从冰山后面穿过。</li>
+    <li>按住大按钮"说话" → 松手复核 → 「对，化成冰山」落一座新雪团进中景层。</li>
+  </ol>
+ </div>
+</div>
+<script>
+(function(){
+  var TEXT = "那年我和你爸去深圳，兜里只有两百块钱，可我们笑得比谁都响。";
+  var SLOTS = [{l:"22%",t:"57%",w:62},{l:"50%",t:"44%",w:54},{l:"78%",t:"56%",w:58},{l:"30%",t:"37%",w:44}];
+  var TYPES = ["berg-a","berg-b","berg-c"];
+  var $ = function(id){return document.getElementById(id)};
+  var btn=$("btn"),recbox=$("recbox"),rectext=$("rectext"),rectime=$("rectime"),hint=$("hint"),
+      mask=$("mask"),cardtext=$("cardtext"),toast=$("toast"),iceMid=$("iceMid");
+  var mode="idle",t0=0,tick=null,typer=null,wi=0,slotIx=0;
+  function showToast(m){toast.textContent=m;toast.classList.add("on");
+    setTimeout(function(){toast.classList.remove("on")},2400)}
+  function dropBerg(){
+    var s=SLOTS[slotIx%SLOTS.length];slotIx++;
+    var t=TYPES[Math.floor(Math.random()*TYPES.length)];
+    var d=document.createElement("div");
+    d.className="berg new";
+    d.style.left=s.l;d.style.top=s.t;d.style.width=s.w+"px";
+    d.innerHTML='<svg><use href="#'+t+'"/></svg>';
+    iceMid.appendChild(d);
+    setTimeout(function(){d.classList.remove("new");
+      d.style.animation="sway "+(8+Math.random()*4).toFixed(1)+"s ease-in-out "+(-Math.random()*8).toFixed(1)+"s infinite"},1000);
+  }
+  function startRec(){
+    if(mode!=="idle")return;
+    mode="rec";t0=Date.now();wi=0;
+    btn.classList.add("rec");btn.textContent="松手 结束";
+    hint.style.display="none";recbox.classList.add("on");rectext.textContent="";
+    typer=setInterval(function(){wi++;rectext.textContent=TEXT.slice(0,wi);
+      if(wi>=TEXT.length)clearInterval(typer)},95);
+    tick=setInterval(function(){rectime.textContent=((Date.now()-t0)/1000).toFixed(1)},100);
+  }
+  function endRec(){
+    if(mode!=="rec")return;
+    mode="review";clearInterval(typer);clearInterval(tick);
+    btn.classList.remove("rec");btn.textContent="按住 说话";
+    recbox.classList.remove("on");
+    cardtext.textContent=rectext.textContent||TEXT.slice(0,8);
+    mask.classList.add("on");
+  }
+  btn.addEventListener("pointerdown",function(e){e.preventDefault();startRec()});
+  btn.addEventListener("pointerup",endRec);
+  btn.addEventListener("pointercancel",endRec);
+  btn.addEventListener("pointerleave",function(){if(mode==="rec")endRec()});
+  $("opOk").addEventListener("click",function(){mask.classList.remove("on");mode="idle";
+    dropBerg();showToast("这段回忆化成冰山了，正漂在您的海面上");hint.style.display="block"});
+  $("opNo").addEventListener("click",function(){mask.classList.remove("on");mode="idle";
+    showToast("已经存进云朵里，什么时候想改都行");hint.style.display="block"});
+})();
+</script>
+</body></html>

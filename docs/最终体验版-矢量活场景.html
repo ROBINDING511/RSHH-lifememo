@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>人生海海 · 矢量活场景（正经前端版）</title>
+<style>
+/* ============================================================
+   人生海海 · b5 日落鎏金 · 全矢量活场景
+   结构：纯 HTML/CSS/SVG，零位图素材
+   深度穿插：远景冰山(z3) → 鲸鱼(z5) → 中景冰山(z7) → 近景冰山(z9)
+   鲸鱼巡航时会从"中景/近景冰山后面"穿过 —— 真正在冰山之间游弋
+   ============================================================ */
+:root{
+  --ink:#2C3E50; --sub:#445A6A; --main:#24648F; --danger:#C0392B; --count:#B3261E;
+  --paper:#F7F3EC;
+  /* 鲸鱼配色（低饱和蓝灰，两色平涂） */
+  --whale:#64809C; --whale-lite:#8CA5BC; --whale-dark:#4E6A86; --whale-eye:#22303C;
+  /* 冰山配色 */
+  --ice-top:#F5F9FB; --ice-l:#E2ECF2; --ice-r:#C7D8E3; --ice-uw:rgba(64,102,128,.24);
+  --ice-warm:rgba(255,213,158,.55);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{background:var(--paper);font-family:-apple-system,"PingFang SC",sans-serif;color:var(--ink);
+  padding:26px 18px 50px;user-select:none}
+h1{font-size:23px;text-align:center;margin-bottom:4px}
+.sub{text-align:center;color:var(--sub);font-size:13.5px;margin-bottom:22px}
+.wrap{display:flex;gap:26px;justify-content:center;align-items:flex-start;flex-wrap:wrap}
+
+/* ---------- 手机壳 ---------- */
+.phone{width:360px;height:748px;border-radius:36px;overflow:hidden;position:relative;flex:0 0 auto;
+  box-shadow:0 14px 44px rgba(40,60,80,.28);border:6px solid #1d2b36}
+.scene{position:absolute;inset:0;overflow:hidden}
+
+/* ---------- 层1：海面（纯 CSS 渐变，替代位图底图） ---------- */
+.bg{position:absolute;inset:0;
+  background:
+    radial-gradient(130% 52% at 50% 0%, rgba(255,222,168,.85) 0%, rgba(255,214,150,.35) 38%, rgba(255,214,150,0) 62%),
+    linear-gradient(180deg,
+      #EED3A2 0%, #DCC39C 10%, #C3C2AE 22%,
+      #A3BCC2 38%, #86AAB6 56%, #6F97A8 74%, #5F889C 100%);
+}
+/* 日光倒影带（静态，顶部中央一条柔光） */
+.sunglint{position:absolute;left:50%;top:0;width:190px;height:340px;transform:translateX(-50%);
+  background:radial-gradient(50% 100% at 50% 0%, rgba(255,240,205,.5), rgba(255,240,205,0) 72%);
+  filter:blur(2px)}
+
+/* ---------- 通用图层 ---------- */
+.layer{position:absolute;inset:0;pointer-events:none}
+.z-far{z-index:3}.z-whale{z-index:5}.z-mid{z-index:7}.z-near{z-index:9}
+.z-rip1{z-index:11}.z-rip2{z-index:12}.z-bird{z-index:13}
+.ui{position:absolute;inset:0;z-index:20;display:flex;flex-direction:column;pointer-events:none}
+.mask{z-index:30}.toast{z-index:31}
+
+/* ---------- 冰山（SVG 实例，简单低多边形 3-4 个面） ---------- */
+.berg{position:absolute;transform-origin:50% 62%;will-change:transform}
+.berg svg{display:block;width:100%;height:auto}
+@keyframes sway{0%,100%{transform:rotate(-1.1deg) translateY(0)}50%{transform:rotate(1.1deg) translateY(3px)}}
+
+/* ---------- 鲸鱼（SVG，摆尾/划鳍全 CSS 动画） ---------- */
+.cruise{position:absolute;left:0;top:0;width:0;height:0;
+  animation:cruise 30s ease-in-out infinite;will-change:transform}
+.flip{transform-origin:0 0;animation:flip 30s ease-in-out infinite}
+.whale{position:absolute;left:-50px;top:-26px;width:100px;height:auto;overflow:visible;
+  filter:drop-shadow(2px 9px 3px rgba(34,66,92,.30));
+  animation:bob 3.4s ease-in-out infinite}
+@keyframes cruise{
+  0%   {transform:translate(242px,306px)}
+  18%  {transform:translate(160px,350px)}
+  42%  {transform:translate(30px,316px)}
+  50%  {transform:translate(22px,314px)}
+  68%  {transform:translate(150px,372px)}
+  90%  {transform:translate(248px,330px)}
+  100% {transform:translate(242px,306px)}
+}
+@keyframes flip{
+  0%,42%{transform:perspective(420px) rotateY(0deg)}
+  50%,90%{transform:perspective(420px) rotateY(180deg)}
+  98%,100%{transform:perspective(420px) rotateY(360deg)}
+}
+@keyframes bob{0%,100%{transform:translateY(-1.5px) rotate(-.8deg)}50%{transform:translateY(1.5px) rotate(.8deg)}}
+.fluke{transform-origin:99px 28px;animation:wag 1.5s ease-in-out infinite alternate}
+@keyframes wag{from{transform:rotate(-9deg)}to{transform:rotate(9deg)}}
+.fin-b{transform-origin:48px 41px;animation:finb 2.6s ease-in-out infinite alternate}
+.fin-t{transform-origin:48px 15px;animation:fint 2.6s ease-in-out infinite alternate-reverse}
+@keyframes finb{from{transform:rotate(-5deg)}to{transform:rotate(7deg)}}
+@keyframes fint{from{transform:rotate(5deg)}to{transform:rotate(-7deg)}}
+
+/* ---------- 水面细纹（两层 SVG 线，视差慢移） ---------- */
+.ripples{position:absolute;left:0;width:200%;height:180px;pointer-events:none}
+.r1{top:300px;animation:drift 34s linear infinite;opacity:.5}
+.r2{top:430px;animation:drift 52s linear infinite reverse;opacity:.34}
+@keyframes drift{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+/* ---------- 飞鸟（两笔线条，扇翅+横穿） ---------- */
+.bird{position:absolute;top:13%;left:-8%;width:26px;animation:fly 30s linear infinite;animation-delay:6s}
+.bird svg{display:block;width:100%}
+.birdwing{animation:flap .9s ease-in-out infinite alternate}
+@keyframes fly{0%{left:-8%;top:14%}45%{top:10%}100%{left:108%;top:13%}}
+@keyframes flap{from{transform:scaleY(1)}to{transform:scaleY(.55)}}
+
+/* ---------- UI（适老化） ---------- */
+.head{padding:26px 22px 0;text-align:center}
+.head h2{font-size:30px;letter-spacing:6px;color:var(--ink);text-shadow:0 1px 0 rgba(255,255,255,.55)}
+.head p{font-size:15px;color:var(--sub);margin-top:6px}
+.spacer{flex:1}
+.recbox{margin:0 20px 14px;background:rgba(255,255,255,.93);border-radius:18px;padding:16px 18px;
+  box-shadow:0 6px 22px rgba(40,60,80,.18);display:none}
+.recbox.on{display:block}
+.recbox .tt{font-size:26px;line-height:1.6;min-height:84px;color:var(--ink)}
+.recbox .tm{font-size:20px;color:var(--count);font-weight:700;margin-top:6px}
+.dot{display:inline-block;width:12px;height:12px;border-radius:50%;background:var(--count);
+  margin-right:8px;animation:blink 1s steps(2) infinite;vertical-align:2px}
+@keyframes blink{50%{opacity:.15}}
+.btn{pointer-events:auto;margin:0 26px 26px;height:96px;border:none;border-radius:26px;
+  background:var(--main);color:#fff;font-size:30px;font-weight:700;letter-spacing:4px;
+  box-shadow:0 8px 24px rgba(36,100,143,.42);transition:transform .18s,background .18s;touch-action:none;cursor:pointer}
+.btn:active{transform:scale(.96)}
+.btn.rec{background:var(--danger);letter-spacing:2px}
+.hint{text-align:center;font-size:15px;color:var(--sub);margin:-14px 0 18px}
+.mask{position:absolute;inset:0;background:rgba(24,38,50,.42);display:none;
+  align-items:center;justify-content:center;pointer-events:auto}
+.mask.on{display:flex}
+.card{width:86%;background:#fff;border-radius:22px;padding:24px 22px;box-shadow:0 16px 48px rgba(0,0,0,.3)}
+.card h3{font-size:22px;margin-bottom:12px}
+.card .tx{font-size:24px;line-height:1.7;color:var(--ink);border-right:3px solid var(--main);
+  display:inline;padding-right:2px;animation:caret 1s steps(2) infinite}
+@keyframes caret{50%{border-color:transparent}}
+.card .ops{margin-top:22px;display:flex;flex-direction:column;gap:14px}
+.op{height:88px;border-radius:20px;font-size:26px;font-weight:700;border:none;transition:transform .18s;cursor:pointer}
+.op:active{transform:scale(.96)}
+.op.ok{background:var(--main);color:#fff}
+.op.no{background:#fff;color:var(--sub);border:2px solid #c9d4dc}
+.toast{position:absolute;left:50%;bottom:150px;transform:translateX(-50%) translateY(10px);
+  background:rgba(28,42,54,.92);color:#fff;font-size:20px;padding:14px 24px;border-radius:16px;
+  opacity:0;transition:opacity .3s,transform .3s;pointer-events:none;max-width:82%;text-align:center}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* 新冰山落下 */
+.berg.new{animation:bergdrop .9s cubic-bezier(.22,1.2,.36,1) both}
+@keyframes bergdrop{0%{transform:scale(1.9) translateY(-26px);opacity:0}
+  60%{transform:scale(.95);opacity:1}100%{transform:scale(1)}}
+
+/* ---------- 右栏说明 ---------- */
+.panel{width:368px;flex:0 0 auto}
+.panel h4{font-size:17px;margin:16px 0 8px}
+.panel ol,.panel ul{padding-left:22px;font-size:14px;line-height:1.9;color:var(--sub)}
+.panel table{width:100%;border-collapse:collapse;font-size:13px;margin-top:6px}
+.panel th,.panel td{border:1px solid #d8cfc2;padding:6px 8px;text-align:left}
+.panel th{background:#efe7da}
+.tagb{display:inline-block;background:var(--main);color:#fff;border-radius:6px;padding:1px 8px;font-size:12px;margin-right:6px}
+.zlist{font-family:ui-monospace,Menlo,monospace;font-size:12.5px;background:#fff;border:1px solid #e2d9cb;
+  border-radius:10px;padding:12px 14px;line-height:1.9;color:var(--sub)}
+.zlist b{color:var(--main)}
+@media (prefers-reduced-motion: reduce){*{animation:none !important;transition:none !important}}
+</style>
+</head>
+<body>
+<h1>人生海海 · 矢量活场景</h1>
+<div class="sub">全 SVG/CSS 绘制 · 零位图 · 鲸鱼在冰山层之间穿插游弋（远冰山下 → 鲸鱼 → 中/近冰山上）</div>
+
+<!-- SVG 符号库：冰山 4 型 + 鲸鱼，全部简单低多边形 -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <!-- 尖峰型 -->
+    <symbol id="berg-peak" viewBox="0 0 100 78">
+      <ellipse cx="50" cy="66" rx="40" ry="9" fill="var(--ice-uw)"/>
+      <path d="M10 48 L38 6 L54 28 L66 14 L92 48 Z" fill="var(--ice-top)"/>
+      <path d="M38 6 L54 28 L46 48 L18 48 Z" fill="var(--ice-l)"/>
+      <path d="M66 14 L92 48 L56 48 L54 28 Z" fill="var(--ice-r)"/>
+      <path d="M38 6 L46 18 L40 20 Z" fill="var(--ice-warm)"/>
+    </symbol>
+    <!-- 双峰型 -->
+    <symbol id="berg-twin" viewBox="0 0 110 70">
+      <ellipse cx="55" cy="60" rx="46" ry="8" fill="var(--ice-uw)"/>
+      <path d="M8 46 L30 12 L48 30 L64 8 L100 46 Z" fill="var(--ice-top)"/>
+      <path d="M30 12 L48 30 L42 46 L16 46 Z" fill="var(--ice-l)"/>
+      <path d="M64 8 L100 46 L60 46 L48 30 Z" fill="var(--ice-r)"/>
+      <path d="M64 8 L72 20 L64 22 Z" fill="var(--ice-warm)"/>
+    </symbol>
+    <!-- 平顶型 -->
+    <symbol id="berg-flat" viewBox="0 0 100 62">
+      <ellipse cx="50" cy="52" rx="42" ry="8" fill="var(--ice-uw)"/>
+      <path d="M8 40 L22 14 L78 14 L92 40 Z" fill="var(--ice-top)"/>
+      <path d="M22 14 L50 14 L44 40 L14 40 Z" fill="var(--ice-l)"/>
+      <path d="M78 14 L92 40 L58 40 L50 14 Z" fill="var(--ice-r)"/>
+      <path d="M22 14 L44 14 L40 20 Z" fill="var(--ice-warm)"/>
+    </symbol>
+    <!-- 小浮冰 -->
+    <symbol id="berg-chunk" viewBox="0 0 70 48">
+      <ellipse cx="35" cy="40" rx="27" ry="6" fill="var(--ice-uw)"/>
+      <path d="M6 32 L24 10 L44 16 L62 32 Z" fill="var(--ice-top)"/>
+      <path d="M24 10 L44 16 L38 32 L12 32 Z" fill="var(--ice-l)"/>
+      <path d="M44 16 L62 32 L40 32 Z" fill="var(--ice-r)"/>
+    </symbol>
+  </defs>
+</svg>
+
+<div class="wrap">
+  <div class="phone"><div class="scene">
+    <!-- 层1 海面渐变 + 日光倒影 -->
+    <div class="bg"></div>
+    <div class="sunglint"></div>
+
+    <!-- 层2 远景冰山（鲸鱼从它们前面游过） -->
+    <div class="layer z-far">
+      <div class="berg" style="left:7%;top:19%;width:46px;animation:sway 8.5s ease-in-out infinite">
+        <svg><use href="#berg-chunk"/></svg></div>
+      <div class="berg" style="left:70%;top:13%;width:38px;animation:sway 10.5s ease-in-out -3s infinite">
+        <svg><use href="#berg-peak"/></svg></div>
+      <div class="berg" style="left:44%;top:25%;width:30px;animation:sway 7.5s ease-in-out -5s infinite">
+        <svg><use href="#berg-chunk"/></svg></div>
+    </div>
+
+    <!-- 层3 鲸鱼（夹在远/中冰山之间 —— 会被中近景冰山挡住） -->
+    <div class="layer z-whale">
+      <div class="cruise"><div class="flip">
+        <svg class="whale" viewBox="0 0 120 56" aria-label="鲸鱼杭航">
+          <!-- 尾鳍（摆动） -->
+          <g class="fluke">
+            <path d="M99 28 C105 25 111 19 119 17 C116 22 116 34 119 39 C111 37 105 31 99 28 Z" fill="var(--whale-dark)"/>
+          </g>
+          <!-- 身体 -->
+          <path d="M12 28 C12 18 24 12 42 11 C64 10 84 14 95 20 C100 22.5 102 25 102 28
+                   C102 31 100 33.5 95 36 C84 42 64 46 42 45 C24 44 12 38 12 28 Z" fill="var(--whale)"/>
+          <!-- 背部受光面 -->
+          <path d="M20 22 C30 15 48 12 66 13 C56 16 44 18.5 34 23 C28 25.5 23 25.5 20 22 Z" fill="var(--whale-lite)"/>
+          <!-- 胸鳍（轻划） -->
+          <path class="fin-t" d="M44 14 C47 7 52 3.5 60 2 C55 7.5 51 11 50 15 Z" fill="var(--whale-dark)"/>
+          <path class="fin-b" d="M44 42 C47 49 52 52.5 60 54 C55 48.5 51 45 50 41 Z" fill="var(--whale-dark)"/>
+          <!-- 眼睛 -->
+          <circle cx="22" cy="27" r="1.9" fill="var(--whale-eye)"/>
+        </svg>
+      </div></div>
+    </div>
+
+    <!-- 层4 中景冰山（挡住鲸鱼 → 鲸鱼在其后穿行） -->
+    <div class="layer z-mid" id="iceMid">
+      <div class="berg" style="left:2%;top:42%;width:84px;animation:sway 9.5s ease-in-out -1s infinite">
+        <svg><use href="#berg-peak"/></svg></div>
+      <div class="berg" style="left:66%;top:39%;width:70px;animation:sway 11s ease-in-out -4s infinite">
+        <svg><use href="#berg-twin"/></svg></div>
+      <div class="berg" style="left:37%;top:52%;width:56px;animation:sway 8s ease-in-out -6s infinite">
+        <svg><use href="#berg-chunk"/></svg></div>
+    </div>
+
+    <!-- 层5 近景冰山（最大，最前） -->
+    <div class="layer z-near">
+      <div class="berg" style="left:58%;top:61%;width:104px;animation:sway 10s ease-in-out -2s infinite">
+        <svg><use href="#berg-flat"/></svg></div>
+      <div class="berg" style="left:-6%;top:66%;width:96px;animation:sway 12s ease-in-out -7s infinite">
+        <svg><use href="#berg-twin"/></svg></div>
+    </div>
+
+    <!-- 层6 水面细纹（两层视差） -->
+    <svg class="ripples r1" viewBox="0 0 720 180" preserveAspectRatio="none" aria-hidden="true">
+      <g fill="none" stroke="rgba(255,255,255,.55)" stroke-width="1.6" stroke-linecap="round">
+        <path d="M0 26 q30 -7 60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0"/>
+        <path d="M0 74 q30 -6 60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0" opacity=".7"/>
+        <path d="M0 128 q30 -8 60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0" opacity=".5"/>
+      </g>
+    </svg>
+    <svg class="ripples r2" viewBox="0 0 720 180" preserveAspectRatio="none" aria-hidden="true">
+      <g fill="none" stroke="rgba(255,255,255,.5)" stroke-width="2" stroke-linecap="round">
+        <path d="M0 40 q36 -8 72 0 t72 0 t72 0 t72 0 t72 0 t72 0 t72 0 t72 0 t72 0 t72 0"/>
+        <path d="M0 110 q36 -7 72 0 t72 0 t72 0 t72 0 t72 0 t72 0 t72 0 t72 0 t72 0 t72 0" opacity=".6"/>
+      </g>
+    </svg>
+
+    <!-- 层7 飞鸟 -->
+    <div class="bird" aria-hidden="true">
+      <svg viewBox="0 0 26 12" class="birdwing">
+        <path d="M1 8 Q7 1 13 6 Q19 1 25 8" fill="none" stroke="#3A4A58" stroke-width="1.8" stroke-linecap="round"/>
+      </svg>
+    </div>
+
+    <!-- 层8 UI -->
+    <div class="ui">
+      <div class="head"><h2>人生海海</h2><p>每一段回忆，都是海面上的一座冰山</p></div>
+      <div class="spacer"></div>
+      <div class="recbox" id="recbox" role="status" aria-live="polite">
+        <div class="tt" id="rectext"></div>
+        <div class="tm"><span class="dot"></span>正在听您说 · <span id="rectime">0.0</span> 秒</div>
+      </div>
+      <div class="hint" id="hint">按住下面大按钮，把回忆说给海听</div>
+      <button class="btn" id="btn" aria-label="按住说话">按住 说话</button>
+    </div>
+
+    <div class="mask" id="mask" role="dialog" aria-modal="true" aria-label="复核转写内容">
+      <div class="card">
+        <h3>听听看，说得对吗？</h3>
+        <div><span class="tx" id="cardtext"></span></div>
+        <div class="ops">
+          <button class="op ok" id="opOk">对，化成冰山</button>
+          <button class="op no" id="opNo">先存起来，再想想</button>
+        </div>
+      </div>
+    </div>
+    <div class="toast" id="toast" role="status"></div>
+  </div></div>
+
+  <div class="panel">
+    <h4><span class="tagb">改了什么</span>对照你提的三条</h4>
+    <ul>
+      <li><b>不具象、更小</b>：鲸鱼和冰山全部改为 SVG 矢量简笔造型（冰山 3-4 个色面、鲸鱼两色平涂），尺寸缩小约一半。</li>
+      <li><b>真正在冰山间游弋</b>：鲸鱼图层夹在"远景冰山"和"中/近景冰山"之间，巡航时会从中景冰山<b>后面</b>穿过，被挡住再游出来——深度穿插，不是贴图叠贴图。</li>
+      <li><b>正经前端</b>：零位图。海面是 CSS 渐变、浪纹是 SVG 描边线、鲸鱼摆尾/划鳍/浮沉、冰山摇曳、飞鸟扇翅全部是 CSS keyframes（只动 transform/opacity），DOM 就是最终小程序 WXML 的结构。</li>
+    </ul>
+    <h4><span class="tagb">图层顺序</span>z-index 深度穿插</h4>
+    <div class="zlist">
+      z3&nbsp; 远景冰山（小 · 慢摇）<br>
+      <b>z5&nbsp; 鲸鱼（巡航 + 摆尾 + 转身）</b><br>
+      z7&nbsp; 中景冰山（会挡住鲸鱼）<br>
+      z9&nbsp; 近景冰山（最大）<br>
+      z11/12 水面细纹（双层视差）<br>
+      z13 飞鸟 · z20 UI · z30 弹窗
+    </div>
+    <h4><span class="tagb">怎么玩</span></h4>
+    <ol>
+      <li>先看 15 秒：鲸鱼从右侧出发向左游，<b>钻到中景冰山后面</b>，到左侧转身（身体侧转压扁再展开），再游回来。</li>
+      <li><b>按住</b>大按钮"说话"：字一个个蹦出（95 毫秒/字）+ 计时。</li>
+      <li><b>松手</b>复核 → 点"对，化成冰山"：一座新冰山<b>落进中景层</b>（和鲸鱼同深度，之后鲸鱼也会从它后面游过）；点"先存起来"落草稿。</li>
+    </ol>
+    <h4><span class="tagb">落地账</span></h4>
+    <table>
+      <tr><th>项</th><th>位图方案(旧)</th><th>矢量方案(本版)</th></tr>
+      <tr><td>鲸鱼素材</td><td>atlas 285KB</td><td>SVG ≈ 1KB</td></tr>
+      <tr><td>冰山素材</td><td>5 张 388KB</td><td>4 个 symbol ≈ 2KB</td></tr>
+      <tr><td>底图</td><td>15KB JPEG</td><td>CSS 渐变 0KB</td></tr>
+      <tr><td>主包占用</td><td>+688KB</td><td><b>+3KB</b></td></tr>
+      <tr><td>待机 CPU</td><td colspan="2" style="text-align:center">相同：只动 transform/opacity，合成器线程</td></tr>
+    </table>
+  </div>
+</div>
+
+<script>
+(function(){
+  var TEXT = "那年我和你爸去深圳，兜里只有两百块钱，可我们笑得比谁都响。";
+  var SLOTS = [
+    {l:"20%", t:"57%", w:64}, {l:"52%", t:"44%", w:56},
+    {l:"80%", t:"55%", w:60}, {l:"30%", t:"38%", w:46}
+  ];
+  var TYPES = ["berg-peak","berg-twin","berg-flat","berg-chunk"];
+  var btn = document.getElementById("btn");
+  var recbox = document.getElementById("recbox");
+  var rectext = document.getElementById("rectext");
+  var rectime = document.getElementById("rectime");
+  var hint = document.getElementById("hint");
+  var mask = document.getElementById("mask");
+  var cardtext = document.getElementById("cardtext");
+  var toast = document.getElementById("toast");
+  var iceMid = document.getElementById("iceMid");
+  var mode = "idle", t0 = 0, tick = null, typer = null, wi = 0, slotIx = 0;
+
+  function showToast(msg){
+    toast.textContent = msg;
+    toast.classList.add("on");
+    setTimeout(function(){ toast.classList.remove("on"); }, 2400);
+  }
+  function dropBerg(){
+    var s = SLOTS[slotIx % SLOTS.length]; slotIx++;
+    var t = TYPES[Math.floor(Math.random() * TYPES.length)];
+    var d = document.createElement("div");
+    d.className = "berg new";
+    d.style.left = s.l; d.style.top = s.t; d.style.width = s.w + "px";
+    d.innerHTML = '<svg><use href="#' + t + '"/></svg>';
+    iceMid.appendChild(d);
+    /* 落定后接上摇曳 */
+    setTimeout(function(){
+      d.classList.remove("new");
+      d.style.animation = "sway " + (8 + Math.random()*4).toFixed(1) + "s ease-in-out " +
+        (-Math.random()*8).toFixed(1) + "s infinite";
+    }, 950);
+  }
+  function startRec(){
+    if (mode !== "idle") return;
+    mode = "rec"; t0 = Date.now(); wi = 0;
+    btn.classList.add("rec"); btn.textContent = "松手 结束";
+    hint.style.display = "none";
+    recbox.classList.add("on");
+    rectext.textContent = "";
+    typer = setInterval(function(){
+      wi++;
+      rectext.textContent = TEXT.slice(0, wi);
+      if (wi >= TEXT.length) clearInterval(typer);
+    }, 95);
+    tick = setInterval(function(){
+      rectime.textContent = ((Date.now() - t0) / 1000).toFixed(1);
+    }, 100);
+  }
+  function endRec(){
+    if (mode !== "rec") return;
+    mode = "review";
+    clearInterval(typer); clearInterval(tick);
+    btn.classList.remove("rec"); btn.textContent = "按住 说话";
+    recbox.classList.remove("on");
+    cardtext.textContent = rectext.textContent || TEXT.slice(0, 8);
+    mask.classList.add("on");
+  }
+  btn.addEventListener("pointerdown", function(e){ e.preventDefault(); startRec(); });
+  btn.addEventListener("pointerup", endRec);
+  btn.addEventListener("pointercancel", endRec);
+  btn.addEventListener("pointerleave", function(){ if (mode === "rec") endRec(); });
+  document.getElementById("opOk").addEventListener("click", function(){
+    mask.classList.remove("on"); mode = "idle";
+    dropBerg();
+    showToast("这段回忆化成冰山了，正漂在您的海面上");
+    hint.style.display = "block";
+  });
+  document.getElementById("opNo").addEventListener("click", function(){
+    mask.classList.remove("on"); mode = "idle";
+    showToast("已经存进云朵里，什么时候想改都行");
+    hint.style.display = "block";
+  });
+})();
+</script>
+</body>
+</html>
