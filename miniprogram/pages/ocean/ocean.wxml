@@ -9,17 +9,16 @@
 
   <!-- ============ 插画海面场景 ============ -->
   <view class="scene" bindtouchstart="onSceneTouchStart">
-    <!-- 矢量活海：日落渐变 + SVG 浪纹，任意缩放不糊，随 pan/zoom 变化，轻轻动 -->
-    <view class="bg-sea" style="background-size: 100% {{seaGradH}}px; background-position: 0 {{seaPosY}}px;">
-      <view class="bg-sea-waves" style="background-size: {{seaTile}}px {{seaTile}}px; background-position: {{seaPosX}}px {{seaPosY}}px;"></view>
-    </view>
+    <view class="bg-gradient"></view>
 
     <!-- 整片海向四面八方扩展：2D 可拖世界，拖动如滚地球（海面纹理随世界滚过+各阶段海色晕染） -->
     <movable-area class="sea-area">
       <movable-view class="sea-world" direction="all" inertia damping="{{40}}" friction="{{2}}"
         out-of-bounds="{{false}}" disabled="{{movableDisabled}}" bindchange="onSeaChange"
-        scale="{{true}}" scale-min="0.6" scale-max="2.5" scale-value="{{seaScale}}" bindscale="onSeaScale"
+        scale="{{true}}" scale-min="0.6" scale-max="2" scale-value="{{seaScale}}" bindscale="onSeaScale"
         style="width:{{worldWidth}}px;height:{{worldHeight}}px" x="{{movX}}" y="{{movY}}">
+        <image class="sea-base" src="/images/ocean/sea_bg.jpg" mode="scaleToFill"
+          style="width:{{worldWidth}}px;height:{{worldHeight}}px" />
         <view class="sea-tint" style="background:{{tintGradient}}"></view>
         <text wx:for="{{stages}}" wx:key="key" class="stage-label"
           style="left:{{item.cx}}px;top:{{item.cy}}px">{{item.name}}之海</text>
@@ -85,10 +84,6 @@
     <text>杭航想听/抱抱了 {{familyReactCount}} 次</text>
   </view>
 
-  <!-- 右上角声音开关（录音时自动静音） -->
-  <view class="sound-btn {{ambientOn && !recording ? '' : 'muted'}}" wx:if="{{!preview}}"
-    style="top: {{capsuleBottom + 16}}px;"
-    hover-class="btn-hover" hover-stay-time="80" bindtap="toggleAmbient"></view>
 
   <!-- 杭航请妈妈试听克隆声音：像→固化；不像→继续克隆 -->
   <view class="voice-review" wx:if="{{voiceReview && !recording && !preview}}">
@@ -103,6 +98,12 @@
     </view>
   </view>
 
+
+  <!-- 引导字幕（非弹窗）：鲸鱼说话时的文字伴读，听不清也能看 -->
+  <view class="whale-caption" wx:if="{{onboardStep >= 0 && !preview && !recording}}">
+    <text>{{onboardQ}}</text>
+    <text class="whale-caption-hint">按住下面回答 · 点鲸鱼重听</text>
+  </view>
 
   <!-- ============ 底部操作区（拇指区） ============ -->
   <view class="dock safe-bottom" wx:if="{{!preview}}">

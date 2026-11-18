@@ -33,7 +33,6 @@ Page({
     prompt: '', todayMemory: null,
     familyOwner: null, familyReactCount: 0,
     voiceReview: null, voiceState: 'collecting',
-    ambientOn: true,
     sheetDy: 0, sheetSettle: true,
     seaTile: 240, seaPosX: 0, seaPosY: 0, seaGradH: 0,
     // v2.0 C 门控 / D 字幕 / A9 状态 / A8 情绪
@@ -75,15 +74,14 @@ Page({
       this.setData({ milestones: sea.layoutMilestones(this._regions || life.getStages()) })
       this.updateSeaBg()
     }
-    this.setData({ birthYear: life.getBirthYear(), drafts: draft.list(), whalePaused: false, ambientOn: wx.getStorageSync('ambientOn') !== '0' })
+    this.setData({ birthYear: life.getBirthYear(), drafts: draft.list(), whalePaused: false })
     if (!this.data.recConsent) this.askConsent()   // C 门控放在进页时，按住说话手势不被弹窗打断
     this.refreshData()
     this.refreshPrompt()
     this.refreshToday()
     this.refreshReactions()
     this.refreshVoice()
-    this.startAmbient()
-    this.preheatAsr()                                   // 预热连接：开口即出字
+    setTimeout(() => this.preheatAsr(), 600)   // 延后预热，首屏更快
     wx.authorize({ scope: 'scope.record' }).catch(() => {})  // 预热授权：0 延迟开口
   },
 
@@ -179,37 +177,12 @@ Page({
   onHide () {
     if (this.data.recording) this.saveDraftAndStop()   // 切后台/来电先落草稿
     this.stopPreviewVoice()
-    this.stopAmbient()
     this.releaseAsr()
   },
 
   onUnload () {
     this.releaseAsr()
     this.stopPreviewVoice()
-    this.stopAmbient()
-  },
-
-  // 环境音（05 岩岸碎浪）：低音量循环，可在杭航关闭
-  startAmbient () {
-    if (wx.getStorageSync('ambientOn') === '0' || this._ambient) return
-    const a = wx.createInnerAudioContext()
-    a.src = '/audio/ambient-05.mp3'
-    a.loop = true
-    a.volume = 0.22
-    a.obeyMuteSwitch = true
-    a.play()
-    this._ambient = a
-  },
-  stopAmbient () {
-    if (this._ambient) { this._ambient.stop(); this._ambient.destroy(); this._ambient = null }
-  },
-  // 右上角声音开关
-  toggleAmbient () {
-    const on = !this.data.ambientOn
-    wx.setStorageSync('ambientOn', on ? '1' : '0')
-    this.setData({ ambientOn: on })
-    if (on && !this.data.recording) this.startAmbient()
-    else this.stopAmbient()
   },
 
   safeTop () {
@@ -432,7 +405,7 @@ Page({
         if (this._whaleAudio) { this._whaleAudio.stop(); this._whaleAudio.destroy() }
         const a = wx.createInnerAudioContext()
         a.obeyMuteSwitch = false
-        a.src = res.url
+        a.src = String(res.url).replace(/^http:/, 'https:')   // 真机要求 https 音频
         a.onPlay(() => this.setData({ whaleSpeaking: true }))
         a.onEnded(() => { this.setData({ whaleSpeaking: false }); a.destroy() })
         a.onError(() => this.setData({ whaleSpeaking: false }))
@@ -477,7 +450,6 @@ Page({
     this.setupWorld(false)
     this._worldInited = true
     this.refreshData()
-    this.startAmbient()
     this.speakQuestion(`${this.data.nickname || '你'}，你的海铺好了。想记什么，按住跟我说。`)
   },
 
@@ -511,7 +483,6 @@ Page({
     this._appendBase = appendBase != null ? appendBase : null
     this.setData({ recording: true, recordMode: mode, transcript: this._appendBase || '', elapsed: 0, countdown: 0, cancelArmed: false, asrHint: '' })
     this._recActive = true   // 同步置位：快速点按的 touchend 也能停住（recorder.recording 是异步 onStart 才真）
-    this.stopAmbient()   // 录音时关闭环境音，避免干扰识别
     this._pendingText = null
     this._frameBuf = []
     if (wx.vibrateShort) wx.vibrateShort({ type: 'medium' })
@@ -527,7 +498,6 @@ Page({
         this._recActive = false
         this._lastDuration = durationMs
         this.setData({ recording: false, countdown: 0, elapsed: 0, recordMode: '', whalePaused: false, cancelArmed: false })
-        this.startAmbient()   // 录完恢复环境音（若开关为开）
         this.applyTranscript()
         if (this.cancelRequested) {
           this.cancelRequested = false

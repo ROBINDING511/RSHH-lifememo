@@ -10,7 +10,7 @@ Page({
     milestones: life.getMilestones(), msName: '', msAge: '',
     inviteCode: '', bindCode: '', feedQ: '',
     polishStyle: 'light',
-    openMenu: 'sea', ambientOn: true, cloneConsent: false,
+    openMenu: 'sea', cloneConsent: false,
     voiceState: '', voiceSampleUrl: '',
     listening: false, voiceText: ''
   },
@@ -24,7 +24,7 @@ Page({
     })
     this.recorder = createRecorder()
     this.refreshVoice()
-    this.setData({ polishStyle: wx.getStorageSync('polishStyle') || 'light', ambientOn: wx.getStorageSync('ambientOn') !== '0', cloneConsent: wx.getStorageSync('cloneConsent') === '1' })
+    this.setData({ polishStyle: wx.getStorageSync('polishStyle') || 'light', cloneConsent: wx.getStorageSync('cloneConsent') === '1' })
   },
   // 声纹=敏感个人信息：单独同意开关（默认关）
   toggleCloneConsent () {
@@ -53,12 +53,7 @@ Page({
     const k = e.currentTarget.dataset.k
     this.setData({ openMenu: this.data.openMenu === k ? '' : k })
   },
-  toggleAmbient () {
-    const on = !this.data.ambientOn
-    wx.setStorageSync('ambientOn', on ? '1' : '0')
-    this.setData({ ambientOn: on })
-    wx.showToast({ title: on ? '海浪声开了' : '海浪声关了', icon: 'none' })
-  },
+
   setStyle (e) {
     const s = e.currentTarget.dataset.s
     wx.setStorageSync('polishStyle', s)
