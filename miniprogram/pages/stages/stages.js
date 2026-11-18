@@ -9,6 +9,7 @@ Page({
     profileMode: 'year', profileBirthday: '', profileAge: '', profileYear: '',
     milestones: life.getMilestones(), msName: '', msAge: '',
     inviteCode: '', bindCode: '', feedQ: '',
+    voiceState: '', voiceSampleUrl: '',
     listening: false, voiceText: ''
   },
   onLoad () {
@@ -20,8 +21,38 @@ Page({
       profileBirthday: p.birthday || '', profileAge: p.age != null ? String(p.age) : '', profileYear: p.year != null ? String(p.year) : ''
     })
     this.recorder = createRecorder()
+    this.refreshVoice()
   },
   noop () {},
+
+  // ---- 妈妈声音克隆管理 ----
+  async refreshVoice () {
+    try {
+      const r = (await wx.cloud.callFunction({ name: 'voiceclone', data: { action: 'status' } })).result || {}
+      this.setData({ voiceState: r.state || '', voiceSampleUrl: r.sampleUrl || '' })
+    } catch (e) { /* 未部署静默 */ }
+  },
+  playVoiceSample () {
+    if (!this.data.voiceSampleUrl) return
+    if (this._va) { this._va.stop(); this._va.destroy(); this._va = null; return }
+    this._va = wx.createInnerAudioContext()
+    this._va.obeyMuteSwitch = false
+    this._va.src = this.data.voiceSampleUrl
+    this._va.onEnded(() => { this._va.destroy(); this._va = null })
+    this._va.play()
+  },
+  async deleteVoice () {
+    const r = await new Promise((res) => wx.showModal({
+      title: '删除克隆的声音？', content: '删除后会重新自动克隆一个新的。', confirmText: '删除', cancelText: '留着',
+      success: (x) => res(x.confirm), fail: () => res(false)
+    }))
+    if (!r) return
+    try {
+      await wx.cloud.callFunction({ name: 'voiceclone', data: { action: 'delete' } })
+      this.refreshVoice()
+      wx.showToast({ title: '删了，会重新克隆', icon: 'none' })
+    } catch (e) { wx.showToast({ title: '没删掉', icon: 'none' }) }
+  },
   syncDraft () { this.setData({ stages: life.buildStages(this._draft) }) },
 
   // ---- 个人资料 ----

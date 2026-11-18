@@ -88,6 +88,19 @@
     <text>杭航想听/抱抱了 {{familyReactCount}} 次</text>
   </view>
 
+  <!-- 杭航请妈妈试听克隆声音：像→固化；不像→继续克隆 -->
+  <view class="voice-review" wx:if="{{voiceReview && !recording && !preview}}">
+    <view class="vr-card">
+      <text class="vr-title">杭航把您的声音克隆好了</text>
+      <text class="vr-sub">听听像不像您？像就固化下来</text>
+      <view class="vr-play" hover-class="btn-hover" hover-stay-time="80" bindtap="playVoiceSample">▶ 试听克隆声音</view>
+      <view class="vr-btns">
+        <view class="vr-like" hover-class="btn-hover" hover-stay-time="80" bindtap="voiceLike">像，固化</view>
+        <view class="vr-unlike" hover-class="btn-hover" hover-stay-time="80" bindtap="voiceUnlike">不像</view>
+      </view>
+    </view>
+  </view>
+
   <!-- ============ 底部操作区（拇指区） ============ -->
   <view class="dock safe-bottom" wx:if="{{!preview}}">
     <view class="dock-row" wx:if="{{!recording}}">

@@ -77,6 +77,15 @@
     </view>
   </view>
 
+  <view class="card" wx:if="{{voiceState}}">
+    <text class="prof-title">妈妈的声音（克隆）</text>
+    <text class="ms-invite">{{voiceState==='frozen' ? '已固化：不再自动克隆；删除后会重新克隆。' : voiceState==='review' ? '克隆好了，回海洋听听像不像。' : '正在收集您的声音，自动克隆中…'}}</text>
+    <view class="ms-add" wx:if="{{voiceSampleUrl}}">
+      <view class="ms-add-btn" style="flex:1" hover-class="btn-hover" hover-stay-time="80" bindtap="playVoiceSample">试听克隆声音</view>
+      <view class="ms-add-btn" style="flex:1;background:var(--c-danger-soft);color:var(--c-danger)" hover-class="btn-hover" hover-stay-time="80" bindtap="deleteVoice">删除声音</view>
+    </view>
+  </view>
+
   <view class="voice-hold {{listening?'on':''}}"
     bindtouchstart="onVoiceStart" catchtouchend="onVoiceEnd" catchtouchcancel="onVoiceEnd">
     <text>{{listening ? '松开，我听懂就设好' : '按住跟杭航说你的划分'}}</text>

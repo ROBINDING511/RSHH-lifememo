@@ -29,9 +29,10 @@ Page({
     // 复核 / 发布
     preview: null, previewVoicePlaying: false, publishing: false,
     drafts: [], icebergCount: 0,
-    // 提示脚手架 / 那年今日 / 家人
+    // 提示脚手架 / 那年今日 / 家人 / 声音克隆
     prompt: '', todayMemory: null,
-    familyOwner: null, familyReactCount: 0
+    familyOwner: null, familyReactCount: 0,
+    voiceReview: null, voiceState: 'collecting'
   },
 
   onLoad (query) {
@@ -58,6 +59,7 @@ Page({
     this.refreshPrompt()
     this.refreshToday()
     this.refreshReactions()
+    this.refreshVoice()
     this.preheatAsr()                                   // 预热连接：开口即出字
     wx.authorize({ scope: 'scope.record' }).catch(() => {})  // 预热授权：0 延迟开口
   },
@@ -85,6 +87,52 @@ Page({
       const r = (await wx.cloud.callFunction({ name: 'family', data: { action: 'myReactions' } })).result || {}
       this.setData({ familyReactCount: r.count || 0 })
     } catch (e) { /* 未部署静默 */ }
+  },
+
+  // ==================== 妈妈声音克隆 ====================
+  async refreshVoice () {
+    if (this.data.familyOwner) return
+    try {
+      const r = (await wx.cloud.callFunction({ name: 'voiceclone', data: { action: 'status' } })).result || {}
+      this.setData({
+        voiceState: r.state || 'collecting',
+        voiceReview: r.state === 'review' ? { sampleUrl: r.sampleUrl } : null
+      })
+    } catch (e) { /* 未部署静默 */ }
+  },
+  playVoiceSample () {
+    const v = this.data.voiceReview
+    if (!v || !v.sampleUrl) return
+    if (this._voiceAudio) { this._voiceAudio.stop(); this._voiceAudio.destroy(); this._voiceAudio = null; return }
+    this._voiceAudio = wx.createInnerAudioContext()
+    this._voiceAudio.obeyMuteSwitch = false
+    this._voiceAudio.src = v.sampleUrl
+    this._voiceAudio.onEnded(() => { this._voiceAudio.destroy(); this._voiceAudio = null })
+    this._voiceAudio.play()
+  },
+  async voiceLike () {
+    try {
+      await wx.cloud.callFunction({ name: 'voiceclone', data: { action: 'confirm', like: true } })
+      this.setData({ voiceReview: null, voiceState: 'frozen' })
+      ui.toast('声音固化好了，不再自动克隆', 2400)
+    } catch (e) { ui.toast('没存上，再试试') }
+  },
+  async voiceUnlike () {
+    try {
+      await wx.cloud.callFunction({ name: 'voiceclone', data: { action: 'confirm', like: false } })
+      this.setData({ voiceReview: null, voiceState: 'collecting' })
+      ui.toast('好，下次接着克隆', 2200)
+    } catch (e) { ui.toast('没存上，再试试') }
+  },
+  // 发布后把这段原声喂给克隆（固化后服务端自动跳过）
+  feedVoiceSample (fileID) {
+    if (!fileID || this.data.familyOwner) return
+    wx.cloud.callFunction({ name: 'voiceclone', data: { action: 'addSample', fileID, durationMs: this._lastDuration || 0 } })
+      .then((r) => {
+        const s = (r && r.result) || {}
+        if (s.state === 'review') this.setData({ voiceReview: { sampleUrl: s.sampleUrl }, voiceState: 'review' })
+        else this.setData({ voiceState: s.state || this.data.voiceState })
+      }).catch(() => {})
   },
 
   // 那年今日：托起一座旧冰山
@@ -301,6 +349,7 @@ Page({
         if (left <= 3 && wx.vibrateShort) wx.vibrateShort({ type: 'light' })
       },
       onStop: async (wavPath, durationMs, err) => {
+        this._lastDuration = durationMs
         this.setData({ recording: false, countdown: 0, elapsed: 0, recordMode: '', whalePaused: false, cancelArmed: false })
         this.applyTranscript()
         if (this.cancelRequested) {
@@ -567,7 +616,7 @@ Page({
         let audioFileID = ''
         if (audioPath) audioFileID = (await wx.cloud.uploadFile({ cloudPath: `voices/${Date.now()}_edit.wav`, filePath: audioPath })).fileID
         await api.updateIceberg(p.editId, { text: body, audioFileID, zoneName, memoryTime: timeValue })
-        created = { _id: p.editId }
+        created = { _id: p.editId, audioFileID }
       } else {
         created = await api.createIceberg({
           text: body, audioPath, photos: p.photos, timeValue, zoneName,
@@ -575,6 +624,7 @@ Page({
         })
       }
       this.lastPublishedId = created && created._id
+      this.feedVoiceSample(created && created.audioFileID)   // 喂给声音克隆（固化后自动跳过）
       this.stopPreviewVoice()
       wavs.forEach((w) => draft.forgetPath(w))
       this.setData({ preview: null, publishing: false, drafts: draft.list() })
