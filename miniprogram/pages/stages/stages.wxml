@@ -11,6 +11,17 @@
     <view class="hub-pill" hover-class="btn-hover" hover-stay-time="80" bindtap="goRecycle">云朵</view>
   </view>
 
+  <!-- 鲸鱼主菜单功能之一：AI 文字梳理风格 -->
+  <view class="card">
+    <text class="prof-title">AI 文字梳理风格</text>
+    <text class="ms-invite">鲸鱼帮您顺文字时按您选的来；原话和原声永远保留，随时可还原。</text>
+    <view class="style-row">
+      <view class="style-opt {{polishStyle === 'verbatim' ? 'on' : ''}}" hover-class="btn-hover" hover-stay-time="80" data-s="verbatim" bindtap="setStyle">忠实原文</view>
+      <view class="style-opt {{polishStyle === 'light' ? 'on' : ''}}" hover-class="btn-hover" hover-stay-time="80" data-s="light" bindtap="setStyle">轻度优化·尽量保留原话</view>
+      <view class="style-opt {{polishStyle === 'written' ? 'on' : ''}}" hover-class="btn-hover" hover-stay-time="80" data-s="written" bindtap="setStyle">口语顺成书面语</view>
+    </view>
+  </view>
+
   <view class="card">
     <text class="prof-title">你的年纪（把"…岁"换算成年份）</text>
     <view class="mode-tabs">

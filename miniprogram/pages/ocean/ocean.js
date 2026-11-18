@@ -354,7 +354,7 @@ Page({
     if (p) this.setData({ 'preview.blanks': blanks })
     ui.toast('好，这段咱们就放在这儿，不碰它。', 2600)
   },
-  onSkipTopic () { this.markBlank() },
+
   // A8 情绪保护：先歇一歇（收起复核卡，草稿已落）
   restNow () {
     const p = this.data.preview
@@ -623,6 +623,8 @@ Page({
         photos: [], previewVoicePlaying: false
       }
     })
+    // 岁数/年份→海 同步算（不等异步 refine），发布时归属即正确
+    this.setData(this.computeTimeZone(text || ''))
     // A8 情绪保护：命中敏感词不整理不追问，温和话术+可歇一歇
     const emo = this.isSensitive(text || '')
     this.setData({ previewStatus: 'pending', previewEmotion: emo, 'preview.blanks': [] })
@@ -632,6 +634,30 @@ Page({
   },
   isSensitive (t) {
     return /不想活|轻生|自杀|过世|去世|走了的人|重病|癌/.test(t || '')
+  },
+  // 岁数优先归海（8岁→童年，不依赖生日）；文本"出生是1987年"是生日非事件年
+  computeTimeZone (text) {
+    const stages = life.getStages()
+    const age = life.parseAge(text)
+    const birthM = text.match(/(?:出生|生于)[^0-9]{0,6}((?:19|20)\d{2})/) || text.match(/((?:19|20)\d{2})\s*年(?:生|出生)/)
+    const by = this.data.birthYear || (birthM ? Number(birthM[1]) : null)
+    const ym = text.match(/((?:19|20)\d{2})\s*年/)
+    const eventYear = (ym && Number(ym[1]) !== by) ? Number(ym[1]) : null
+    const out = {}
+    if (age != null) {
+      out['preview.zoneIndex'] = stages.findIndex((x) => x.key === life.stageOfAge(age).key)
+      if (by) {
+        const yr = life.eventYear(by, age)
+        out['preview.timeLabel'] = `${yr}年 · ${age}岁`
+        out['preview._autoYear'] = yr
+      } else out['preview.timeLabel'] = `${age}岁`
+    } else if (eventYear && by) {
+      const a = eventYear - by
+      out['preview.timeLabel'] = `${eventYear}年 · ${a}岁`
+      out['preview.zoneIndex'] = stages.findIndex((x) => x.key === life.stageOfAge(a).key)
+      out['preview._autoYear'] = eventYear
+    } else out['preview.timeLabel'] = ''
+    return out
   },
 
   async refinePreview (wavPath, text) {
@@ -646,8 +672,6 @@ Page({
     if (!finalText && wavPath) finalText = (await this.fallbackTranscribe(wavPath).catch(() => '')) || ''
     let p = this.data.preview
     if (!p || p.wavPath !== wavPath) return
-    // A3 口述命中"不想说/跳过"也触发留白
-    if (/不想说|不想多说|别问了|跳过/.test(finalText)) this.markBlank()
     let r = null
     if (finalText.replace(/\s/g, '').length >= 2) {
       try { r = await api.analyzeMemory(finalText, (p.blanks || []).map((b) => b.topic)) }
@@ -660,21 +684,7 @@ Page({
     const upd = { 'preview.rawText': finalText, 'preview.audioOnly': !finalText && !!wavPath, 'preview.zoneOptions': stages.map((s) => s.key), 'preview._aiTitle': (r && r.title) || '', 'preview._four': (r && r.four) || '', 'preview.showTitle': false }
     // AI 标题直接加在文字上方（不可关，但可在框内直接点改）；四字名字另存 _four
     if (finalText) upd['preview.text'] = (r && r.title) ? `${r.title}\n${finalText}` : finalText
-    // 年份("2017年")或岁数("14岁") → 换算年龄 → 自动归海；不再瞎归晚年
-    const ym = finalText.match(/((?:19|20)\d{2})\s*年/)
-    const age = life.parseAge(finalText)
-    if (ym && this.data.birthYear) {
-      const yr = Number(ym[1])
-      const a = yr - this.data.birthYear
-      upd['preview.timeLabel'] = `${yr}年 · ${a}岁`
-      upd['preview.zoneIndex'] = stages.findIndex((x) => x.key === life.stageOfAge(a).key)
-      upd['preview._autoYear'] = yr
-    } else if (age != null && this.data.birthYear) {
-      const yr = life.eventYear(this.data.birthYear, age)
-      upd['preview.timeLabel'] = `${yr}年 · ${age}岁`
-      upd['preview.zoneIndex'] = stages.findIndex((x) => x.key === life.stageOfAge(age).key)
-      upd['preview._autoYear'] = yr
-    } else upd['preview.timeLabel'] = ''
+    Object.assign(upd, this.computeTimeZone(finalText))
     this.setData(upd)
     if (this.data.previewStatus !== 'failed') this.setData({ previewStatus: 'done' })
   },
@@ -754,7 +764,7 @@ Page({
     const knownTitles = (this._icebergs || []).map((b) => b.title).filter(Boolean)
     wx.cloud.callFunction({
       name: 'refine',
-      data: { lines, birthYear: this.data.birthYear, stageKeys: life.getStages().map((s) => s.key), knownTitles, blanks: (blanks || []).map((b) => b.topic) }
+      data: { lines, birthYear: this.data.birthYear, stageKeys: life.getStages().map((s) => s.key), knownTitles, blanks: (blanks || []).map((b) => b.topic), style: wx.getStorageSync('polishStyle') || 'light' }
     }).then((r) => {
       const res = (r && r.result) || {}
       return wx.cloud.database().collection('icebergs').doc(id).update({

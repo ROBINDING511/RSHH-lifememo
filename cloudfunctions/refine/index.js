@@ -94,10 +94,19 @@ exports.main = async (event) => {
     const p1 = parseJSON(r1.choices[0].message.content)
     doubts = (p1.doubts || []).map((d, i) => ({ id: 'd' + i, kind: d.kind || 'word', line: d.line || 0, original: d.original || '', candidates: d.candidates || [], status: 'open', at: Date.now() }))
 
-    // step2 轻整理写稿（去赘词/顺语序/断句；禁替换方言/删口头禅/补全/书面腔；第一人称妈妈口吻）
-    const r2 = await chat([{ role: 'user', content: `你是裱糊匠不是作者。只允许去赘词/顺语序/断句；禁止替换方言词、删口头禅、补全未说内容、书面腔改写。方言/口头禅保留并列入 dialect。留白处标"[此处留白]"。年份双说法照原话保留。第一人称妈妈口吻。逐句 evidence{line,quote}。${ctx}\n严格JSON：{"sentences":[{"text":"","evidence":[{"line":0,"quote":""}],"dialect":[]}]}\n转写：\n${linesText}` }])
-    const p2 = parseJSON(r2.choices[0].message.content)
-    sentences = (p2.sentences || []).map((s, i) => ({ id: 's' + i, text: s.text || '', evidence: s.evidence || [], dialect: s.dialect || [], state: 'unset', source: 'ai-light' }))
+    // step2 按用户选的"AI文字梳理风格"写稿（鲸鱼主菜单设置）
+    const style = event.style || 'light'
+    if (style === 'verbatim') {
+      // 忠实原文：不整理，逐字成句
+      sentences = lines.map((l, i) => ({ id: 's' + i, text: l.text, evidence: [{ line: l.n, quote: l.text }], dialect: [], state: 'unset', source: 'raw' }))
+    } else {
+      const rule = style === 'written'
+        ? '在保留全部事实与第一人称的前提下，调整语序、把口语顺成书面语；仍禁止补全未说内容、禁止替换方言词（方言保留列入 dialect）。'
+        : '只允许去赘词/顺语序/断句；禁止替换方言词、删口头禅、补全未说内容、书面腔改写。方言/口头禅保留并列入 dialect。'
+      const r2 = await chat([{ role: 'user', content: `你是裱糊匠不是作者。${rule}留白处标"[此处留白]"。年份双说法照原话保留。第一人称妈妈口吻。逐句 evidence{line,quote}。${ctx}\n严格JSON：{"sentences":[{"text":"","evidence":[{"line":0,"quote":""}],"dialect":[]}]}\n转写：\n${linesText}` }])
+      const p2 = parseJSON(r2.choices[0].message.content)
+      sentences = (p2.sentences || []).map((s, i) => ({ id: 's' + i, text: s.text || '', evidence: s.evidence || [], dialect: s.dialect || [], state: 'unset', source: 'ai-light' }))
+    }
 
     // 短句跳过审查修订
     if (!short && sentences.length) {

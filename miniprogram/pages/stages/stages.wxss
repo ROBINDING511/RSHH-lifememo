@@ -20,6 +20,9 @@
 .dash { color: var(--c-text-2); font-size: var(--fs-md); }
 .unit { color: var(--c-text-2); font-size: var(--fs-sm); margin-right: 8rpx; }
 .stage-swatch { width: 32rpx; height: 32rpx; border-radius: 8rpx; }
+.style-row { display: flex; flex-direction: column; gap: 12rpx; }
+.style-opt { min-height: 88rpx; display: flex; align-items: center; padding: 0 24rpx; border-radius: var(--radius-md); background: var(--c-soft); color: var(--c-text-2); font-size: var(--fs-md); }
+.style-opt.on { background: var(--c-primary-soft); color: var(--c-primary); font-weight: 500; }
 .hub-row { display: flex; gap: 16rpx; margin: 0 0 24rpx; }
 .hub-pill { flex: 1; min-height: 88rpx; display: flex; align-items: center; justify-content: center; background: var(--c-card); border: 2rpx solid var(--hairline); border-radius: var(--radius-md); color: var(--c-text); font-size: var(--fs-md); font-weight: 500; box-sizing: border-box; }
 .stage-rows { display: flex; flex-direction: column; gap: 16rpx; }

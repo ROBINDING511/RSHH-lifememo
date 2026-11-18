@@ -9,6 +9,7 @@ Page({
     profileMode: 'year', profileBirthday: '', profileAge: '', profileYear: '',
     milestones: life.getMilestones(), msName: '', msAge: '',
     inviteCode: '', bindCode: '', feedQ: '',
+    polishStyle: 'light',
     voiceState: '', voiceSampleUrl: '',
     listening: false, voiceText: ''
   },
@@ -22,8 +23,15 @@ Page({
     })
     this.recorder = createRecorder()
     this.refreshVoice()
+    this.setData({ polishStyle: wx.getStorageSync('polishStyle') || 'light' })
   },
   noop () {},
+  setStyle (e) {
+    const s = e.currentTarget.dataset.s
+    wx.setStorageSync('polishStyle', s)
+    this.setData({ polishStyle: s })
+    wx.showToast({ title: '梳理风格已记下', icon: 'none' })
+  },
   goTimeline () { wx.navigateTo({ url: '/pages/timeline/timeline' }) },
   goRecycle () { wx.navigateTo({ url: '/pages/recycle/recycle' }) },
 

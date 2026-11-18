@@ -163,8 +163,6 @@
         <view class="emotion-rest" hover-class="btn-hover" hover-stay-time="80" bindtap="restNow">先歇一歇</view>
       </view>
 
-      <!-- A3 留白：这段不想说 -->
-      <view class="skip-topic" wx:if="{{!previewEmotion}}" hover-class="btn-hover" hover-stay-time="80" bindtap="onSkipTopic">这段不想说</view>
 
       <!-- 照片：微信式九宫格，裸 + 添加，无多余解释文案 -->
       <view class="photo-grid">
