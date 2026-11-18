@@ -489,6 +489,7 @@ Page({
     if (this.data.preview && appendBase == null) return   // 复核卡开着只允许续录
     this._appendBase = appendBase != null ? appendBase : null
     this.setData({ recording: true, recordMode: mode, transcript: this._appendBase || '', elapsed: 0, countdown: 0, cancelArmed: false, asrHint: '' })
+    this._recActive = true   // 同步置位：快速点按的 touchend 也能停住（recorder.recording 是异步 onStart 才真）
     this.stopAmbient()   // 录音时关闭环境音，避免干扰识别
     this._pendingText = null
     this._frameBuf = []
@@ -502,6 +503,7 @@ Page({
         if (left <= 3 && wx.vibrateShort) wx.vibrateShort({ type: 'light' })
       },
       onStop: async (wavPath, durationMs, err) => {
+        this._recActive = false
         this._lastDuration = durationMs
         this.setData({ recording: false, countdown: 0, elapsed: 0, recordMode: '', whalePaused: false, cancelArmed: false })
         this.startAmbient()   // 录完恢复环境音（若开关为开）
@@ -533,10 +535,10 @@ Page({
     })
   },
 
-  finishRecording () { if (this.recorder.recording) this.recorder.stop() },
+  finishRecording () { if (this._recActive) this.recorder.stop() },
 
   saveDraftAndStop () {
-    if (!this.recorder.recording) return
+    if (!this._recActive) return
     this.cancelRequested = true
     this.recorder.stop()
     if (wx.vibrateShort) wx.vibrateShort({ type: 'light' })
