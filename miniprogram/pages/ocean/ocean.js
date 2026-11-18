@@ -64,6 +64,7 @@ Page({
     this.setupWorld(this._worldInited)   // 首次居中；之后保留上次游到的位置
     this._worldInited = true
     this.setData({ birthYear: life.getBirthYear(), drafts: draft.list(), whalePaused: false, ambientOn: wx.getStorageSync('ambientOn') !== '0', recConsent: wx.getStorageSync('recConsent') === '1' })
+    if (!this.data.recConsent) this.askConsent()   // C 门控放在进页时，按住说话手势不被弹窗打断
     this.refreshData()
     this.refreshPrompt()
     this.refreshToday()
@@ -396,7 +397,7 @@ Page({
 
   // ==================== 录音（按住说话） ====================
   onHoldStart (e) {
-    if (!this.data.recConsent) { this.askConsent(); return }   // C 门控：未同意不录
+    if (!this.data.recConsent) { ui.toast('先同意录音说明才能说', 2000); return }   // 按住说话不被打断
     this._holdSource = 'button'
     this._holdY = e.touches && e.touches[0] ? e.touches[0].clientY : 0
     this.startRecording('hold')
@@ -856,23 +857,37 @@ Page({
   // 按压轻震（无超调回弹）
   tapHaptic () { if (wx.vibrateShort) wx.vibrateShort({ type: 'light' }) },
 
-  async discardPreview () {
+  // 存草稿：点了就存，不弹窗
+  saveDraftNow () {
     const p = this.data.preview
     if (!p) return
     this.stopPreviewVoice()
-    const r = await ui.confirm({
-      title: '这段回忆就不要了吗？',
-      content: '点"存起来"会放进草稿，回头还能找回来；点"丢掉"才真的不要了。',
-      confirmText: '存起来', cancelText: '丢掉'
-    })
-    if (r === 'confirm') {
-      draft.save({ wavPath: p.wavPath, text: p.text, reason: '暂未发布' })
-      this.setData({ preview: null, drafts: draft.list() })
-      ui.toast('存好了，随时能找回来', 2400)
-    } else {
+    draft.save({ wavPath: p.wavPath, text: p.text, reason: '存草稿' })
+    this.setData({ preview: null, drafts: draft.list() })
+    ui.toast('存草稿了，随时能找回来', 2200)
+  },
+  // ❌ 化成云：有必要再找回（云朵落回海面），没必要就删除
+  async discardToCloud () {
+    const p = this.data.preview
+    if (!p) return
+    this.stopPreviewVoice()
+    const text = (p.text || '').trim() || '（这段只留了声音）'
+    try {
+      const created = await api.createIceberg({
+        text, audioPath: p.wavPath, photos: p.photos,
+        timeValue: p._autoYear ? String(p._autoYear) : (p.zoneOptions[p.zoneIndex] || '说不清了'),
+        zoneName: p.zoneOptions[p.zoneIndex] || '晚年',
+        title: p._four || text.slice(0, 4)
+      })
+      await api.removeIceberg(created._id)   // deleted=true → 进云朵
       draft.forgetPath(p.wavPath)
-      this.setData({ preview: null })
-      ui.toast('丢掉了')
+      this.setData({ preview: null, drafts: draft.list() })
+      ui.toast('化成云了，在云朵里能找回', 2400)
+      this.refreshData()
+    } catch (e) {
+      draft.save({ wavPath: p.wavPath, text: p.text, reason: '化云失败' })
+      this.setData({ preview: null, drafts: draft.list() })
+      ui.toast('没化成，先存草稿了', 2400)
     }
   }
 })

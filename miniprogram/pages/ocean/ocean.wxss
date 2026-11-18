@@ -122,7 +122,8 @@
 
 /* ============ 发布卡片 ============ */
 .preview-mask { position: absolute; left: 0; right: 0; top: 0; bottom: 0; z-index: 30; background: rgba(15,58,92,0.5); display: flex; align-items: flex-end; }
-.preview-card { width: 100%; background: var(--c-card); border-radius: var(--radius-xl) var(--radius-xl) 0 0; padding: 0 36rpx 40rpx; box-sizing: border-box; max-height: 88vh; overflow-y: auto; will-change: transform; }
+.preview-card { position: relative; width: 100%; background: var(--c-card); border-radius: var(--radius-xl) var(--radius-xl) 0 0; padding: 0 36rpx 40rpx; box-sizing: border-box; max-height: 88vh; overflow-y: auto; will-change: transform; }
+.sheet-close-x { position: absolute; top: 12rpx; right: 12rpx; width: 76rpx; height: 76rpx; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: var(--c-soft); color: var(--c-text-2); font-size: 40rpx; line-height: 1; z-index: 2; }
 .sheet-settle { transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1); }
 .sheet-grip { display: flex; justify-content: center; padding: 16rpx 0 20rpx; }
 .sheet-grip-bar { width: 64rpx; height: 8rpx; border-radius: 4rpx; background: rgba(31, 27, 22, 0.16); }

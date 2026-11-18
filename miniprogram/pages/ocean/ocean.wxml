@@ -146,6 +146,7 @@
         catchtouchend="onSheetEnd" catchtouchcancel="onSheetEnd">
         <view class="sheet-grip-bar"></view>
       </view>
+      <view class="sheet-close-x" catchtap="discardToCloud">×</view>
       <textarea class="preview-text" value="{{preview.text}}" maxlength="2000"
         auto-height cursor-spacing="120" show-confirm-bar="{{false}}"
         bindinput="onPreviewInput"
@@ -202,8 +203,8 @@
       </view>
 
       <view class="preview-actions">
-        <button class="btn-ghost btn-danger-ghost flex1" hover-class="btn-hover"
-          hover-stay-time="80" bindtap="discardPreview">不要了</button>
+        <button class="btn-ghost flex1" hover-class="btn-hover"
+          hover-stay-time="80" bindtap="saveDraftNow">存草稿</button>
         <button class="btn-primary flex1" hover-class="btn-hover"
           hover-stay-time="80" loading="{{publishing}}" disabled="{{publishing}}"
           bindtouchstart="tapHaptic" bindtap="publish">变成冰山</button>
