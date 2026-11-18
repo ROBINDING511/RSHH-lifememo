@@ -120,7 +120,10 @@
 
 /* ============ 发布卡片 ============ */
 .preview-mask { position: absolute; left: 0; right: 0; top: 0; bottom: 0; z-index: 30; background: rgba(15,58,92,0.5); display: flex; align-items: flex-end; }
-.preview-card { width: 100%; background: #fff; border-radius: var(--radius-xl) var(--radius-xl) 0 0; padding: 40rpx 36rpx 40rpx; box-sizing: border-box; max-height: 88vh; overflow-y: auto; }
+.preview-card { width: 100%; background: var(--c-card); border-radius: var(--radius-xl) var(--radius-xl) 0 0; padding: 0 36rpx 40rpx; box-sizing: border-box; max-height: 88vh; overflow-y: auto; will-change: transform; }
+.sheet-settle { transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1); }
+.sheet-grip { display: flex; justify-content: center; padding: 16rpx 0 20rpx; }
+.sheet-grip-bar { width: 64rpx; height: 8rpx; border-radius: 4rpx; background: rgba(31, 27, 22, 0.16); }
 .preview-text { width: 100%; min-height: 200rpx; font-size: var(--fs-lg); line-height: 1.7; color: var(--c-text); padding: 28rpx; box-sizing: border-box; background: var(--c-soft); border-radius: var(--radius-md); border: 2rpx solid #DCE9F2; }
 /* 照片九宫格：微信式，灰底裸 + ，无解释文案 */
 .photo-grid { display: flex; flex-wrap: wrap; gap: 16rpx; margin-top: 24rpx; }
@@ -177,6 +180,7 @@
 /* ============ 减少动态效果：全停，静态显示 ============ */
 @media (prefers-reduced-motion: reduce) {
   .cruise, .whalebox, .wf, .berg, .sea-texture { animation: none !important; }
+  .sheet-settle { transition: none !important; }
   .wf-straight { opacity: 1; }
   .bg-art { transition: none; }
   .record-btn.record-hover { transform: none; }

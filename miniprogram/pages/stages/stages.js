@@ -108,6 +108,7 @@ Page({
     wx.showToast({ title: '恢复默认了', icon: 'none' })
   },
   saveAll () {
+    if (wx.vibrateShort) wx.vibrateShort({ type: 'light' })
     life.setStages(this._draft)
     wx.showToast({ title: '保存好了', icon: 'none' })
     setTimeout(() => wx.navigateBack(), 900)

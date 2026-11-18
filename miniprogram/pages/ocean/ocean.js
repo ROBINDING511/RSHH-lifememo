@@ -33,7 +33,8 @@ Page({
     prompt: '', todayMemory: null,
     familyOwner: null, familyReactCount: 0,
     voiceReview: null, voiceState: 'collecting',
-    ambientOn: true
+    ambientOn: true,
+    sheetDy: 0, sheetSettle: true
   },
 
   onLoad (query) {
@@ -366,7 +367,7 @@ Page({
   },
   onContinueStart () {
     const p = this.data.preview
-    if (p) this.startRecording('hold', p.text || '')
+    if (p) { this.tapHaptic(); this.startRecording('hold', p.text || '') }
   },
   onContinueEnd () { if (this.data.recording) this.finishRecording() },
 
@@ -706,6 +707,35 @@ Page({
       await ui.confirm({ title: '没存上去', content: '可能是网络不太好。您说的这段已经帮您存下来了，等网络好了点"找回来"就能接着存。', confirmText: '知道了', cancelText: '知道了' })
     }
   },
+
+  // 阻尼抽屉：下拉关闭（高阻尼橡皮筋 + 速度吸附，无超调）；关闭自动存草稿不丢话
+  onSheetStart (e) {
+    this._sheetY0 = e.touches[0].clientY
+    this._sheetT0 = Date.now()
+    this.setData({ sheetSettle: false, sheetDy: 0 })
+  },
+  onSheetMove (e) {
+    const dy = e.touches[0].clientY - this._sheetY0
+    this.setData({ sheetDy: dy >= 0 ? dy : dy * 0.25 })   // 上拉橡皮筋阻尼
+  },
+  onSheetEnd () {
+    const dy = this.data.sheetDy
+    const dt = Math.max(1, Date.now() - this._sheetT0)
+    const v = dy / dt
+    this.setData({ sheetSettle: true })
+    if (dy > 120 || v > 0.5) this.dismissSheet()
+    else this.setData({ sheetDy: 0 })
+  },
+  dismissSheet () {
+    const p = this.data.preview
+    if (!p) return
+    this.stopPreviewVoice()
+    draft.save({ wavPath: p.wavPath, text: p.text, reason: '暂未发布' })
+    this.setData({ preview: null, drafts: draft.list(), sheetDy: 0 })
+    ui.toast('存好了，随时能找回来', 2200)
+  },
+  // 按压轻震（无超调回弹）
+  tapHaptic () { if (wx.vibrateShort) wx.vibrateShort({ type: 'light' }) },
 
   async discardPreview () {
     const p = this.data.preview

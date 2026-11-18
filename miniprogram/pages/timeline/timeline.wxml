@@ -24,7 +24,7 @@
           <view class="item-dot">
             <image wx:if="{{item.icon}}" class="item-icon" src="/images/pixel/{{item.icon}}.png" mode="aspectFit" />
           </view>
-          <view class="item-card">
+          <view class="item-card enter" style="animation-delay:{{(index > 5 ? 5 : index) * 50}}ms">
             <text class="item-title">{{item.title}}</text>
             <text class="item-meta">{{item.label}}{{item.label && item.zoneName ? ' · ' : ''}}{{item.zoneName}}之海</text>
           </view>

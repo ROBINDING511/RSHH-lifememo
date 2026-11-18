@@ -139,7 +139,11 @@
 
   <!-- ============ 发布卡片 ============ -->
   <view class="preview-mask" wx:if="{{preview}}">
-    <view class="preview-card safe-bottom">
+    <view class="preview-card safe-bottom {{sheetSettle ? 'sheet-settle' : ''}}" style="transform: translateY({{sheetDy}}px)">
+      <view class="sheet-grip" catchtouchstart="onSheetStart" catchtouchmove="onSheetMove"
+        catchtouchend="onSheetEnd" catchtouchcancel="onSheetEnd">
+        <view class="sheet-grip-bar"></view>
+      </view>
       <textarea class="preview-text" value="{{preview.text}}" maxlength="2000"
         auto-height cursor-spacing="120" show-confirm-bar="{{false}}"
         bindinput="onPreviewInput"
@@ -192,7 +196,7 @@
           hover-stay-time="80" bindtap="discardPreview">不要了</button>
         <button class="btn-primary flex1" hover-class="btn-hover"
           hover-stay-time="80" loading="{{publishing}}" disabled="{{publishing}}"
-          bindtap="publish">变成冰山</button>
+          bindtouchstart="tapHaptic" bindtap="publish">变成冰山</button>
       </view>
     </view>
   </view>

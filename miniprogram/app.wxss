@@ -89,7 +89,8 @@ page {
   letter-spacing: 0;
 }
 .btn-primary::after { border: none; }
-.btn-primary.btn-hover { background: var(--c-primary-deep); transform: scale(0.98); }
+.btn-primary { transition: transform 0.12s cubic-bezier(0.22, 1, 0.36, 1), background-color 0.12s; }
+.btn-primary.btn-hover { background: var(--c-primary-deep); transform: scale(0.97); }
 
 .btn-ghost {
   display: flex; align-items: center; justify-content: center;
@@ -104,7 +105,8 @@ page {
   box-sizing: border-box;
 }
 .btn-ghost::after { border: none; }
-.btn-ghost.btn-hover { background: #E7E0D4; transform: scale(0.98); }
+.btn-ghost { transition: transform 0.12s cubic-bezier(0.22, 1, 0.36, 1), background-color 0.12s; }
+.btn-ghost.btn-hover { background: #E7E0D4; transform: scale(0.97); }
 
 .btn-danger-ghost { background: var(--c-danger-soft); border-color: rgba(179, 64, 47, 0.16); color: var(--c-danger); }
 .btn-danger-ghost.btn-hover { background: #F2DED8; transform: scale(0.98); }
@@ -123,3 +125,13 @@ page {
 .flex1 { flex: 1; }
 
 .safe-bottom { padding-bottom: calc(env(safe-area-inset-bottom) + 24rpx); }
+
+/* ============ 克制入场：仅一次 fade+rise，小 stagger（无 spring）============ */
+@keyframes enterRise { from { opacity: 0; transform: translateY(12rpx); } to { opacity: 1; transform: none; } }
+.enter { animation: enterRise 0.3s cubic-bezier(0.22, 1, 0.36, 1) both; }
+/* 详情转场：背景淡入 + 容器微缩放上升（简化共享元素） */
+@keyframes detailIn { from { opacity: 0; transform: translateY(16rpx) scale(0.98); } to { opacity: 1; transform: none; } }
+.detail-enter { animation: detailIn 0.3s cubic-bezier(0.22, 1, 0.36, 1) both; }
+@media (prefers-reduced-motion: reduce) {
+  .enter, .detail-enter { animation: none !important; }
+}

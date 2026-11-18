@@ -5,7 +5,7 @@
     - 所有按钮 ≥104rpx 高；删除入口写"化成云"并说明可找回
     - 标记选择用大图标 + 文字，选中态不只靠颜色
 -->
-<view class="page wash-bg" wx:if="{{b}}">
+<view class="page wash-bg detail-enter" wx:if="{{b}}">
   <view class="berg-head card">
     <view class="berg-head-row">
       <image class="berg-icon" wx:if="{{iconFile}}" src="{{iconFile}}" mode="aspectFit" />

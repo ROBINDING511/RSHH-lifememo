@@ -92,7 +92,10 @@ Page({
   goBack () { wx.navigateBack() },
 
   // 继续说/补录：回海洋以编辑模式打开这段回忆
-  continueRecord () { wx.navigateTo({ url: '/pages/ocean/ocean?edit=' + this.id }) },
+  continueRecord () {
+    if (wx.vibrateShort) wx.vibrateShort({ type: 'light' })
+    wx.navigateTo({ url: '/pages/ocean/ocean?edit=' + this.id })
+  },
 
   // 音频上下文：本地优先 + 关静音键跟随；canplay 时支持按句 seek
   async ensureAudio () {

@@ -19,7 +19,8 @@
   </view>
 
   <scroll-view scroll-y class="list" wx:if="{{items.length}}" enhanced show-scrollbar="{{false}}">
-    <view class="cloud-card {{raining === item._id ? 'raining' : ''}}"
+    <view class="cloud-card enter {{raining === item._id ? 'raining' : ''}}"
+      style="animation-delay:{{(index > 5 ? 5 : index) * 50}}ms"
       wx:for="{{items}}" wx:key="_id">
       <view class="cloud-top">
         <image class="cloud-img" src="/images/misc/cloud.png" mode="aspectFit" />
