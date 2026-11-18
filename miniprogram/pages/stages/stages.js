@@ -10,6 +10,7 @@ Page({
     milestones: life.getMilestones(), msName: '', msAge: '',
     inviteCode: '', bindCode: '', feedQ: '',
     polishStyle: 'light',
+    openMenu: 'sea', ambientOn: true,
     voiceState: '', voiceSampleUrl: '',
     listening: false, voiceText: ''
   },
@@ -23,9 +24,20 @@ Page({
     })
     this.recorder = createRecorder()
     this.refreshVoice()
-    this.setData({ polishStyle: wx.getStorageSync('polishStyle') || 'light' })
+    this.setData({ polishStyle: wx.getStorageSync('polishStyle') || 'light', ambientOn: wx.getStorageSync('ambientOn') !== '0' })
   },
   noop () {},
+  // 主菜单：一级展开/收起二级
+  toggleMenu (e) {
+    const k = e.currentTarget.dataset.k
+    this.setData({ openMenu: this.data.openMenu === k ? '' : k })
+  },
+  toggleAmbient () {
+    const on = !this.data.ambientOn
+    wx.setStorageSync('ambientOn', on ? '1' : '0')
+    this.setData({ ambientOn: on })
+    wx.showToast({ title: on ? '海浪声开了' : '海浪声关了', icon: 'none' })
+  },
   setStyle (e) {
     const s = e.currentTarget.dataset.s
     wx.setStorageSync('polishStyle', s)
