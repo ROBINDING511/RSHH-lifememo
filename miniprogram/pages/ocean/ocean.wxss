@@ -26,6 +26,12 @@
 .sea-world { position: relative; }
 .sea-texture { position: absolute; left: 0; top: 0; }
 .sea-tint { position: absolute; left: 0; top: 0; width: 100%; height: 100%; opacity: .5; pointer-events: none; }
+/* 浪：极淡波光两层异速漂移，轻轻的水动（一个波纹周期=120rpx，循环无缝） */
+.sea-ripple { position: absolute; left: -60rpx; top: 0; width: calc(100% + 120rpx); height: 100%; pointer-events: none; }
+.sea-ripple.r1 { background: repeating-linear-gradient(95deg, rgba(255,255,255,0) 0 60rpx, rgba(255,255,255,.07) 60rpx 64rpx, rgba(255,255,255,0) 64rpx 120rpx); animation: rippleDrift 26s linear infinite; }
+.sea-ripple.r2 { background: repeating-linear-gradient(85deg, rgba(255,255,255,0) 0 90rpx, rgba(255,255,255,.05) 90rpx 95rpx, rgba(255,255,255,0) 95rpx 180rpx); animation: rippleDrift2 40s linear infinite; }
+@keyframes rippleDrift { from { transform: translateX(0); } to { transform: translateX(120rpx); } }
+@keyframes rippleDrift2 { from { transform: translateX(0); } to { transform: translateX(-180rpx); } }
 .stage-label { position: absolute; transform: translate(-50%, -50%); color: rgba(18,58,72,.85); background: rgba(255,255,255,.55); padding: 8rpx 28rpx; border-radius: 32rpx; font-size: var(--fs-sm); font-weight: 600; letter-spacing: 6rpx; pointer-events: none; }
 .sea-curve { position: absolute; left: 0; top: 0; right: 0; bottom: 0; pointer-events: none; background: radial-gradient(ellipse at 50% 45%, rgba(20,56,76,0) 55%, rgba(20,56,76,.30) 100%); }
 /* 人生节点小旗 */
@@ -110,7 +116,7 @@
 .record-main { color: #fff; font-size: var(--fs-lg); font-weight: 500; letter-spacing: 6rpx; line-height: 1.2; }
 
 /* ============ 实时转写面板（微信式按住说话，0 延迟弹出）============ */
-.live-mask { position: absolute; left: 0; right: 0; bottom: calc(env(safe-area-inset-bottom) + 160rpx); z-index: 25; display: flex; justify-content: center; padding: 0 32rpx; pointer-events: none; }
+.live-mask { position: absolute; left: 0; right: 0; bottom: calc(env(safe-area-inset-bottom) + 160rpx); z-index: 35; display: flex; justify-content: center; padding: 0 32rpx; pointer-events: none; }
 .live-card { width: 100%; background: rgba(253,252,249,0.97); border-radius: var(--radius-lg); padding: 28rpx 32rpx; box-shadow: 0 12rpx 40rpx rgba(23,80,95,0.22); border: 2rpx solid rgba(31,100,120,0.08); }
 .live-card.live-cancel { background: rgba(247,232,228,0.97); border-color: rgba(179,64,47,0.25); }
 .live-status { display: flex; align-items: center; gap: 14rpx; }
@@ -163,11 +169,12 @@
 .vc-on { background: var(--c-danger); }
 .vc-on::after { border: none; width: 18rpx; height: 22rpx; background: #fff; top: 50%; left: 50%; transform: translate(-50%,-50%); border-radius: 3rpx; }
 .vc-text { color: var(--c-primary); font-size: var(--fs-sm); font-weight: 500; }
-.preview-actions { display: flex; gap: 24rpx; margin-top: 48rpx; }
+.continue-hold { margin-top: 24rpx; min-height: 88rpx; display: flex; align-items: center; justify-content: center; border: 2rpx dashed rgba(31,100,120,.4); border-radius: 44rpx; color: var(--c-primary); font-size: var(--fs-md); }
+.preview-actions { display: flex; gap: 24rpx; margin-top: 24rpx; }
 
 /* ============ 减少动态效果：全停，静态显示 ============ */
 @media (prefers-reduced-motion: reduce) {
-  .caustic, .cruise, .whalebox, .wf, .berg, .live-dot { animation: none !important; }
+  .caustic, .cruise, .whalebox, .wf, .berg, .live-dot, .sea-ripple { animation: none !important; }
   .wf-straight { opacity: 1; }
   .bg-art { transition: none; }
   .record-btn.record-hover, .dock-pill.btn-hover, .rec-done.btn-hover { transform: none; }

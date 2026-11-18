@@ -23,6 +23,9 @@
         <image class="sea-texture" src="/images/ocean/sea_bg.jpg" mode="scaleToFill"
           style="width:{{worldWidth}}px;height:{{worldHeight}}px" />
         <view class="sea-tint" style="background:{{tintGradient}}"></view>
+        <!-- 浪：两层极淡的波光缓慢漂移，轻轻的水动 -->
+        <view class="sea-ripple r1"></view>
+        <view class="sea-ripple r2"></view>
         <text wx:for="{{stages}}" wx:key="key" class="stage-label"
           style="left:{{item.cx}}px;top:{{item.cy}}px">{{item.name}}之海</text>
         <view wx:for="{{bergs}}" wx:key="id" class="berg"
@@ -158,6 +161,11 @@
         hover-class="btn-hover" hover-stay-time="80" bindtap="playPreviewVoice">
         <view class="vc-btn {{previewVoicePlaying ? 'vc-on' : ''}}"></view>
         <text class="vc-text">{{previewVoicePlaying ? '正在播放，点这里停' : '听听我自己的声音'}}</text>
+      </view>
+
+      <view class="continue-hold" hover-class="btn-hover" hover-stay-time="80"
+        bindtouchstart="onContinueStart" catchtouchend="onContinueEnd" catchtouchcancel="onContinueEnd">
+        <text>没说完？按住继续说</text>
       </view>
 
       <view class="preview-actions">

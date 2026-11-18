@@ -49,6 +49,14 @@
 .photo-cell { width: 220rpx; height: 220rpx; }
 .photo-img { width: 220rpx; height: 220rpx; border-radius: var(--radius-md); background: var(--c-soft); }
 
+/* ============ 继续说/补录 ============ */
+.continue-entry {
+  margin: 0 0 20rpx; min-height: 88rpx;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--c-primary-soft); color: var(--c-primary);
+  border-radius: 44rpx; font-size: var(--fs-md); font-weight: 500;
+}
+
 /* ============ 底部操作 ============ */
 .actions {
   position: fixed; left: 32rpx; right: 32rpx; bottom: 32rpx;

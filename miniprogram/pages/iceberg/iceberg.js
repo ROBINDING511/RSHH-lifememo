@@ -82,6 +82,9 @@ Page({
 
   goBack () { wx.navigateBack() },
 
+  // 继续说/补录：回海洋以编辑模式打开这段回忆
+  continueRecord () { wx.navigateTo({ url: '/pages/ocean/ocean?edit=' + this.id }) },
+
   // 播放妈妈的原声（再点一次暂停）。下载到本地再播 + 关静音键跟随，避免"听不到"。
   async playVoice () {
     const b = this.data.b

@@ -8,7 +8,7 @@
 //  4) 任何异常路径（断网/来电/切后台/识别失败）都先落地本地草稿，绝不白说。
 //  5) 顶部元素按微信胶囊位置下移。
 // 业务逻辑（录音/ASR/复核/发布/草稿/导航）与 Canvas 版逐字一致，仅渲染层替换。
-const { createRecorder, MAX_SECONDS } = require('../../utils/recorder')
+const { createRecorder, MAX_SECONDS, concatWavs } = require('../../utils/recorder')
 const api = require('../../utils/api')
 const draft = require('../../utils/draft')
 const life = require('../../utils/life')
@@ -70,7 +70,7 @@ Page({
     icebergCount: 0
   },
 
-  onLoad () {
+  onLoad (query) {
     this.asr = null
     this.previewAudio = null
     this.recorder = createRecorder()
@@ -78,6 +78,22 @@ Page({
       firstLaunch: getApp().globalData.firstLaunch,
       capsuleBottom: this.safeTop()
     })
+    if (query && query.edit) this.loadForEdit(query.edit)
+  },
+
+  // 从冰山详情"继续说/补录"进来：载入该回忆进复核卡（编辑模式）
+  async loadForEdit (id) {
+    try {
+      const res = await wx.cloud.database().collection('icebergs').doc(id).get()
+      const b = res.data
+      let wav = ''
+      if (b.audioFileID) {
+        try { const d = await wx.cloud.downloadFile({ fileID: b.audioFileID }); wav = d.tempFilePath } catch (e) {}
+      }
+      this.openPreview(wav, b.text || '', { editId: id })
+    } catch (e) {
+      wx.showToast({ title: '没打开这段回忆', icon: 'none' })
+    }
   },
 
   // 胶囊下沿：顶部元素从这条线以下开始排，避开状态栏和胶囊
@@ -214,7 +230,11 @@ Page({
 
   applyTranscript () {
     this._lastTranscriptAt = Date.now()
-    if (this._pendingText != null) this.setData({ transcript: this._pendingText })
+    if (this._pendingText != null) {
+      // 续录模式：新字接在原文后面
+      const t = this._appendBase != null ? this._appendBase + this._pendingText : this._pendingText
+      this.setData({ transcript: t })
+    }
   },
 
   releaseAsr () {
@@ -431,10 +451,12 @@ Page({
     for (const f of b) { if (this.asr) this.asr.sendFrame(f) }
   },
 
-  async startRecording (mode) {
-    if (this.data.recording || this.data.analyzing || this.data.preview) return
+  async startRecording (mode, appendBase) {
+    if (this.data.recording || this.data.analyzing) return
+    if (this.data.preview && appendBase == null) return   // 复核卡开着时只允许"续录"
+    this._appendBase = appendBase != null ? appendBase : null
     // 0 延迟：手指一按立刻弹出实时转写面板（微信式），授权/建连在后台进行
-    this.setData({ recording: true, recordMode: mode, transcript: '', elapsed: 0, countdown: 0, cancelArmed: false, asrHint: '' })
+    this.setData({ recording: true, recordMode: mode, transcript: this._appendBase || '', elapsed: 0, countdown: 0, cancelArmed: false, asrHint: '' })
     this._pendingText = null
     this._recFrames = 0
     this._frameBuf = []
@@ -480,8 +502,10 @@ Page({
           return
         }
 
-        // 0 等待：松手立即进复核卡；流式收尾 / AI 建议 / 兜底转写全部后台补
-        this.openPreview(wavPath, (this.data.transcript || '').trim())
+        // 0 等待：松手立即进复核卡；续录则接回原复核卡；流式收尾/AI/兜底后台补
+        const full = (this.data.transcript || '').trim()
+        if (this._appendBase != null) { this._appendBase = null; this.appendToPreview(wavPath, full) }
+        else this.openPreview(wavPath, full)
       }
     })
   },
@@ -558,7 +582,7 @@ Page({
   },
 
   // ==================== 发布卡片 ====================
-  async openPreview (wavPath, text) {
+  async openPreview (wavPath, text, opts) {
     const hasText = text && text.replace(/\s/g, '').length >= 2
     // 0 等待：复核卡立即弹出（先给默认选项），AI 建议/流式收尾后台补
     this.setData({
@@ -566,6 +590,7 @@ Page({
         wavPath, text: text || '', rawText: text || '', audioOnly: !hasText && !!wavPath,
         zoneOptions: life.getStages().map((s) => s.key), zoneIndex: life.getStages().length - 1,
         timeLabel: '', _autoYear: null,
+        editId: (opts && opts.editId) || null, extraWavs: [],
         photos: [], previewVoicePlaying: false
       }
     })
@@ -610,6 +635,25 @@ Page({
     }
     this.setData(upd)
   },
+
+  // 续录松手：把新的一段接回复核卡（文字拼接 + 音频段累积）
+  appendToPreview (wavPath, fullText) {
+    const p = this.data.preview
+    if (!p) return
+    this.setData({
+      recording: false, recordMode: '',
+      'preview.text': fullText,
+      'preview.audioOnly': false,
+      'preview.extraWavs': (p.extraWavs || []).concat(wavPath ? [wavPath] : [])
+    })
+    wx.showToast({ title: '接上了，可继续说或变成冰山', icon: 'none', duration: 2000 })
+  },
+  onContinueStart () {
+    const p = this.data.preview
+    if (!p) return
+    this.startRecording('hold', p.text || '')
+  },
+  onContinueEnd () { if (this.data.recording) this.finishRecording() },
 
   onPreviewInput (e) {
     const v = e.detail.value
@@ -702,20 +746,33 @@ Page({
     this.setData({ publishing: true })
     wx.showLoading({ title: '冰山生成中…', mask: true })
     try {
-      const created = await api.createIceberg({
-        text: body,
-        audioPath: p.wavPath,
-        photos: p.photos,
-        timeValue: p._autoYear ? String(p._autoYear) : (p.zoneOptions[p.zoneIndex] || '说不清了'),
-        zoneName: p.zoneIndex >= 0 ? p.zoneOptions[p.zoneIndex] : '晚年',
-        title: (p.rawText && body.startsWith(p.rawText)) ? '' : body.split('\n')[0].slice(0, 12)
-      })
+      // 续录的多段音频拼成一段再上传
+      const wavs = [p.wavPath].concat(p.extraWavs || []).filter(Boolean)
+      const audioPath = wavs.length > 1 ? concatWavs(wavs) : wavs[0]
+      const timeValue = p._autoYear ? String(p._autoYear) : (p.zoneOptions[p.zoneIndex] || '说不清了')
+      const zoneName = p.zoneIndex >= 0 ? p.zoneOptions[p.zoneIndex] : '晚年'
+      let created
+      if (p.editId) {
+        // 补录/续录：更新原冰山，不新建
+        let audioFileID = ''
+        if (audioPath) {
+          const up = await wx.cloud.uploadFile({ cloudPath: `voices/${Date.now()}_edit.wav`, filePath: audioPath })
+          audioFileID = up.fileID
+        }
+        await api.updateIceberg(p.editId, { text: body, audioFileID, zoneName, memoryTime: timeValue })
+        created = { _id: p.editId }
+      } else {
+        created = await api.createIceberg({
+          text: body, audioPath, photos: p.photos, timeValue, zoneName,
+          title: (p.rawText && body.startsWith(p.rawText)) ? '' : body.split('\n')[0].slice(0, 12)
+        })
+      }
       this.lastPublishedId = created && created._id
       this.stopPreviewVoice()
-      draft.forgetPath(p.wavPath)
+      wavs.forEach((w) => draft.forgetPath(w))
       this.setData({ preview: null, publishing: false, drafts: draft.list() })
       wx.hideLoading()
-      wx.showToast({ title: '一座新的冰山入海了', icon: 'none', duration: 2400 })
+      wx.showToast({ title: p.editId ? '补好了，冰山更新了' : '一座新的冰山入海了', icon: 'none', duration: 2400 })
       await this.refreshData()
       // 滚到新冰山所在的人生阶段（整片海连续滚动）
       const st = life.stageByKey(p.zoneOptions[p.zoneIndex])

@@ -153,4 +153,36 @@ function buildWavFile (chunks) {
   }
 }
 
-module.exports = { createRecorder, MAX_SECONDS, COUNTDOWN_SECONDS }
+// 续录拼接：把多段 WAV 的 PCM 顺次拼成一段新 WAV（继续说→接在原录音后）
+function concatWavs (paths) {
+  const fsm = wx.getFileSystemManager()
+  const pcmParts = []
+  for (const p of paths) {
+    if (!p) continue
+    try {
+      const buf = fsm.readFileSync(p)
+      const u8 = new Uint8Array(buf)
+      // 定位 data chunk；找不到则跳过 44 字节标准头
+      let off = 12, pcm = null
+      if (u8.length > 44 && String.fromCharCode(u8[0], u8[1], u8[2], u8[3]) === 'RIFF') {
+        while (off + 8 <= u8.length) {
+          const id = String.fromCharCode(u8[off], u8[off + 1], u8[off + 2], u8[off + 3])
+          const size = u8[off + 4] | (u8[off + 5] << 8) | (u8[off + 6] << 16) | (u8[off + 7] << 24)
+          if (id === 'data') { pcm = u8.slice(off + 8, off + 8 + size); break }
+          off += 8 + size + (size % 2)
+        }
+      }
+      if (!pcm) pcm = u8.slice(44)
+      if (pcm && pcm.length) pcmParts.push(pcm)
+    } catch (e) { /* 读不到的段跳过 */ }
+  }
+  if (!pcmParts.length) return null
+  let total = 0
+  pcmParts.forEach((p) => { total += p.length })
+  const all = new Uint8Array(total)
+  let o = 0
+  pcmParts.forEach((p) => { all.set(p, o); o += p.length })
+  return buildWavFile([all.buffer])
+}
+
+module.exports = { createRecorder, MAX_SECONDS, COUNTDOWN_SECONDS, concatWavs }
