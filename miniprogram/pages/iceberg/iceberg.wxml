@@ -17,8 +17,43 @@
   </view>
 
   <view class="berg-body card">
-    <view class="berg-text">
-      <text wx:for="{{sentences}}" wx:key="index" class="sentence" data-i="{{index}}" bindtap="playSentence">{{item}}</text>
+    <!-- A10 三视图 + 大字 -->
+    <view class="view-tabs">
+      <view class="view-tab {{view === 'clean' ? 'on' : ''}}" hover-class="btn-hover" hover-stay-time="80" data-v="clean" bindtap="setView">整理稿</view>
+      <view class="view-tab {{view === 'raw' ? 'on' : ''}}" hover-class="btn-hover" hover-stay-time="80" data-v="raw" bindtap="setView">逐字</view>
+      <view class="view-tab {{view === 'doubt' ? 'on' : ''}}" hover-class="btn-hover" hover-stay-time="80" data-v="doubt" bindtap="setView">疑点标注</view>
+      <view class="view-tab {{big ? 'on' : ''}}" hover-class="btn-hover" hover-stay-time="80" bindtap="toggleBig">大字</view>
+    </view>
+
+    <!-- 逐字视图（一键还原逐字永远可用） -->
+    <view wx:if="{{view === 'raw'}}" class="berg-text {{big ? 'big' : ''}}">
+      <text>{{b.rawText || b.text}}</text>
+    </view>
+
+    <!-- 整理稿 / 疑点标注：E 翻书 -->
+    <view wx:else class="book {{big ? 'big' : ''}}" bindtouchstart="onBookTouchStart" bindtouchend="onBookTouchEnd">
+      <view class="book-page">
+        <view wx:for="{{pages[page]}}" wx:key="*this" wx:for-item="si" class="sent-block">
+          <view class="sent-text" data-i="{{si}}" bindtap="playSentence">
+            <text wx:for="{{segs[si]}}" wx:key="index" wx:for-item="sg"
+              class="{{sg.red ? 'doubt-word' : ''}}" data-id="{{sg.red}}" bindtap="openDoubt">{{sg.t}}</text>
+          </view>
+          <view class="sent-confirm" wx:if="{{view === 'clean'}}">
+            <view class="sent-yes {{sentences[si].state === 'yes' ? 'on' : ''}}" hover-class="btn-hover" hover-stay-time="80" data-id="{{sentences[si].id}}" bindtap="confirmYes">像我说的</view>
+            <view class="sent-no" hover-class="btn-hover" hover-stay-time="80" data-id="{{sentences[si].id}}" bindtap="confirmNo">不像</view>
+          </view>
+          <view class="sent-fix" wx:if="{{confirmExpand === sentences[si].id}}">
+            <input class="fix-input" value="{{fixText}}" placeholder="您来说，或按住下面说" bindinput="onFixInput" />
+            <view class="fix-hold {{fixing ? 'on' : ''}}" bindtouchstart="fixHoldStart" catchtouchend="fixHoldEnd" catchtouchcancel="fixHoldEnd">{{fixing ? '松开 完成' : '按住 说话纠正'}}</view>
+            <view class="fix-ok" hover-class="btn-hover" hover-stay-time="80" data-id="{{sentences[si].id}}" bindtap="applyFix">按我说的改</view>
+          </view>
+        </view>
+      </view>
+      <view class="book-nav" wx:if="{{pageCount > 1}}">
+        <view class="book-btn {{page === 0 ? 'dis' : ''}}" hover-class="btn-hover" hover-stay-time="80" bindtap="prevPage">上一页</view>
+        <text class="book-pageno">第 {{page + 1}} / {{pageCount}} 页</text>
+        <view class="book-btn {{page === pageCount - 1 ? 'dis' : ''}}" hover-class="btn-hover" hover-stay-time="80" bindtap="nextPage">下一页</view>
+      </view>
     </view>
     <text class="sentence-hint" wx:if="{{b.audioFileID}}">点某一句，听那一句的原声</text>
 
@@ -37,6 +72,11 @@
         <text class="voice-tip">{{playing ? '正在播放，点这里停' : '听听当时的声音'}}</text>
         <text class="voice-sub" wx:if="{{!playing}}">您当时说这段话的录音</text>
       </view>
+    </view>
+    <!-- B5 可拖动进度条 -->
+    <view class="progress-row" wx:if="{{b.audioFileID}}">
+      <slider class="progress" min="0" max="100" value="{{dur ? cur / dur * 100 : 0}}" block-size="20" activeColor="#1F6478" bindchange="onSeek" />
+      <text class="progress-time">{{cur}}s / {{dur}}s</text>
     </view>
   </view>
 
@@ -78,6 +118,25 @@
       </view>
       <button class="btn-ghost sheet-close" hover-class="btn-hover" hover-stay-time="80"
         bindtap="closeIconMenu">先不选了</button>
+    </view>
+  </view>
+
+  <!-- B4 红字点改 sheet -->
+  <view class="icon-mask" wx:if="{{doubtSheet}}" bindtap="closeDoubt">
+    <view class="icon-sheet safe-bottom" catchtap="">
+      <text class="sheet-title">这个词听得准吗</text>
+      <text class="doubt-ctx">{{doubtSheet.ctx}}</text>
+      <view class="doubt-play" hover-class="btn-hover" hover-stay-time="80" bindtap="playDoubtLine">▶ 听这一句原声</view>
+      <view class="doubt-cands">
+        <view class="doubt-cand" wx:for="{{doubtSheet.candidates}}" wx:key="*this"
+          hover-class="btn-hover" hover-stay-time="80" data-v="{{item}}" bindtap="pickCandidate">
+          {{item}}<text class="cand-tag">{{doubtSheet.kind === 'number' ? '按算术' : '同音候选·未核实'}}</text>
+        </view>
+      </view>
+      <view class="doubt-keep" hover-class="btn-hover" hover-stay-time="80" bindtap="keepOriginal">保留原词／原说</view>
+      <input class="fix-input" value="{{doubtInput}}" placeholder="自己写" bindinput="onDoubtInput" />
+      <view class="fix-ok" hover-class="btn-hover" hover-stay-time="80" bindtap="applyDoubt">确认改</view>
+      <button class="btn-ghost sheet-close" hover-class="btn-hover" hover-stay-time="80" bindtap="closeDoubt">先不改</button>
     </view>
   </view>
 </view>

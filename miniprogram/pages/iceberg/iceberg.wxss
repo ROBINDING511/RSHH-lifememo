@@ -101,3 +101,36 @@
 .fail-title { font-size: var(--fs-xl); color: var(--c-text); font-weight: 500; }
 .fail-sub { font-size: var(--fs-sm); color: var(--c-text-2); margin-top: 16rpx; text-align: center; }
 .fail-btn { width: 100%; margin-top: 24rpx; }
+/* ============ v2.0 阅读：三视图/翻书/大字/句级确认/红字/进度 ============ */
+.view-tabs { display: flex; gap: 12rpx; flex-wrap: wrap; margin-bottom: 24rpx; }
+.view-tab { padding: 10rpx 24rpx; border-radius: 24rpx; background: var(--c-soft); color: var(--c-text-2); font-size: var(--fs-sm); }
+.view-tab.on { background: var(--c-primary-soft); color: var(--c-primary); font-weight: 500; }
+.berg-text.big text, .book.big .sent-text { font-size: 48rpx; line-height: 1.9; }
+.book-page { display: flex; flex-direction: column; gap: 28rpx; }
+.sent-block { display: flex; flex-direction: column; gap: 12rpx; }
+.sent-text { font-size: var(--fs-lg); line-height: 1.9; color: var(--c-text); }
+.doubt-word { color: var(--c-danger); text-decoration: underline; text-underline-offset: 6rpx; padding: 4rpx 2rpx; }
+.sent-confirm { display: flex; gap: 16rpx; }
+.sent-yes, .sent-no { min-height: 88rpx; padding: 0 32rpx; display: flex; align-items: center; justify-content: center; border-radius: var(--radius-md); font-size: var(--fs-md); }
+.sent-yes { background: var(--c-soft); color: var(--c-text-2); }
+.sent-yes.on { background: var(--c-primary-soft); color: var(--c-primary); }
+.sent-no { background: var(--c-soft); color: var(--c-text-2); }
+.sent-fix { display: flex; flex-direction: column; gap: 12rpx; padding: 20rpx; background: var(--c-soft); border-radius: var(--radius-md); }
+.fix-input { min-height: 88rpx; background: var(--c-card); border: 2rpx solid var(--hairline); border-radius: var(--radius-md); padding: 0 20rpx; font-size: var(--fs-md); }
+.fix-hold { min-height: 88rpx; display: flex; align-items: center; justify-content: center; border-radius: var(--radius-md); background: var(--c-card); border: 2rpx solid var(--hairline); color: var(--c-primary); font-size: var(--fs-md); }
+.fix-hold.on { background: var(--c-primary); color: #fff; }
+.fix-ok { min-height: 88rpx; display: flex; align-items: center; justify-content: center; border-radius: var(--radius-md); background: var(--c-primary); color: #fff; font-size: var(--fs-md); }
+.book-nav { display: flex; align-items: center; justify-content: space-between; margin-top: 28rpx; gap: 16rpx; }
+.book-btn { min-height: 88rpx; padding: 0 32rpx; display: flex; align-items: center; justify-content: center; border-radius: var(--radius-md); background: var(--c-soft); color: var(--c-text); font-size: var(--fs-md); }
+.book-btn.dis { opacity: .4; }
+.book-pageno { font-size: var(--fs-md); color: var(--c-text-2); }
+.progress-row { display: flex; align-items: center; gap: 16rpx; margin-top: 16rpx; }
+.progress { flex: 1; margin: 0; }
+.progress-time { font-size: var(--fs-xs); color: var(--c-text-2); }
+.doubt-ctx { display: block; margin: 16rpx 0; font-size: var(--fs-md); line-height: 1.8; color: var(--c-text); }
+.doubt-play { align-self: flex-start; padding: 10rpx 28rpx; border-radius: 28rpx; background: var(--c-primary-soft); color: var(--c-primary); font-size: var(--fs-sm); margin-bottom: 16rpx; }
+.doubt-cands { display: flex; flex-direction: column; gap: 12rpx; margin-bottom: 16rpx; }
+.doubt-cand { min-height: 88rpx; display: flex; align-items: center; justify-content: space-between; padding: 0 24rpx; border-radius: var(--radius-md); background: var(--c-soft); color: var(--c-text); font-size: var(--fs-md); }
+.cand-tag { font-size: var(--fs-xs); color: var(--c-text-2); }
+.doubt-keep { min-height: 88rpx; display: flex; align-items: center; justify-content: center; border-radius: var(--radius-md); background: var(--c-card); border: 2rpx solid var(--hairline); color: var(--c-text); font-size: var(--fs-md); margin-bottom: 16rpx; }
+@media (prefers-reduced-motion: reduce) { .book-page, .detail-enter { animation: none !important; transition: none !important; } }

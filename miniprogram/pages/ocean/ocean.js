@@ -799,6 +799,7 @@ Page({
         .then((r) => this.feedVoiceSample(r.audioFileID)).catch(() => {})
       // B2 证据链后台跑，不阻塞发布；失败=逐字照常用
       this.runRefine(created._id, p.rawText || body, p.blanks)
+      if (!wx.getStorageSync('L4_pub')) wx.setStorageSync('L4_pub', Date.now())   // A12 首座冰山
     } catch (e) {
       wx.hideLoading()
       this.setData({ publishing: false })
