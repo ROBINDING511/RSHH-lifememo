@@ -60,6 +60,7 @@ Page({
     this.refreshToday()
     this.refreshReactions()
     this.refreshVoice()
+    this.startAmbient()
     this.preheatAsr()                                   // 预热连接：开口即出字
     wx.authorize({ scope: 'scope.record' }).catch(() => {})  // 预热授权：0 延迟开口
   },
@@ -155,12 +156,29 @@ Page({
   onHide () {
     if (this.data.recording) this.saveDraftAndStop()   // 切后台/来电先落草稿
     this.stopPreviewVoice()
+    this.stopAmbient()
     this.releaseAsr()
   },
 
   onUnload () {
     this.releaseAsr()
     this.stopPreviewVoice()
+    this.stopAmbient()
+  },
+
+  // 环境音（05 岩岸碎浪）：低音量循环，可在杭航关闭
+  startAmbient () {
+    if (wx.getStorageSync('ambientOn') === '0' || this._ambient) return
+    const a = wx.createInnerAudioContext()
+    a.src = '/audio/ambient-05.mp3'
+    a.loop = true
+    a.volume = 0.22
+    a.obeyMuteSwitch = true
+    a.play()
+    this._ambient = a
+  },
+  stopAmbient () {
+    if (this._ambient) { this._ambient.stop(); this._ambient.destroy(); this._ambient = null }
   },
 
   safeTop () {
@@ -479,7 +497,7 @@ Page({
     this.setData({
       preview: {
         wavPath, text: text || '', rawText: text || '', audioOnly: !hasText && !!wavPath,
-        zoneOptions: stages.map((s) => s.key), zoneIndex: stages.length - 1,
+        zoneOptions: stages.map((s) => s.key), zoneIndex: Math.floor((stages.length - 1) / 2),
         timeLabel: '', _autoYear: null, showTitle: false, _aiTitle: '',
         editId: (opts && opts.editId) || null, extraWavs: [],
         photos: [], previewVoicePlaying: false
@@ -511,8 +529,16 @@ Page({
     // 默认保留讲述者原话（逐字）；AI 小标题可选、可一键还原
     const upd = { 'preview.rawText': finalText, 'preview.audioOnly': !finalText && !!wavPath, 'preview.zoneOptions': stages.map((s) => s.key), 'preview._aiTitle': (r && r.title) || '', 'preview.showTitle': false }
     if (finalText) upd['preview.text'] = finalText
+    // 年份("2017年")或岁数("14岁") → 换算年龄 → 自动归海；不再瞎归晚年
+    const ym = finalText.match(/((?:19|20)\d{2})\s*年/)
     const age = life.parseAge(finalText)
-    if (age != null && this.data.birthYear) {
+    if (ym && this.data.birthYear) {
+      const yr = Number(ym[1])
+      const a = yr - this.data.birthYear
+      upd['preview.timeLabel'] = `${yr}年 · ${a}岁`
+      upd['preview.zoneIndex'] = stages.findIndex((x) => x.key === life.stageOfAge(a).key)
+      upd['preview._autoYear'] = yr
+    } else if (age != null && this.data.birthYear) {
       const yr = life.eventYear(this.data.birthYear, age)
       upd['preview.timeLabel'] = `${yr}年 · ${age}岁`
       upd['preview.zoneIndex'] = stages.findIndex((x) => x.key === life.stageOfAge(age).key)
@@ -618,13 +644,13 @@ Page({
         await api.updateIceberg(p.editId, { text: body, audioFileID, zoneName, memoryTime: timeValue })
         created = { _id: p.editId, audioFileID }
       } else {
+        // 先落文字记录（秒回），音频/照片后台上传再挂上 → 不再久等"冰山生成中"
         created = await api.createIceberg({
-          text: body, audioPath, photos: p.photos, timeValue, zoneName,
+          text: body, audioPath: null, photos: [], timeValue, zoneName,
           title: (p.rawText && body.startsWith(p.rawText)) ? '' : body.split('\n')[0].slice(0, 12)
         })
       }
       this.lastPublishedId = created && created._id
-      this.feedVoiceSample(created && created.audioFileID)   // 喂给声音克隆（固化后自动跳过）
       this.stopPreviewVoice()
       wavs.forEach((w) => draft.forgetPath(w))
       this.setData({ preview: null, publishing: false, drafts: draft.list() })
@@ -636,7 +662,12 @@ Page({
       if (this.lastPublishedId) {
         const pid = this.lastPublishedId
         setTimeout(() => this.clearNewBerg(pid), 1100)
+        setTimeout(() => this.refreshData(), 5 * 60 * 1000)   // 新冰山红旗 5 分钟后消失
       }
+      // 媒体后台上传，完成后喂给声音克隆（固化后服务端自动跳过）
+      if (p.editId) this.feedVoiceSample(created.audioFileID)
+      else api.attachMedia(created._id, { audioPath, photos: p.photos })
+        .then((r) => this.feedVoiceSample(r.audioFileID)).catch(() => {})
     } catch (e) {
       wx.hideLoading()
       this.setData({ publishing: false })

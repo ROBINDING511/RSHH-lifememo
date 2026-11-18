@@ -9,6 +9,7 @@ Page({
     profileMode: 'year', profileBirthday: '', profileAge: '', profileYear: '',
     milestones: life.getMilestones(), msName: '', msAge: '',
     inviteCode: '', bindCode: '', feedQ: '',
+    ambientOn: true,
     voiceState: '', voiceSampleUrl: '',
     listening: false, voiceText: ''
   },
@@ -22,10 +23,17 @@ Page({
     })
     this.recorder = createRecorder()
     this.refreshVoice()
+    this.setData({ ambientOn: wx.getStorageSync('ambientOn') !== '0' })
   },
   noop () {},
   goTimeline () { wx.navigateTo({ url: '/pages/timeline/timeline' }) },
   goRecycle () { wx.navigateTo({ url: '/pages/recycle/recycle' }) },
+  toggleAmbient () {
+    const on = !this.data.ambientOn
+    wx.setStorageSync('ambientOn', on ? '1' : '0')
+    this.setData({ ambientOn: on })
+    wx.showToast({ title: on ? '海浪声开了' : '海浪声关了', icon: 'none' })
+  },
 
   // ---- 妈妈声音克隆管理 ----
   async refreshVoice () {

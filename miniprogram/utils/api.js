@@ -80,6 +80,24 @@ async function updateIceberg (id, patch) {
   return db().collection('icebergs').doc(id).update({ data: patch })
 }
 
+// 先建文字记录（快），音频/照片后台上传后再挂上 → "冰山生成中"不再久等
+async function attachMedia (id, payload) {
+  const ts = Date.now()
+  const rid = () => Math.floor(Math.random() * 100000)
+  const audioTask = payload.audioPath
+    ? wx.cloud.uploadFile({ cloudPath: `voices/${ts}_${rid()}.wav`, filePath: payload.audioPath })
+    : Promise.resolve(null)
+  const photoTasks = Promise.all((payload.photos || []).map((p, i) =>
+    wx.cloud.uploadFile({ cloudPath: `photos/${ts}_${i}_${rid()}.jpg`, filePath: p })
+  ))
+  const [audioUp, photoUps] = await Promise.all([audioTask, photoTasks])
+  const patch = {}
+  if (audioUp) patch.audioFileID = audioUp.fileID
+  if (photoUps.length) patch.photos = photoUps.map((u) => u.fileID)
+  if (Object.keys(patch).length) await updateIceberg(id, patch)
+  return { audioFileID: audioUp ? audioUp.fileID : '' }
+}
+
 async function removeIceberg (id) {
   // 软删除：冰山融化成云
   return updateIceberg(id, { deleted: true, deletedAt: Date.now() })
@@ -107,6 +125,6 @@ function getAsrConfig () {
 module.exports = {
   icebergSizeOf,
   listZones, ensureZone,
-  listIcebergs, listRecycled, createIceberg, updateIceberg, removeIceberg, restoreIceberg,
+  listIcebergs, listRecycled, createIceberg, attachMedia, updateIceberg, removeIceberg, restoreIceberg,
   analyzeMemory, getAsrConfig
 }

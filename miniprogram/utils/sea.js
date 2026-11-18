@@ -79,6 +79,8 @@ function layoutBergs (icebergs, regions, birthYear, newId) {
     return {
       id: b._id, left: g.cx + dx - width / 2, top: g.cy + dy - width / 2, width,
       opacity: layer === 'far' ? 0.85 : 1,
+      // 新冰山插红旗 5 分钟（长辈会回听），到期自动消失
+      flag: !!(b.createdAt && Date.now() - b.createdAt < 5 * 60 * 1000),
       swayAnim: sway, anim: b._id === newId ? BERG_DROP : sway, stage: st.key
     }
   })
