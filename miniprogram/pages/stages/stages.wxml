@@ -144,6 +144,7 @@
         </view>
       </view>
       <view class="menu-link" hover-class="btn-hover" hover-stay-time="80" bindtap="toggleAmbient">二级 · 海浪声：{{ambientOn ? '开' : '关'}}</view>
+      <view class="menu-link" hover-class="btn-hover" hover-stay-time="80" bindtap="toggleCloneConsent">二级 · 允许克隆我的声音：{{cloneConsent ? '已同意' : '未同意'}}</view>
     </view>
   </view>
 

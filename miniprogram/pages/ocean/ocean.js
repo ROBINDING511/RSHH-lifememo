@@ -61,10 +61,9 @@ Page({
 
   onShow () {
     if (this.data.firstLaunch) {
-      this.setData({ firstLaunch: false, recConsent: wx.getStorageSync('recConsent') === '1' })
+      this.setData({ firstLaunch: false })
       getApp().globalData.firstLaunch = false   // 清全局，避免编辑模式新开 ocean 再弹引导
-      if (this.data.recConsent) this.startOnboard()   // 首页=杭航提问，引导按住回答
-      else { this._pendingOnboard = true; this.askConsent() }
+      this.startOnboard()   // 首页=杭航提问；录音同意走微信官方隐私授权+系统麦克风权限
       return
     }
     // 视角(pan+zoom)=用户自己的：返回时不碰 movable-view 内部状态，仅重建数据；
@@ -76,7 +75,7 @@ Page({
       this.setData({ milestones: sea.layoutMilestones(this._regions || life.getStages()) })
       this.updateSeaBg()
     }
-    this.setData({ birthYear: life.getBirthYear(), drafts: draft.list(), whalePaused: false, ambientOn: wx.getStorageSync('ambientOn') !== '0', recConsent: wx.getStorageSync('recConsent') === '1' })
+    this.setData({ birthYear: life.getBirthYear(), drafts: draft.list(), whalePaused: false, ambientOn: wx.getStorageSync('ambientOn') !== '0' })
     if (!this.data.recConsent) this.askConsent()   // C 门控放在进页时，按住说话手势不被弹窗打断
     this.refreshData()
     this.refreshPrompt()
@@ -150,7 +149,8 @@ Page({
   },
   // 发布后把这段原声喂给克隆（固化后服务端自动跳过）
   feedVoiceSample (fileID) {
-    if (!fileID || this.data.familyOwner) return
+    // 声纹=敏感个人信息：须单独同意（杭航·声音菜单开关）才收集克隆样本
+    if (!fileID || this.data.familyOwner || wx.getStorageSync('cloneConsent') !== '1') return
     wx.cloud.callFunction({ name: 'voiceclone', data: { action: 'addSample', fileID, durationMs: this._lastDuration || 0 } })
       .then((r) => {
         const s = (r && r.result) || {}
@@ -413,7 +413,6 @@ Page({
 
   // ==================== 录音（按住说话） ====================
   onHoldStart (e) {
-    if (!this.data.recConsent) { ui.toast('先同意录音说明才能说', 2000); return }   // 按住说话不被打断
     this._holdSource = 'button'
     this._holdY = e.touches && e.touches[0] ? e.touches[0].clientY : 0
     this.startRecording('hold')
@@ -461,25 +460,6 @@ Page({
     ui.toast(`${this.data.nickname || '你'}，你的海铺好了`, 2400)
   },
 
-  // C 录音同意门控
-  askConsent () {
-    wx.showModal({
-      title: '录音前跟您说清楚',
-      content: '录音只用来把您的话变成文字和冰山，存在您自己的云空间里，随时可删；不分享就没人听得到。',
-      confirmText: '同意', cancelText: '先不用',
-      success: (r) => {
-        if (r.confirm) {
-          wx.setStorageSync('recConsent', '1')
-          this.setData({ recConsent: true })
-          if (this._pendingOnboard) { this._pendingOnboard = false; this.startOnboard() }
-          else ui.toast('好了，按住就能说')
-        } else {
-          this.setData({ whalePaused: true })
-          ui.toast('没关系，想说了再同意', 2400)
-        }
-      }
-    })
-  },
   onHoldMove (e) {
     if (!this.data.recording || this._holdSource !== 'button') return
     const y = e.touches && e.touches[0] ? e.touches[0].clientY : 0

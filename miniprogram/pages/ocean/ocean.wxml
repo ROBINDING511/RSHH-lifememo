@@ -43,7 +43,7 @@
 
     <!-- 鲸鱼杭航：屏幕层游弋（始终可见）+ 自然微动；长按说话副入口 -->
     <view class="whale-layer">
-      <view class="cruise {{whalePaused || recording || !recConsent ? 'paused' : ''}}">
+      <view class="cruise {{whalePaused || recording ? 'paused' : ''}}">
         <view class="whalebox" bindtap="onWhaleTap" bindlongpress="onWhaleLongPress" hover-class="whale-hover" hover-stay-time="80">
           <image class="wf wf-straight" src="/images/ocean/whale.png" mode="aspectFit" />
         </view>
@@ -111,13 +111,13 @@
 
   <!-- ============ 底部操作区（拇指区） ============ -->
   <view class="dock safe-bottom" wx:if="{{!preview}}">
-    <view class="record-btn {{recording ? (cancelArmed ? 'record-cancel' : 'record-on') : ''}} {{recConsent ? '' : 'record-disabled'}}"
+    <view class="record-btn {{recording ? (cancelArmed ? 'record-cancel' : 'record-on') : ''}}"
       hover-class="record-hover" hover-stay-time="80"
       bindtouchstart="onHoldStart" bindtouchmove="onHoldMove"
       catchtouchend="onHoldEnd" catchtouchcancel="onHoldEnd">
       <text class="record-main">{{recording ? (cancelArmed ? '松开 取消' : '松开 发送') : '按住 说话'}}</text>
     </view>
-    <text class="consent-hint" wx:if="{{!recConsent}}">先点按钮同意录音说明，才能说话</text>
+
   </view>
 
   <!-- ============ 实时转写面板（微信式：按住即弹 0 延迟，边说边出字）============
