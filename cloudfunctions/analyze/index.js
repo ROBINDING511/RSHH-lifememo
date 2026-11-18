@@ -51,7 +51,7 @@ exports.main = async (event) => {
   if (event.onboard) {
     const P = {
       nickname: `从这句话提炼用户希望被怎么称呼（如"陈阿姨"/"妈妈"/"老李"）。只输出JSON{"nickname":"..."}；没提到则{"nickname":""}。话：${text}`,
-      birth: `提取出生年份(4位数字)。只输出JSON{"year":1958}；没有则{"year":null}。话：${text}`,
+      birth: `提取出生年份。两位年份按常理补全世纪（如"87的"/"我87"→1987，长辈多为19xx；若明显是近年则20xx）。只输出JSON{"year":1987}；完全无法判断则{"year":null,"ask":true}。话：${text}`,
       event: `用户被问"人生中一个重要的时间是什么"。提取事件名(2-8字,如结婚/孩子出生/离婚/退休)。若表示没有/不想说/跳过→{"event":"","none":true}；否则{"event":"...","none":false}。话：${text}`,
       eventTime: `提取该事件发生的年份(4位)或当时岁数。只输出JSON{"year":1990,"age":null}或{"year":null,"age":30}；都没有{"year":null,"age":null}。话：${text}`
     }

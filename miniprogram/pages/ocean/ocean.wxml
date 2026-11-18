@@ -100,6 +100,7 @@
   <view class="whale-caption" wx:if="{{onboardStep >= 0 && !preview && !recording}}">
     <text>{{onboardQ}}</text>
     <text class="whale-caption-hint">按住下面的青色按钮回答</text>
+    <view class="caption-ok" wx:if="{{nickPending}}" hover-class="btn-hover" hover-stay-time="80" bindtap="confirmNick">对，就这么叫</view>
   </view>
 
   <!-- ============ 底部操作区（拇指区） ============ -->

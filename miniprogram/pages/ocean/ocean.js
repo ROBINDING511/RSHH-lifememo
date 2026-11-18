@@ -40,7 +40,7 @@ Page({
     liveBig: false, liveExpanded: false, liveFollow: true, liveTail: '',
     previewStatus: '', previewEmotion: false,
     // 引导对话：杭航"说"出来→按住答→提炼→生成海
-    onboardStep: -1, onboardQ: '', nickname: ''
+    onboardStep: -1, onboardQ: '', nickname: '', nickPending: false
   },
 
   onLoad (query) {
@@ -393,21 +393,36 @@ Page({
   // ==================== 引导对话：杭航问→按住答→提炼→生成海 ====================
   startOnboard () {
     // 引导=鲸鱼的问题以字幕呈现（鲸鱼不发语音），不弹窗
-    this.setData({ onboardStep: 0, onboardQ: '能告诉我怎么称呼你吗？', nickname: life.getNickname() })
+    this._nickPending = false
+    this.setData({ onboardStep: 0, nickPending: false, onboardQ: '能告诉我怎么称呼你吗？', nickname: life.getNickname() })
   },
+  applyNick (n) {
+    life.setNickname(n)
+    this._nickPending = false
+    this.setData({ nickname: n, nickPending: false, onboardStep: 1, onboardQ: `${n}，你是哪一年出生的呀～` })
+  },
+  confirmNick () { if (this._pendingNick) this.applyNick(this._pendingNick) },
   async handleOnboard (text) {
     const step = this.data.onboardStep
     if (!text) { ui.toast('没听清，按住再说一次', 2000); return }
     const nick = this.data.nickname || '你'
     const r = await api.analyzeOnboard(['nickname', 'birth', 'event', 'eventTime'][step] || 'nickname', text).catch(() => ({}))
     if (step === 0) {
+      // 称呼先给文字让用户确认/改，不直接套用
+      if (this._nickPending) {
+        if (/^(好|对|可以|行|嗯|是的|没错)/.test(text)) { this.applyNick(this._pendingNick); return }
+        const n2 = (r.nickname || '').trim()
+        if (n2) { this._pendingNick = n2; this.setData({ onboardQ: `叫你「${n2}」，好吗？对就点"对"，或按住说别的称呼。` }) }
+        else this.setData({ onboardQ: '想让我怎么称呼你？按住说，比如"陈阿姨"或"妈妈"。' })
+        return
+      }
       const n = (r.nickname || '').trim()
-      if (!n) { ui.toast('没听清称呼，按住再说一次', 2000); return }
-      life.setNickname(n)
-      this.setData({ nickname: n, onboardStep: 1, onboardQ: `${n}，你是哪一年出生的呀～` })
+      if (!n) { this.setData({ onboardQ: '想让我怎么称呼你？按住说，比如"陈阿姨"或"妈妈"。' }); return }
+      this._pendingNick = n
+      this.setData({ nickPending: true, onboardQ: `叫你「${n}」，好吗？对就点"对"，或按住说别的称呼。` })
     } else if (step === 1) {
       const y = Number(r.year)
-      if (!y) { ui.toast('没听清年份，按住再说一次', 2000); return }
+      if (!y) { this.setData({ onboardQ: `${nick}，方便再说一下出生年份吗？比如1987年。` }); return }   // 不显示"没听清"
       const p = life.getProfile() || {}
       life.setProfile(Object.assign({}, p, { mode: 'year', year: y }))   // 出生=人生第一个 mark
       this.setData({ birthYear: y, onboardStep: 2, onboardQ: `${nick}，如果人生中有一个重要的时间，你会认为是什么时间呢？` })
@@ -419,7 +434,7 @@ Page({
       const by = this.data.birthYear
       let age = r.age != null ? Number(r.age) : null
       if (age == null && r.year && by) age = Number(r.year) - by
-      if (age == null || age < 0) { ui.toast('没听清时间，按住再说一次', 2000); return }
+      if (age == null || age < 0) { this.setData({ onboardQ: `${nick}，${this._pendingEvent}那是哪一年呀？比如2015年，或说你当时几岁。` }); return }
       life.addMilestone(this._pendingEvent, age)   // 事件+时间 → 新的一片海
       this.finishOnboard()
       return
