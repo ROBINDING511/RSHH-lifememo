@@ -21,8 +21,11 @@
 .sea-area { position: absolute; left: 0; top: 0; width: 100%; height: 100%; }
 .sea-world { position: relative; }
 /* 海面本身在动：纹理略大于世界并缓慢漂移（无平行线），叠加柔光晕染 */
-/* 海底板：高分辨率水彩位图（真机可靠渲染），随世界 pan/zoom */
-.sea-base { position: absolute; left: 0; top: 0; }
+/* 代码海：单层线性渐变（真机可靠）+ 浪沫椭圆，零图片下载；在世界内随 pan/zoom 矢量清晰 */
+.sea-code { position: absolute; left: 0; top: 0; background: linear-gradient(180deg, #E9DCA9 0%, #E4D6A4 30%, #C9D3B4 45%, #8FC0CB 62%, #4E89A0 82%, #3A7089 100%); }
+.sea-foam { position: absolute; left: 0; top: 0; width: 100%; height: 100%; overflow: hidden; animation: seaDrift 30s ease-in-out infinite; }
+.foam { position: absolute; border-radius: 50%; background: rgba(255, 250, 235, 0.10); }
+@keyframes seaDrift { 0%, 100% { transform: translate(0, 0); } 50% { transform: translate(30px, 16px); } }
 /* 引导字幕（非弹窗） */
 .whale-caption { position: absolute; left: 40rpx; right: 40rpx; bottom: calc(env(safe-area-inset-bottom) + 190rpx); z-index: 24; text-align: center; pointer-events: none; }
 .whale-caption text { display: block; font-size: var(--fs-lg); line-height: 1.7; color: var(--c-text); text-shadow: 0 1px 0 rgba(255,255,255,.6); }

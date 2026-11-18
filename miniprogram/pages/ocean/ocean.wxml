@@ -17,8 +17,13 @@
         out-of-bounds="{{false}}" disabled="{{movableDisabled}}" bindchange="onSeaChange"
         scale="{{true}}" scale-min="0.6" scale-max="2" scale-value="{{seaScale}}" bindscale="onSeaScale"
         style="width:{{worldWidth}}px;height:{{worldHeight}}px" x="{{movX}}" y="{{movY}}">
-        <image class="sea-base" src="/images/ocean/sea_bg.jpg" mode="scaleToFill"
-          style="width:{{worldWidth}}px;height:{{worldHeight}}px" />
+        <!-- 代码海：CSS 渐变+浪沫形状，零下载、随世界 pan/zoom 矢量清晰 -->
+        <view class="sea-code" style="width:{{worldWidth}}px;height:{{worldHeight}}px">
+          <view class="sea-foam">
+            <view wx:for="{{foamBlobs}}" wx:key="i" class="foam"
+              style="left:{{item.x}}px;top:{{item.y}}px;width:{{item.w}}px;height:{{item.h}}px"></view>
+          </view>
+        </view>
         <view class="sea-tint" style="background:{{tintGradient}}"></view>
         <text wx:for="{{stages}}" wx:key="key" class="stage-label"
           style="left:{{item.cx}}px;top:{{item.cy}}px">{{item.name}}之海</text>

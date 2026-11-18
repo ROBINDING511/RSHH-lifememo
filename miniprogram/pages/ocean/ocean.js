@@ -34,7 +34,6 @@ Page({
     familyOwner: null, familyReactCount: 0,
     voiceReview: null, voiceState: 'collecting',
     sheetDy: 0, sheetSettle: true,
-    seaTile: 240, seaPosX: 0, seaPosY: 0, seaGradH: 0,
     // v2.0 C 门控 / D 字幕 / A9 状态 / A8 情绪
     recConsent: false,
     liveBig: false, liveExpanded: false, liveFollow: true, liveTail: '',
@@ -72,7 +71,6 @@ Page({
       this._worldInited = true
     } else {
       this.setData({ milestones: sea.layoutMilestones(this._regions || life.getStages()) })
-      this.updateSeaBg()
     }
     this.setData({ birthYear: life.getBirthYear(), drafts: draft.list(), whalePaused: false })
     if (!this.data.recConsent) this.askConsent()   // C 门控放在进页时，按住说话手势不被弹窗打断
@@ -210,25 +208,19 @@ Page({
       mx = Math.max(-(s * w.worldWidth - info.W), Math.min(0, px))
       my = Math.max(-(s * w.worldHeight - info.H), Math.min(0, py))
     }
+    // 代码海浪沫：确定性散点（零图片），随世界 pan/zoom
+    const blobs = []
+    for (let i = 0; i < 16; i++) {
+      const sx = (i * 733) % 97, sy = (i * 397) % 89
+      blobs.push({ i, x: (sx / 97) * w.worldWidth, y: (sy / 89) * w.worldHeight, w: 180 + (i % 5) * 90, h: 40 + (i % 3) * 22 })
+    }
     this.setData({
       worldWidth: w.worldWidth, worldHeight: w.worldHeight,
       movX: mx, movY: my, tintGradient: w.tint, stages: w.regions,
-      seaScale: this._scale || 1   // 重应用用户视角，绝不自动重置
+      seaScale: this._scale || 1,   // 重应用用户视角，绝不自动重置
+      foamBlobs: blobs
     })
     this.setData({ milestones: sea.layoutMilestones(w.regions) })
-    this.updateSeaBg()
-  },
-
-  // ==================== 矢量活海：背景尺寸/位置随 pan/zoom 更新（矢量不糊）====================
-  updateSeaBg () {
-    const s = this._scale || 1
-    const mx = this._movX != null ? this._movX : this.data.movX
-    const my = this._movY != null ? this._movY : this.data.movY
-    this.setData({
-      seaTile: 240 * s,
-      seaPosX: mx, seaPosY: my,
-      seaGradH: (this.data.worldHeight || 2000) * s
-    })
   },
 
   async refreshData () {
@@ -569,7 +561,7 @@ Page({
     const id = e.currentTarget.dataset.id
     if (id) wx.navigateTo({ url: `/pages/iceberg/iceberg?id=${id}` })
   },
-  onSeaChange (e) { this._movX = e.detail.x; this._movY = e.detail.y; this.updateSeaBg() },
+  onSeaChange (e) { this._movX = e.detail.x; this._movY = e.detail.y },
   // 双指捏合缩放（聚拢缩小 / 打开放大）
   onSeaScale (e) {
     // 只认用户双指捏合（有触摸）；页面重排的伪 scale 事件一律忽略
@@ -577,7 +569,6 @@ Page({
     this._scale = e.detail.scale
     getApp().globalData.seaScale = e.detail.scale   // 会话内记住用户视角
     this.setData({ seaScale: e.detail.scale })
-    this.updateSeaBg()
   },
 
   onBergDragStart (e) {
