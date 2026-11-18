@@ -9,10 +9,10 @@
 
   <!-- ============ 插画海面场景 ============ -->
   <view class="scene" bindtouchstart="onSceneTouchStart">
-    <view class="bg-gradient"></view>
-    <image class="bg-art {{bgLoaded ? 'show' : ''}}" src="/images/ocean/sea_bg.jpg"
-      mode="aspectFill" bindload="onBgLoad" />
-
+    <!-- 矢量活海：日落渐变 + SVG 浪纹，任意缩放不糊，随 pan/zoom 变化，轻轻动 -->
+    <view class="bg-sea" style="background-size: 100% {{seaGradH}}px; background-position: 0 {{seaPosY}}px;">
+      <view class="bg-sea-waves" style="background-size: {{seaTile}}px {{seaTile}}px; background-position: {{seaPosX}}px {{seaPosY}}px;"></view>
+    </view>
 
     <!-- 整片海向四面八方扩展：2D 可拖世界，拖动如滚地球（海面纹理随世界滚过+各阶段海色晕染） -->
     <movable-area class="sea-area">
@@ -20,9 +20,6 @@
         out-of-bounds="{{false}}" disabled="{{movableDisabled}}" bindchange="onSeaChange"
         scale="{{true}}" scale-min="0.6" scale-max="2.5" scale-value="{{seaScale}}" bindscale="onSeaScale"
         style="width:{{worldWidth}}px;height:{{worldHeight}}px" x="{{movX}}" y="{{movY}}">
-        <image class="sea-texture" src="/images/ocean/sea_bg.jpg" mode="scaleToFill"
-          style="width:{{worldWidth+120}}px;height:{{worldHeight+120}}px" />
-
         <view class="sea-tint" style="background:{{tintGradient}}"></view>
         <text wx:for="{{stages}}" wx:key="key" class="stage-label"
           style="left:{{item.cx}}px;top:{{item.cy}}px">{{item.name}}之海</text>

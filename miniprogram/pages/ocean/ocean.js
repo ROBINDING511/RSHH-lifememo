@@ -34,7 +34,8 @@ Page({
     familyOwner: null, familyReactCount: 0,
     voiceReview: null, voiceState: 'collecting',
     ambientOn: true,
-    sheetDy: 0, sheetSettle: true
+    sheetDy: 0, sheetSettle: true,
+    seaTile: 240, seaPosX: 0, seaPosY: 0, seaGradH: 0
   },
 
   onLoad (query) {
@@ -221,6 +222,19 @@ Page({
       movX: mx, movY: my, tintGradient: w.tint, stages: w.regions
     })
     this.setData({ milestones: sea.layoutMilestones(w.regions) })
+    this.updateSeaBg()
+  },
+
+  // ==================== 矢量活海：背景尺寸/位置随 pan/zoom 更新（矢量不糊）====================
+  updateSeaBg () {
+    const s = this._scale || 1
+    const mx = this._movX != null ? this._movX : this.data.movX
+    const my = this._movY != null ? this._movY : this.data.movY
+    this.setData({
+      seaTile: 240 * s,
+      seaPosX: mx, seaPosY: my,
+      seaGradH: (this.data.worldHeight || 2000) * s
+    })
   },
 
   async refreshData () {
@@ -463,9 +477,9 @@ Page({
     const id = e.currentTarget.dataset.id
     if (id) wx.navigateTo({ url: `/pages/iceberg/iceberg?id=${id}` })
   },
-  onSeaChange (e) { this._movX = e.detail.x; this._movY = e.detail.y },
+  onSeaChange (e) { this._movX = e.detail.x; this._movY = e.detail.y; this.updateSeaBg() },
   // 双指捏合缩放（聚拢缩小 / 打开放大）
-  onSeaScale (e) { this._scale = e.detail.scale; this.setData({ seaScale: e.detail.scale }) },
+  onSeaScale (e) { this._scale = e.detail.scale; this.setData({ seaScale: e.detail.scale }); this.updateSeaBg() },
 
   onBergDragStart (e) {
     this._dragId = e.currentTarget.dataset.id
