@@ -53,7 +53,8 @@ Page({
       wx.navigateTo({ url: '/packageGuide/pages/guide/guide' })
       return
     }
-    this.setupWorld()
+    this.setupWorld(this._worldInited)   // 首次居中；之后保留上次游到的位置
+    this._worldInited = true
     this.setData({ birthYear: life.getBirthYear(), drafts: draft.list(), whalePaused: false })
     this.refreshData()
     this.refreshPrompt()
@@ -190,13 +191,22 @@ Page({
   },
 
   // ==================== 世界 / 布局 ====================
-  setupWorld () {
+  // keepPosition=true 时保留上次游到的位置（从详情返回不回到中央）
+  setupWorld (keepPosition) {
     const w = sea.buildWorld(life.getStages())
     this._world = w
     this._regions = w.regions
+    let mx = w.movX, my = w.movY
+    if (keepPosition) {
+      const info = sea.windowSize()
+      const px = this._movX != null ? this._movX : this.data.movX
+      const py = this._movY != null ? this._movY : this.data.movY
+      mx = Math.max(-(w.worldWidth - info.W), Math.min(0, px))
+      my = Math.max(-(w.worldHeight - info.H), Math.min(0, py))
+    }
     this.setData({
       worldWidth: w.worldWidth, worldHeight: w.worldHeight,
-      movX: w.movX, movY: w.movY, tintGradient: w.tint, stages: w.regions
+      movX: mx, movY: my, tintGradient: w.tint, stages: w.regions
     })
     this.setData({ milestones: sea.layoutMilestones(w.regions) })
   },
@@ -658,7 +668,11 @@ Page({
       ui.toast(p.editId ? '补好了，冰山更新了' : '一座新的冰山入海了', 2400)
       await this.refreshData()
       const g = (this._regions || []).find((x) => x.key === zoneName)
-      if (g) this.setData(sea.centerOn(g, this._world))
+      if (g) {
+        const c = sea.centerOn(g, this._world)
+        this._movX = c.movX; this._movY = c.movY
+        this.setData(c)
+      }
       if (this.lastPublishedId) {
         const pid = this.lastPublishedId
         setTimeout(() => this.clearNewBerg(pid), 1100)
