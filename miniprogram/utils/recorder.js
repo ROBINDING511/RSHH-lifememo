@@ -34,7 +34,10 @@ function createRecorder () {
     if (state.onFrame) state.onFrame(res.frameBuffer, elapsed)
   })
 
-  rm.onStart(() => { state.recording = true })
+  rm.onStart(() => {
+    state.recording = true
+    if (state.stopRequested) { state.stopRequested = false; rm.stop() }
+  })
 
   rm.onStop(() => {
     state.recording = false
@@ -69,6 +72,7 @@ function createRecorder () {
       state.chunks = []
       state.startAt = Date.now()
       state.lastLeft = -1
+      state.stopRequested = false
 
       const setting = {
         duration: MAX_SECONDS * 1000, // 到点自动停，像微信语音
@@ -102,6 +106,7 @@ function createRecorder () {
     },
 
     stop () {
+      state.stopRequested = true
       if (state.timer) clearTimeout(state.timer)
       clearInterval(state.cdTimer)
       clearInterval(state.tickTimer)
