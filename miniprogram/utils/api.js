@@ -109,10 +109,10 @@ async function restoreIceberg (id) {
 }
 
 // ---------- 云函数 ----------
-async function analyzeMemory (text) {
+async function analyzeMemory (text, blanks) {
   const res = await wx.cloud.callFunction({
     name: 'analyze',
-    data: { text }
+    data: { text, blanks: blanks || [] }
   })
   return res.result
 }

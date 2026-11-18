@@ -35,7 +35,11 @@ Page({
     voiceReview: null, voiceState: 'collecting',
     ambientOn: true,
     sheetDy: 0, sheetSettle: true,
-    seaTile: 240, seaPosX: 0, seaPosY: 0, seaGradH: 0
+    seaTile: 240, seaPosX: 0, seaPosY: 0, seaGradH: 0,
+    // v2.0 C 门控 / D 字幕 / A9 状态 / A8 情绪
+    recConsent: false,
+    liveBig: false, liveExpanded: false, liveFollow: true, liveTail: '',
+    previewStatus: '', previewEmotion: false
   },
 
   onLoad (query) {
@@ -59,7 +63,7 @@ Page({
     }
     this.setupWorld(this._worldInited)   // 首次居中；之后保留上次游到的位置
     this._worldInited = true
-    this.setData({ birthYear: life.getBirthYear(), drafts: draft.list(), whalePaused: false, ambientOn: wx.getStorageSync('ambientOn') !== '0' })
+    this.setData({ birthYear: life.getBirthYear(), drafts: draft.list(), whalePaused: false, ambientOn: wx.getStorageSync('ambientOn') !== '0', recConsent: wx.getStorageSync('recConsent') === '1' })
     this.refreshData()
     this.refreshPrompt()
     this.refreshToday()
@@ -312,7 +316,41 @@ Page({
     this._lastTranscriptAt = Date.now()
     if (this._pendingText == null) return
     const t = this._appendBase != null ? this._appendBase + this._pendingText : this._pendingText
-    this.setData({ transcript: t })
+    // D 字幕纪律：默认最近 2 行
+    const seg = t.split(/(?<=[。！？!?；;])/).filter(Boolean)
+    this.setData({ transcript: t, liveTail: seg.slice(-2).join('') })
+  },
+  // D 字幕：上滑读历史停跟随 / 回到最新 / 大字 / 看全部
+  onLiveScrollTop () { if (this.data.liveFollow) this.setData({ liveFollow: false }) },
+  backLatest () { this.setData({ liveFollow: true }) },
+  toggleLiveBig () { this.setData({ liveBig: !this.data.liveBig }) },
+  toggleLiveExpanded () { this.setData({ liveExpanded: !this.data.liveExpanded, liveFollow: true }) },
+
+  // A3 留白：这段不想说 → 记 blanks，AI 禁提，温和安抚
+  markBlank (topic) {
+    const p = this.data.preview
+    const t = topic || (p && p.text || '').slice(0, 12) || '这段'
+    const blanks = (p && p.blanks) || []
+    blanks.push({ topic: t, reason: '本人跳过', at: Date.now() })
+    try {
+      const idx = wx.getStorageSync('blanksIndex') || []
+      if (!idx.includes(t)) idx.push(t)
+      wx.setStorageSync('blanksIndex', idx.slice(-20))
+    } catch (e) {}
+    if (p) this.setData({ 'preview.blanks': blanks })
+    ui.toast('好，这段咱们就放在这儿，不碰它。', 2600)
+  },
+  onSkipTopic () { this.markBlank() },
+  // A8 情绪保护：先歇一歇（收起复核卡，草稿已落）
+  restNow () {
+    const p = this.data.preview
+    if (p) {
+      draft.save({ wavPath: p.wavPath, text: p.text, reason: '情绪保护' })
+      this.markBlank((p.text || '').slice(0, 12))
+    }
+    this.stopPreviewVoice()
+    this.setData({ preview: null, drafts: draft.list(), previewEmotion: false })
+    ui.toast('歇一歇，话已经帮您存好了', 2600)
   },
 
   releaseAsr () {
@@ -358,9 +396,28 @@ Page({
 
   // ==================== 录音（按住说话） ====================
   onHoldStart (e) {
+    if (!this.data.recConsent) { this.askConsent(); return }   // C 门控：未同意不录
     this._holdSource = 'button'
     this._holdY = e.touches && e.touches[0] ? e.touches[0].clientY : 0
     this.startRecording('hold')
+  },
+  // C 录音同意门控
+  askConsent () {
+    wx.showModal({
+      title: '录音前跟您说清楚',
+      content: '录音只用来把您的话变成文字和冰山，存在您自己的云空间里，随时可删；不分享就没人听得到。',
+      confirmText: '同意', cancelText: '先不用',
+      success: (r) => {
+        if (r.confirm) {
+          wx.setStorageSync('recConsent', '1')
+          this.setData({ recConsent: true })
+          ui.toast('好了，按住就能说')
+        } else {
+          this.setData({ whalePaused: true })
+          ui.toast('没关系，想说了再同意', 2400)
+        }
+      }
+    })
   },
   onHoldMove (e) {
     if (!this.data.recording || this._holdSource !== 'button') return
@@ -544,8 +601,15 @@ Page({
         photos: [], previewVoicePlaying: false
       }
     })
+    // A8 情绪保护：命中敏感词不整理不追问，温和话术+可歇一歇
+    const emo = this.isSensitive(text || '')
+    this.setData({ previewStatus: 'pending', previewEmotion: emo, 'preview.blanks': [] })
+    if (emo) { this.markBlank((text || '').slice(0, 12)); return }
     if (!hasText && wavPath) ui.toast('没听清，可以先存声音，或直接打字', 3000)
     this.refinePreview(wavPath, text || '')
+  },
+  isSensitive (t) {
+    return /不想活|轻生|自杀|过世|去世|走了的人|重病|癌/.test(t || '')
   },
 
   async refinePreview (wavPath, text) {
@@ -560,9 +624,12 @@ Page({
     if (!finalText && wavPath) finalText = (await this.fallbackTranscribe(wavPath).catch(() => '')) || ''
     let p = this.data.preview
     if (!p || p.wavPath !== wavPath) return
+    // A3 口述命中"不想说/跳过"也触发留白
+    if (/不想说|不想多说|别问了|跳过/.test(finalText)) this.markBlank()
     let r = null
     if (finalText.replace(/\s/g, '').length >= 2) {
-      try { r = await api.analyzeMemory(finalText) } catch (e) { console.warn(e) }
+      try { r = await api.analyzeMemory(finalText, (p.blanks || []).map((b) => b.topic)) }
+      catch (e) { console.warn(e); this.setData({ previewStatus: 'failed' }) }
     }
     p = this.data.preview
     if (!p || p.wavPath !== wavPath) return
@@ -587,6 +654,7 @@ Page({
       upd['preview._autoYear'] = yr
     } else upd['preview.timeLabel'] = ''
     this.setData(upd)
+    if (this.data.previewStatus !== 'failed') this.setData({ previewStatus: 'done' })
   },
 
   appendToPreview (wavPath, fullText) {

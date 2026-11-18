@@ -44,7 +44,10 @@ function chat (messages) {
 
 exports.main = async (event) => {
   const text = (event && event.text || '').trim()
-  if (!text) return { timeOptions: [], zoneOptions: [], title: '' }
+  const blanks = (event && event.blanks) || []
+  if (!text) return { four: '', title: '', timeOptions: [], zoneOptions: [] }
+  // A3/A4：留白话题禁提；只读已发生转写，零新增（A5）
+  const blankLine = blanks.length ? `\n【禁提话题（本人已跳过，绝不提起/追问）】：${blanks.join('、')}` : ''
 
   const prompt = `你是一个温柔的记忆整理助手。用户（一位母亲）刚说了一段自己的人生回忆。
 请分析这段话，严格按 JSON 输出，不要输出任何其他文字：
@@ -55,6 +58,7 @@ exports.main = async (event) => {
   "zoneOptions": ["1-3个人生阶段，从这些词里选或组合：童年、少年、恋爱、结婚、孩子出生、孩子长大、工作、退休、晚年、旅行、新的开始"]
 }
 
+${blankLine}
 回忆内容：
 ${text.slice(0, 1200)}`
 

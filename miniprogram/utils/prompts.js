@@ -7,10 +7,34 @@ const BANK = {
   晚年: ['现在最想念谁？', '这辈子最庆幸的一个决定？', '想给当年的自己说句什么？', '最近一次开心是因为什么？'],
   通用: ['今天有什么想记下来的？', '最近想起的一件旧事？', '有没有一张老照片想讲讲？', '此刻最想对谁说句话？']
 }
-function pick (stageKey, exclude) {
-  const pool = (BANK[stageKey] || []).concat(BANK.通用)
-  const fresh = pool.filter((q) => q !== exclude)
-  const list = fresh.length ? fresh : pool
-  return list[Math.floor(Math.random() * list.length)]
+// A7 追问上限：同一问题短期不重复（storage 近期已问）；为未来鲸鱼对话预留 followUpCount
+const ASK_TTL = 7 * 24 * 3600 * 1000
+function recentAsked () {
+  try {
+    const a = wx.getStorageSync('askedRecent') || []
+    return a.filter((x) => Date.now() - x.at < ASK_TTL)
+  } catch (e) { return [] }
 }
-module.exports = { BANK, pick }
+function recordAsked (q) {
+  try {
+    const a = recentAsked().filter((x) => x.q !== q)
+    a.push({ q, at: Date.now() })
+    wx.setStorageSync('askedRecent', a.slice(-30))
+  } catch (e) {}
+}
+// A3 留白：blanks 话题禁提
+function blankTopics () {
+  try { return wx.getStorageSync('blanksIndex') || [] } catch (e) { return [] }
+}
+function pick (stageKey, exclude) {
+  const blanks = blankTopics()
+  const asked = recentAsked().map((x) => x.q)
+  let pool = (BANK[stageKey] || []).concat(BANK.通用)
+  pool = pool.filter((q) => !blanks.some((b) => b && q.includes(b)))   // 留白话题不追问
+  const fresh = pool.filter((q) => q !== exclude && !asked.includes(q))
+  const list = fresh.length ? fresh : pool.filter((q) => q !== exclude)
+  const q = (list.length ? list : pool)[Math.floor(Math.random() * (list.length ? list.length : pool.length))]
+  recordAsked(q)
+  return q
+}
+module.exports = { BANK, pick, recordAsked, blankTopics }
