@@ -1,8 +1,14 @@
 <!--pages/stages/stages.wxml — 人生阶段规划：拖拽 / 语音 / 个人资料-->
 <view class="page wash-bg">
   <view class="head">
-    <text class="title">人生阶段</text>
-    <text class="sub">每个人对阶段的划分不一样，按你的来</text>
+    <text class="title">杭航</text>
+    <text class="sub">小鲸鱼帮你管着这片海</text>
+  </view>
+
+  <!-- 时间轴 / 云朵 收进杭航，主海面保持干净 -->
+  <view class="hub-row">
+    <view class="hub-pill" hover-class="btn-hover" hover-stay-time="80" bindtap="goTimeline">时间轴</view>
+    <view class="hub-pill" hover-class="btn-hover" hover-stay-time="80" bindtap="goRecycle">云朵</view>
   </view>
 
   <view class="card">

@@ -24,6 +24,8 @@ Page({
     this.refreshVoice()
   },
   noop () {},
+  goTimeline () { wx.navigateTo({ url: '/pages/timeline/timeline' }) },
+  goRecycle () { wx.navigateTo({ url: '/pages/recycle/recycle' }) },
 
   // ---- 妈妈声音克隆管理 ----
   async refreshVoice () {

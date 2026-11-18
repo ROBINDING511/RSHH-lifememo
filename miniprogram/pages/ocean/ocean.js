@@ -665,8 +665,5 @@ Page({
       this.setData({ preview: null })
       ui.toast('丢掉了')
     }
-  },
-
-  goTimeline () { wx.navigateTo({ url: '/pages/timeline/timeline' }) },
-  goRecycle () { wx.navigateTo({ url: '/pages/recycle/recycle' }) }
+  }
 })

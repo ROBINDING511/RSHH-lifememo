@@ -103,16 +103,6 @@
 
   <!-- ============ 底部操作区（拇指区） ============ -->
   <view class="dock safe-bottom" wx:if="{{!preview}}">
-    <view class="dock-row" wx:if="{{!recording}}">
-      <view class="dock-pill" hover-class="btn-hover" hover-stay-time="80" bindtap="goTimeline">
-        <image src="/images/pixel/flag-blue.png" class="dock-icon" mode="aspectFit" />
-        <text>时间轴</text>
-      </view>
-      <view class="dock-pill" hover-class="btn-hover" hover-stay-time="80" bindtap="goRecycle">
-        <image src="/images/misc/cloud.png" class="dock-icon" mode="aspectFit" />
-        <text>云朵</text>
-      </view>
-    </view>
     <view class="record-btn {{recording ? (cancelArmed ? 'record-cancel' : 'record-on') : ''}}"
       hover-class="record-hover" hover-stay-time="80"
       bindtouchstart="onHoldStart" bindtouchmove="onHoldMove"
