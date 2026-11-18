@@ -43,7 +43,7 @@ docs/               设计稿与评审记录
 - 正文 ≥34rpx、转写 48rpx+；触控 ≥88rpx；可点元素必有按压反馈。
 - 关键信息用原生 view/text（随微信字体放大、读屏可达），不用 Canvas 画文字。
 - 破坏性操作给"存下来"退路 + 二次确认；任何失败路径落草稿（`utils/draft.js`）。
-- 校验：`node --check`、`docs/tools/xcheck_wxml_js.py`、`docs/tools/a11y_check.py`（WCAG 2.2 AA）。
+- 校验：`node --check`、`docs/tools/xcheck_wxml_js.js`、`docs/tools/a11y_check.js`（WCAG 2.2 AA）。
 
 ## 开源
 MIT License（见 LICENSE）。欢迎 issue / PR。

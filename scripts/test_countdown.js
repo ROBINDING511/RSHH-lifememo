@@ -1,18 +1,13 @@
-// scripts/test_countdown.mjs — 录音倒计时行为测试（驱动真实 recorder.js，非副本）
-// 运行：node scripts/test_countdown.mjs
+// scripts/test_countdown.js — 录音倒计时行为测试（驱动真实 recorder.js，非副本）
+// 运行：node scripts/test_countdown.js
 //
 // 做法：shim 掉 wx 与定时器（假时钟），直接 require 真实的 utils/recorder.js，
 // 推进虚拟时间，收集 onCountdown 回调。这样测的就是线上代码本身，
 // 不存在「测试副本与源码不同步」的问题。
 
-import { createRequire } from 'module'
-import { readFileSync } from 'fs'
-import { fileURLToPath } from 'url'
-import { dirname, join } from 'path'
-const require = createRequire(import.meta.url)
-// 注意：必须用 fileURLToPath 解码，直接取 url.pathname 会把中文目录名
-// percent-encode（人生海海 → %E4%BA%BA%E7%94%9F%E6%B5%B7%E6%B5%B7）导致 MODULE_NOT_FOUND
-const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
+const { readFileSync } = require('fs')
+const { join } = require('path')
+const ROOT = join(__dirname, '..')
 
 // ===== 假时钟 =====
 let virtualNow = 0

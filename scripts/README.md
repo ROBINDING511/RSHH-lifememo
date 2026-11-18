@@ -159,7 +159,7 @@ cd ~/Projects/人生海海
 **改了文件但没触发刷新**
 确认改的是 `miniprogram/` 或 `cloudfunctions/` 下的源码文件。
 `.md`、`.txt`、`docs/` 里的文件被有意忽略，改文档不该触发编译。
-如果确实漏了某种扩展名，在 `scripts/watch.mjs` 的 `SOURCE_EXT` 里补上。
+如果确实漏了某种扩展名，在 `scripts/watch.js` 的 `SOURCE_EXT` 里补上。
 
 **端口冲突 / IDE 未启动**
 脚本会自动拉起 IDE。若 IDE 已用不同端口启动，先完全退出微信开发者工具再跑命令。
@@ -173,6 +173,6 @@ cd ~/Projects/人生海海
 ## 实现说明
 
 - `mp.sh` — Bash 入口，封装 CLI 调用；路径相对脚本自身解析，项目再移动也不失效
-- `watch.mjs` — Node 文件监听，用内置 `fs.watch` 递归监听，不依赖 fswatch/watchman
+- `watch.js` — Node 文件监听，用内置 `fs.watch` 递归监听，不依赖 fswatch/watchman
 - CLI 输出里的 Electron `DeprecationWarning` 已统一过滤
 - `mp.sh` 被 `source` 时只加载函数不执行，便于单独测试内部逻辑

@@ -5,7 +5,7 @@
     <text class="sub">每个人对阶段的划分不一样，按你的来</text>
   </view>
 
-  <view class="card prof">
+  <view class="card">
     <text class="prof-title">你的年纪（把"…岁"换算成年份）</text>
     <view class="mode-tabs">
       <view class="tab {{profileMode==='birthday'?'on':''}}" hover-class="btn-hover" hover-stay-time="80" bindtap="setMode" data-m="birthday">生日</view>
