@@ -580,7 +580,7 @@ Page({
     if (!p) return
     this.setData({
       recording: false, recordMode: '',
-      'preview.text': fullText, 'preview.audioOnly': false,
+      'preview.text': fullText, 'preview.rawText': fullText, 'preview.audioOnly': false,
       'preview.extraWavs': (p.extraWavs || []).concat(wavPath ? [wavPath] : [])
     })
     ui.toast('接上了，可继续说或变成冰山')
