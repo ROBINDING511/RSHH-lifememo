@@ -1,0 +1,41 @@
+<!--packageGuide/pages/setup/setup.wxml — 首次设置指引：填空+滚轮，非追问-->
+<view class="page wash-bg">
+  <view class="head">
+    <text class="title">先设置一下，海就认得你</text>
+    <text class="sub">填好就能开始记录；每一项都可以跳过，之后在杭航里也能改</text>
+  </view>
+
+  <view class="card">
+    <text class="prof-title">怎么称呼你</text>
+    <input class="field" type="nickname" value="{{nickname}}" placeholder="点一下可填微信昵称，或自己写" bindinput="onNick" />
+    <text class="tip">微信昵称可一键带入；微信不提供生日，生日需您选一下</text>
+  </view>
+
+  <view class="card">
+    <text class="prof-title">你的生日（滚轮选，不用说话）</text>
+    <view class="mode-tabs">
+      <view class="tab {{birthMode === 'date' ? 'on' : ''}}" hover-class="btn-hover" hover-stay-time="80" data-m="date" bindtap="setBirthMode">完整生日</view>
+      <view class="tab {{birthMode === 'year' ? 'on' : ''}}" hover-class="btn-hover" hover-stay-time="80" data-m="year" bindtap="setBirthMode">只填年份</view>
+    </view>
+    <picker wx:if="{{birthMode === 'date'}}" mode="date" value="{{birthday || '1960-01-01'}}" start="1920-01-01" end="2020-12-31" bindchange="onBirthday">
+      <view class="field picker-field">{{birthday || '点这里滚轮选生日'}}</view>
+    </picker>
+    <picker wx:else mode="selector" range="{{years}}" value="{{yearIdx}}" bindchange="onYear">
+      <view class="field picker-field">{{year || '点这里滚轮选年份'}}</view>
+    </picker>
+  </view>
+
+  <view class="card">
+    <text class="prof-title">一个重要的时刻（可选）</text>
+    <text class="tip">比如结婚、孩子出生、退休。填了会为你多开一片海；不填就只有一片起点海，我们不猜。</text>
+    <input class="field" value="{{event}}" placeholder="时刻名字，如 孩子出生" bindinput="onEvent" />
+    <picker mode="selector" range="{{years}}" value="{{evIdx}}" bindchange="onEventYear">
+      <view class="field picker-field">{{eventYear || '那是哪一年（滚轮选）'}}</view>
+    </picker>
+  </view>
+
+  <view class="btns safe-bottom">
+    <view class="btn-save" hover-class="btn-hover" hover-stay-time="80" bindtap="save">开始记录</view>
+    <view class="btn-skip" hover-class="btn-hover" hover-stay-time="80" bindtap="skip">跳过，直接开始</view>
+  </view>
+</view>

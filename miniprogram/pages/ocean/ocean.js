@@ -39,7 +39,6 @@ Page({
     liveBig: false, liveExpanded: false, liveFollow: true, liveTail: '',
     previewStatus: '', previewEmotion: false,
     // 引导对话：杭航"说"出来→按住答→提炼→生成海
-    onboardStep: -1, onboardQ: '', nickname: '', nickPending: false
   },
 
   onLoad (query) {
@@ -61,7 +60,7 @@ Page({
     if (this.data.firstLaunch) {
       this.setData({ firstLaunch: false })
       getApp().globalData.firstLaunch = false   // 清全局，避免编辑模式新开 ocean 再弹引导
-      this.startOnboard()   // 首页=杭航提问；录音同意走微信官方隐私授权+系统麦克风权限
+      wx.navigateTo({ url: '/packageGuide/pages/setup/setup' })   // 首次=设置指引(填空+滚轮)，非追问
       return
     }
     // 视角(pan+zoom)=用户自己的：返回时不碰 movable-view 内部状态，仅重建数据；
@@ -382,64 +381,6 @@ Page({
     this._holdY = e.touches && e.touches[0] ? e.touches[0].clientY : 0
     this.startRecording('hold')
   },
-  // ==================== 引导对话：杭航问→按住答→提炼→生成海 ====================
-  startOnboard () {
-    // 引导=鲸鱼的问题以字幕呈现（鲸鱼不发语音），不弹窗
-    this._nickPending = false
-    this.setData({ onboardStep: 0, nickPending: false, onboardQ: '能告诉我怎么称呼你吗？', nickname: life.getNickname() })
-  },
-  applyNick (n) {
-    life.setNickname(n)
-    this._nickPending = false
-    this.setData({ nickname: n, nickPending: false, onboardStep: 1, onboardQ: `${n}，你是哪一年出生的呀～` })
-  },
-  confirmNick () { if (this._pendingNick) this.applyNick(this._pendingNick) },
-  async handleOnboard (text) {
-    const step = this.data.onboardStep
-    if (!text) { ui.toast('没听清，按住再说一次', 2000); return }
-    const nick = this.data.nickname || '你'
-    const r = await api.analyzeOnboard(['nickname', 'birth', 'event', 'eventTime'][step] || 'nickname', text).catch(() => ({}))
-    if (step === 0) {
-      // 称呼先给文字让用户确认/改，不直接套用
-      if (this._nickPending) {
-        if (/^(好|对|可以|行|嗯|是的|没错)/.test(text)) { this.applyNick(this._pendingNick); return }
-        const n2 = (r.nickname || '').trim()
-        if (n2) { this._pendingNick = n2; this.setData({ onboardQ: `叫你「${n2}」，好吗？对就点"对"，或按住说别的称呼。` }) }
-        else this.setData({ onboardQ: '想让我怎么称呼你？按住说，比如"陈阿姨"或"妈妈"。' })
-        return
-      }
-      const n = (r.nickname || '').trim()
-      if (!n) { this.setData({ onboardQ: '想让我怎么称呼你？按住说，比如"陈阿姨"或"妈妈"。' }); return }
-      this._pendingNick = n
-      this.setData({ nickPending: true, onboardQ: `叫你「${n}」，好吗？对就点"对"，或按住说别的称呼。` })
-    } else if (step === 1) {
-      const y = Number(r.year)
-      if (!y) { this.setData({ onboardQ: `${nick}，方便再说一下出生年份吗？比如1987年。` }); return }   // 不显示"没听清"
-      const p = life.getProfile() || {}
-      life.setProfile(Object.assign({}, p, { mode: 'year', year: y }))   // 出生=人生第一个 mark
-      this.setData({ birthYear: y, onboardStep: 2, onboardQ: `${nick}，如果人生中有一个重要的时间，你会认为是什么时间呢？` })
-    } else if (step === 2) {
-      if (r.none || !r.event) { this.finishOnboard(); return }   // 用户不说→不猜测几片海
-      this._pendingEvent = String(r.event).slice(0, 8)
-      this.setData({ onboardStep: 3, onboardQ: `${nick}，${this._pendingEvent}那是哪一年（或你几岁）呢？` })
-    } else if (step === 3) {
-      const by = this.data.birthYear
-      let age = r.age != null ? Number(r.age) : null
-      if (age == null && r.year && by) age = Number(r.year) - by
-      if (age == null || age < 0) { this.setData({ onboardQ: `${nick}，${this._pendingEvent}那是哪一年呀？比如2015年，或说你当时几岁。` }); return }
-      life.addMilestone(this._pendingEvent, age)   // 事件+时间 → 新的一片海
-      this.finishOnboard()
-      return
-    }
-  },
-  finishOnboard () {
-    this._pendingEvent = null
-    this.setData({ onboardStep: -1, onboardQ: '' })
-    this.setupWorld(false)
-    this._worldInited = true
-    this.refreshData()
-    ui.toast(`${this.data.nickname || '你'}，你的海铺好了`, 2400)
-  },
 
   onHoldMove (e) {
     if (!this.data.recording || this._holdSource !== 'button') return
@@ -507,7 +448,7 @@ Page({
         }
         if (durationMs < 800) return ui.toast('太短了，多说几句')
         const full = (this.data.transcript || '').trim()
-        if (this.data.onboardStep >= 0) { this.handleOnboard(full); return }   // 引导期回答不建冰山
+
         if (this._appendBase != null) { this._appendBase = null; this.appendToPreview(wavPath, full) }
         else this.openPreview(wavPath, full)
       }
@@ -554,7 +495,6 @@ Page({
     if (!this.data.recording && this.data.whalePaused) this.setData({ whalePaused: false })
   },
   onWhaleTap () {
-    if (this.data.onboardStep >= 0) return   // 引导期字幕已在，点鲸鱼不进菜单
     wx.navigateTo({ url: '/pages/stages/stages' })
   },
   onBergTap (e) {

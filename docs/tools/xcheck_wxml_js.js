@@ -11,7 +11,8 @@ const PAGES = [
   'pages/timeline/timeline',
   'pages/recycle/recycle',
   'pages/stages/stages',
-  'packageGuide/pages/guide/guide'
+  'packageGuide/pages/guide/guide',
+  'packageGuide/pages/setup/setup'
 ]
 const EVENT_RE = /\b(?:bind|catch)(?::)?([A-Za-z]+)\s*=\s*"([A-Za-z_$][\w$]*)"/gi
 const SELF_CLOSING = new Set(['image', 'input', 'icon', 'import', 'include', 'wxs', 'slot', 'switch', 'progress', 'checkbox', 'radio', 'audio', 'video', 'camera', 'live-player', 'live-pusher', 'official-account', 'open-data', 'ad', 'functional-page-navigator', 'navigator', 'block'])

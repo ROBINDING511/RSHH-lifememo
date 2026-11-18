@@ -3,7 +3,8 @@ const fs = require('fs')
 const path = require('path')
 
 const ROOT = path.join(__dirname, '..', '..', 'miniprogram')
-const PAGES = ['pages/ocean/ocean', 'pages/iceberg/iceberg', 'pages/timeline/timeline', 'pages/recycle/recycle', 'pages/stages/stages', 'packageGuide/pages/guide/guide']
+const PAGES = ['pages/ocean/ocean', 'pages/iceberg/iceberg', 'pages/timeline/timeline', 'pages/recycle/recycle', 'pages/stages/stages', 'packageGuide/pages/guide/guide',
+  'packageGuide/pages/setup/setup']
 const COMPARE_RE = /(===|!==|==|!=)\s*$/
 
 const appWxss = fs.readFileSync(path.join(ROOT, 'app.wxss'), 'utf8')
