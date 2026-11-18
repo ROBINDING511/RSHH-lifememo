@@ -19,6 +19,7 @@
     <movable-area class="sea-area">
       <movable-view class="sea-world" direction="all" inertia damping="{{40}}" friction="{{2}}"
         out-of-bounds="{{false}}" disabled="{{movableDisabled}}" bindchange="onSeaChange"
+        scale="{{true}}" scale-min="0.6" scale-max="2.5" scale-value="{{seaScale}}" bindscale="onSeaScale"
         style="width:{{worldWidth}}px;height:{{worldHeight}}px" x="{{movX}}" y="{{movY}}">
         <image class="sea-texture" src="/images/ocean/sea_bg.jpg" mode="scaleToFill"
           style="width:{{worldWidth+120}}px;height:{{worldHeight+120}}px" />

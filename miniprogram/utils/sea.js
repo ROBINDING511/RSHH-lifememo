@@ -30,12 +30,13 @@ function buildWorld (stages) {
   return { regions, tint, worldWidth: W2, worldHeight: H2, movX: -(W2 - W) / 2, movY: -(H2 - H) / 2 }
 }
 
-// 视口居中到某海域
-function centerOn (g, world) {
+// 视口居中到某海域（考虑缩放 scale，transform-origin 0 0）
+function centerOn (g, world, scale) {
+  const s = scale || 1
   const { W, H } = windowSize()
   return {
-    movX: clamp(-(g.cx - W / 2), -(world.worldWidth - W), 0),
-    movY: clamp(-(g.cy - H / 2), -(world.worldHeight - H), 0)
+    movX: clamp(W / 2 - s * g.cx, -(s * world.worldWidth - W), 0),
+    movY: clamp(H / 2 - s * g.cy, -(s * world.worldHeight - H), 0)
   }
 }
 

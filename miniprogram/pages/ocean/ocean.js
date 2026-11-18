@@ -18,7 +18,7 @@ Page({
     bergs: [],
     milestones: [],
     stages: [],
-    worldWidth: 0, worldHeight: 0, movX: 0, movY: 0,
+    worldWidth: 0, worldHeight: 0, movX: 0, movY: 0, seaScale: 1,
     tintGradient: '',
     whalePaused: false,
     movableDisabled: false,
@@ -210,8 +210,9 @@ Page({
       const info = sea.windowSize()
       const px = this._movX != null ? this._movX : this.data.movX
       const py = this._movY != null ? this._movY : this.data.movY
-      mx = Math.max(-(w.worldWidth - info.W), Math.min(0, px))
-      my = Math.max(-(w.worldHeight - info.H), Math.min(0, py))
+      const s = this._scale || 1
+      mx = Math.max(-(s * w.worldWidth - info.W), Math.min(0, px))
+      my = Math.max(-(s * w.worldHeight - info.H), Math.min(0, py))
     }
     this.setData({
       worldWidth: w.worldWidth, worldHeight: w.worldHeight,
@@ -461,6 +462,8 @@ Page({
     if (id) wx.navigateTo({ url: `/pages/iceberg/iceberg?id=${id}` })
   },
   onSeaChange (e) { this._movX = e.detail.x; this._movY = e.detail.y },
+  // 双指捏合缩放（聚拢缩小 / 打开放大）
+  onSeaScale (e) { this._scale = e.detail.scale; this.setData({ seaScale: e.detail.scale }) },
 
   onBergDragStart (e) {
     this._dragId = e.currentTarget.dataset.id
@@ -499,7 +502,8 @@ Page({
   _worldPoint (touch) {
     const mx = this._movX != null ? this._movX : this.data.movX
     const my = this._movY != null ? this._movY : this.data.movY
-    return { x: touch.clientX - mx, y: touch.clientY - my }
+    const s = this._scale || 1
+    return { x: (touch.clientX - mx) / s, y: (touch.clientY - my) / s }
   },
 
   // ==================== 草稿 / 复核 / 发布 ====================
@@ -680,7 +684,7 @@ Page({
       await this.refreshData()
       const g = (this._regions || []).find((x) => x.key === zoneName)
       if (g) {
-        const c = sea.centerOn(g, this._world)
+        const c = sea.centerOn(g, this._world, this._scale)
         this._movX = c.movX; this._movY = c.movY
         this.setData(c)
       }
