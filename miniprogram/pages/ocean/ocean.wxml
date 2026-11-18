@@ -59,7 +59,7 @@
   </view>
 
   <!-- ============ 空态提示（深色胶囊白字，压在任何水色上都看得清） ============ -->
-  <view class="empty-hint" wx:if="{{icebergCount === 0 && !recording && !preview && !drafts.length}}">
+  <view class="empty-hint" wx:if="{{icebergCount === 0 && !recording && !preview && !drafts.length && onboardStep < 0}}">
     <view class="hint-card">
       <text class="hint-title">{{prompt || '想说什么，就说给杭航听'}}</text>
       <text class="hint-sub">按住下面的青色按钮，说说看</text>
@@ -98,6 +98,15 @@
         <view class="vr-unlike" hover-class="btn-hover" hover-stay-time="80" bindtap="voiceUnlike">不像</view>
       </view>
     </view>
+  </view>
+
+  <!-- 引导：杭航提问 + 指向按住说话按钮 -->
+  <view class="onboard" wx:if="{{onboardStep >= 0 && !preview}}">
+    <view class="onboard-card">
+      <text class="onboard-q">{{onboardQ}}</text>
+      <text class="onboard-hint">按住下面的青色按钮回答杭航</text>
+    </view>
+    <view class="onboard-arrow">↓</view>
   </view>
 
   <!-- ============ 底部操作区（拇指区） ============ -->

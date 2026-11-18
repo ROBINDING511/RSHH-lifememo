@@ -109,6 +109,11 @@ async function restoreIceberg (id) {
 }
 
 // ---------- 云函数 ----------
+async function analyzeOnboard (step, text) {
+  const res = await wx.cloud.callFunction({ name: 'analyze', data: { text, onboard: step } })
+  return res.result || {}
+}
+
 async function analyzeMemory (text, blanks) {
   const res = await wx.cloud.callFunction({
     name: 'analyze',
@@ -123,7 +128,7 @@ function getAsrConfig () {
 }
 
 module.exports = {
-  icebergSizeOf,
+  icebergSizeOf, analyzeOnboard,
   listZones, ensureZone,
   listIcebergs, listRecycled, createIceberg, attachMedia, updateIceberg, removeIceberg, restoreIceberg,
   analyzeMemory, getAsrConfig

@@ -39,7 +39,9 @@ Page({
     // v2.0 C 门控 / D 字幕 / A9 状态 / A8 情绪
     recConsent: false,
     liveBig: false, liveExpanded: false, liveFollow: true, liveTail: '',
-    previewStatus: '', previewEmotion: false
+    previewStatus: '', previewEmotion: false,
+    // 引导对话：杭航问→按住答→提炼→生成海
+    onboardStep: -1, onboardQ: '', nickname: ''
   },
 
   onLoad (query) {
@@ -59,9 +61,10 @@ Page({
 
   onShow () {
     if (this.data.firstLaunch) {
-      this.setData({ firstLaunch: false })
+      this.setData({ firstLaunch: false, recConsent: wx.getStorageSync('recConsent') === '1' })
       getApp().globalData.firstLaunch = false   // 清全局，避免编辑模式新开 ocean 再弹引导
-      wx.navigateTo({ url: '/packageGuide/pages/guide/guide' })
+      if (this.data.recConsent) this.startOnboard()   // 首页=杭航提问，引导按住回答
+      else { this._pendingOnboard = true; this.askConsent() }
       return
     }
     // 视角(pan+zoom)=用户自己的：返回时不碰 movable-view 内部状态，仅重建数据；
@@ -415,6 +418,49 @@ Page({
     this._holdY = e.touches && e.touches[0] ? e.touches[0].clientY : 0
     this.startRecording('hold')
   },
+  // ==================== 引导对话：杭航问→按住答→提炼→生成海 ====================
+  startOnboard () {
+    this.setData({ onboardStep: 0, onboardQ: '能告诉我怎么称呼你吗？', nickname: life.getNickname() })
+  },
+  async handleOnboard (text) {
+    const step = this.data.onboardStep
+    if (!text) { ui.toast('没听清，按住再说一次', 2000); return }
+    const nick = this.data.nickname || '你'
+    const r = await api.analyzeOnboard(['nickname', 'birth', 'event', 'eventTime'][step] || 'nickname', text).catch(() => ({}))
+    if (step === 0) {
+      const n = (r.nickname || '').trim()
+      if (!n) { ui.toast('没听清称呼，按住再说一次', 2000); return }
+      life.setNickname(n)
+      this.setData({ nickname: n, onboardStep: 1, onboardQ: `${n}，你是哪一年出生的呀～` })
+    } else if (step === 1) {
+      const y = Number(r.year)
+      if (!y) { ui.toast('没听清年份，按住再说一次', 2000); return }
+      const p = life.getProfile() || {}
+      life.setProfile(Object.assign({}, p, { mode: 'year', year: y }))   // 出生=人生第一个 mark
+      this.setData({ birthYear: y, onboardStep: 2, onboardQ: `${nick}，如果人生中有一个重要的时间，你会认为是什么时间呢？` })
+    } else if (step === 2) {
+      if (r.none || !r.event) { this.finishOnboard(); return }   // 用户不说→不猜测几片海
+      this._pendingEvent = String(r.event).slice(0, 8)
+      this.setData({ onboardStep: 3, onboardQ: `${nick}，${this._pendingEvent}那是哪一年（或你几岁）呢？` })
+    } else if (step === 3) {
+      const by = this.data.birthYear
+      let age = r.age != null ? Number(r.age) : null
+      if (age == null && r.year && by) age = Number(r.year) - by
+      if (age == null || age < 0) { ui.toast('没听清时间，按住再说一次', 2000); return }
+      life.addMilestone(this._pendingEvent, age)   // 事件+时间 → 新的一片海
+      this.finishOnboard()
+    }
+  },
+  finishOnboard () {
+    this._pendingEvent = null
+    this.setData({ onboardStep: -1, onboardQ: '' })
+    this.setupWorld(false)
+    this._worldInited = true
+    this.refreshData()
+    this.startAmbient()
+    ui.toast(`${this.data.nickname || '你'}，你的海铺好了`, 2400)
+  },
+
   // C 录音同意门控
   askConsent () {
     wx.showModal({
@@ -425,7 +471,8 @@ Page({
         if (r.confirm) {
           wx.setStorageSync('recConsent', '1')
           this.setData({ recConsent: true })
-          ui.toast('好了，按住就能说')
+          if (this._pendingOnboard) { this._pendingOnboard = false; this.startOnboard() }
+          else ui.toast('好了，按住就能说')
         } else {
           this.setData({ whalePaused: true })
           ui.toast('没关系，想说了再同意', 2400)
@@ -499,6 +546,7 @@ Page({
         }
         if (durationMs < 800) return ui.toast('太短了，多说几句')
         const full = (this.data.transcript || '').trim()
+        if (this.data.onboardStep >= 0) { this.handleOnboard(full); return }   // 引导期回答不建冰山
         if (this._appendBase != null) { this._appendBase = null; this.appendToPreview(wavPath, full) }
         else this.openPreview(wavPath, full)
       }

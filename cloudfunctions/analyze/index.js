@@ -46,6 +46,21 @@ exports.main = async (event) => {
   const text = (event && event.text || '').trim()
   const blanks = (event && event.blanks) || []
   if (!text) return { four: '', title: '', timeOptions: [], zoneOptions: [] }
+
+  // 引导对话提取（称呼/出生年/重要事件/事件时间）
+  if (event.onboard) {
+    const P = {
+      nickname: `从这句话提炼用户希望被怎么称呼（如"陈阿姨"/"妈妈"/"老李"）。只输出JSON{"nickname":"..."}；没提到则{"nickname":""}。话：${text}`,
+      birth: `提取出生年份(4位数字)。只输出JSON{"year":1958}；没有则{"year":null}。话：${text}`,
+      event: `用户被问"人生中一个重要的时间是什么"。提取事件名(2-8字,如结婚/孩子出生/离婚/退休)。若表示没有/不想说/跳过→{"event":"","none":true}；否则{"event":"...","none":false}。话：${text}`,
+      eventTime: `提取该事件发生的年份(4位)或当时岁数。只输出JSON{"year":1990,"age":null}或{"year":null,"age":30}；都没有{"year":null,"age":null}。话：${text}`
+    }
+    try {
+      const r = await chat([{ role: 'user', content: P[event.onboard] || P.nickname }])
+      const m = String(r.choices[0].message.content).match(/\{[\s\S]*\}/)
+      return JSON.parse(m ? m[0] : '{}')
+    } catch (e) { return {} }
+  }
   // A3/A4：留白话题禁提；只读已发生转写，零新增（A5）
   const blankLine = blanks.length ? `\n【禁提话题（本人已跳过，绝不提起/追问）】：${blanks.join('、')}` : ''
 

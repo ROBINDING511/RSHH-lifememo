@@ -1,11 +1,9 @@
 // utils/life.js — 人生之海：可自定义片数/名字/边界 + 个人资料 + 人生节点 + 口述解析
 // 默认五片海（童年/少年/青年/中年/晚年），用户可增删、改名、改边界；海面颜色按片数连续渐变。
+// 海的片数由用户自己的重要事件生成，不预设/不猜测：默认仅一片"起点"海，
+// 出生=第一个 mark；用户每说一个重要事件+时间 → 新增一片以它命名的海。
 const DEFAULT_STAGES = [
-  { name: '童年', to: 12 },
-  { name: '少年', to: 17 },
-  { name: '青年', to: 35 },
-  { name: '中年', to: 59 },
-  { name: '晚年', to: 120 }
+  { name: '起点', to: 120 }
 ]
 const C0 = [207, 232, 220]   // #CFE8DC 浅薄荷
 const C1 = [110, 156, 192]   // #6E9CC0 深蓝
@@ -58,6 +56,8 @@ function stageByKey (key) { return getStages().find((s) => s.key === key) || nul
 // ---- 个人资料：生日 / 年龄 / 出生年 三选一 ----
 function getProfile () { try { return wx.getStorageSync('lifeProfile') || null } catch (e) { return null } }
 function setProfile (p) { try { wx.setStorageSync('lifeProfile', p) } catch (e) {} }
+function getNickname () { const p = getProfile(); return (p && p.nickname) || '' }
+function setNickname (n) { const p = getProfile() || {}; p.nickname = n; setProfile(p) }
 function getBirthYear () {
   const p = getProfile()
   if (!p) return null
@@ -141,7 +141,7 @@ function parseMilestoneFromText (text) {
 module.exports = {
   DEFAULT_STAGES, getStages, setStages, resetStages, buildStages,
   stageOfAge, stageOfYear, stageByKey,
-  getProfile, setProfile, getBirthYear,
+  getProfile, setProfile, getNickname, setNickname, getBirthYear,
   parseAge, eventYear, parseStagesFromText,
   getMilestones, setMilestones, addMilestone, removeMilestone, parseMilestoneFromText
 }
