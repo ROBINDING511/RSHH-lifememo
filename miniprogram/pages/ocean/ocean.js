@@ -408,7 +408,8 @@ Page({
     if (this.data.recording) return
     if (this.data.preview && appendBase == null) return   // 复核卡开着只允许续录
     this._appendBase = appendBase != null ? appendBase : null
-    this.setData({ recording: true, recordMode: mode, transcript: this._appendBase || '', elapsed: 0, countdown: 0, cancelArmed: false, asrHint: '' })
+    this.setData({ recording: true, recordMode: mode, transcript: this._appendBase || '', liveTail: '', elapsed: 0, countdown: 0, cancelArmed: false, asrHint: '' })
+    if (this.asr) this.asr.reset()   // 清空上一段残留字：新录音只含本次内容
     this._recActive = true   // 同步置位：快速点按的 touchend 也能停住（recorder.recording 是异步 onStart 才真）
     this._pendingText = null
     this._frameBuf = []
