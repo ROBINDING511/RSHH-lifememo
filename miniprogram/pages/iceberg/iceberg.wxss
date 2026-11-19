@@ -135,3 +135,4 @@
 .model-switch { align-self: flex-end; display: flex; align-items: center; gap: 10rpx; margin-top: 20rpx; padding: 12rpx 24rpx; border-radius: 999rpx; background: var(--c-surface-2); color: var(--c-text-soft); font-size: var(--fs-xs); }
 .ms-cur { color: var(--c-primary); font-weight: 700; font-size: var(--fs-sm); }
 .ms-arrow { color: var(--c-text-faint); }
+.ms-label { color: var(--c-text-soft); }
