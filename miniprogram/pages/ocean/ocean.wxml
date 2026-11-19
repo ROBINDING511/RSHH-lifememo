@@ -17,7 +17,7 @@
         style="width:{{worldWidth}}px;height:{{worldHeight}}px" />
       <text wx:for="{{stageLabels}}" wx:key="name" class="sea-label" style="left:{{item.left}}px">{{item.name}}之海</text>
       <view wx:for="{{mountains}}" wx:key="id" class="mtn"
-        style="left:{{item.left}}px;bottom:{{item.bottom}}px;width:{{item.width}}px"
+        style="left:{{item.left}}px;bottom:{{item.bottom}}px;width:{{item.width}}px;animation-delay:{{item.delay}}s"
         data-id="{{item.id}}" bindtap="onBergTap" hover-class="mtn-hover" hover-stay-time="80">
         <image class="mtn-img" src="{{item.src}}" mode="scaleToFill" style="height:{{item.height}}px" />
       </view>

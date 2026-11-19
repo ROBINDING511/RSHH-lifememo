@@ -12,7 +12,8 @@
 .sea-area { position: absolute; left: 0; top: 0; width: 100%; height: 100%; }
 .sea-world { position: relative; }
 /* 雪山=记忆：用户定稿SVG的真实云slab贴图（含纹理），按天数换红→蓝素材 */
-.mtn { position: absolute; z-index: 2; pointer-events: auto; }
+.mtn { position: absolute; z-index: 2; pointer-events: auto; transform-origin: 50% 100%; animation: mtnsway 7s ease-in-out infinite; }
+@keyframes mtnsway { 0%, 100% { transform: rotate(-0.7deg) translateY(0); } 50% { transform: rotate(0.7deg) translateY(-3rpx); } }
 .mtn-img { display: block; width: 100%; }
 .mtn-hover { opacity: .85; }
 /* 小船=杭航：在雪山之间的海上飘，轻微左右摇（不压山） */
@@ -124,7 +125,7 @@
 
 /* ============ 减少动态效果：全停，静态显示 ============ */
 @media (prefers-reduced-motion: reduce) {
-  .boat-drift { animation: none !important; }
+  .boat-drift, .mtn { animation: none !important; }
   .sheet-settle { transition: none !important; }
   .record-btn.record-hover { transform: none; }
 }

@@ -107,60 +107,67 @@ function lerpHex (h1, h2, t) {
   return '#' + [0, 1, 2].map((i) => lerp(a[i], b[i], t).toString(16).padStart(2, '0')).join('')
 }
 // 雪山素材=用户定稿SVG的真实云slab（含纹理/颗粒）；今天=红，随天数沉淀到深蓝
-function slabFor (createdAt) {
-  const days = Math.floor((Date.now() - (createdAt || Date.now())) / 86400000)
-  if (days <= 0) return 'red'        // 今天最新=红slab
-  if (days <= 2) return 'blue1'      // 浅蓝
-  if (days <= 4) return 'blue3'      // 中蓝
-  return 'deep'                      // 5天+ 最深蓝
-}
-// seeded rng（同背景生成器 mjs）：每座山宽/高/包包形态稳定随机
-function mulberry (a) {
-  return function () {
-    a |= 0; a = (a + 0x6D2B79F5) | 0
-    let t = Math.imul(a ^ (a >>> 15), 1 | a)
-    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296
+// 颜色模型：最新=橙；今天=红，随更新内容增多红→蓝漂移；昨天=蓝，逐日加深
+function slabColor (createdAt, newest, todayList, dayStart) {
+  const c = createdAt || 0
+  if (c === newest) return 'orange'
+  if (c >= dayStart) {
+    const newer = todayList.filter((x) => (x.createdAt || 0) > c).length
+    const t = newer / Math.max(1, todayList.length)
+    if (t < 0.25) return 'red'
+    if (t < 0.5) return 'mix33'
+    if (t < 0.75) return 'mix66'
+    return 'blue1'
   }
+  const days = Math.floor((dayStart - c) / 86400000) + 1
+  if (days <= 1) return 'blue1'
+  if (days <= 3) return 'blue3'
+  return 'deep'
 }
-// 一个年代=一屏宽；山在海上密排；小船与最新生成的山在一起
 function layoutMountains (icebergs, H, W, birthYear) {
   const list = (icebergs || []).slice()
   const stages = life.getStages()
   const eraOf = (b) => {
     const z = stageOfMemory(b, birthYear)
-    const i = stages.findIndex((s) => s.name === z.name || s.key === z.key)
+    const i = stages.findIndex((x) => x.name === z.name || x.key === z.key)
     return i < 0 ? stages.length : i
   }
   const groups = {}
   list.forEach((b) => { const e = eraOf(b); (groups[e] = groups[e] || []).push(b) })
-  // 每片海(含空海)都占一屏 → 新加的节点海左右滑能看到
   const worldWidth = Math.max(W, stages.length * W)
-  const labels = stages.map((s, ei) => ({ left: Math.round(ei * W + W / 2), name: s.name }))
+  const labels = stages.map((x, ei) => ({ left: Math.round(ei * W + W / 2), name: x.name }))
+  const d0 = new Date(); d0.setHours(0, 0, 0, 0)
+  const dayStart = d0.getTime()
+  const newest = list.reduce((m, b) => Math.max(m, b.createdAt || 0), 0)
+  const todayList = list.filter((b) => (b.createdAt || 0) >= dayStart)
   const mountains = []
-  stages.forEach((s, ei) => {
+  stages.forEach((x, ei) => {
     const g = (groups[ei] || []).sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0))
     g.forEach((b, i) => {
       const rng = mulberry(hash(b._id || String(i)) + 7)
       const len = (b.text || '').length
-      const width = Math.round(90 + rng() * 70)                                        // 密排 90–160
-      const height = Math.round((50 + Math.min(130, len * 0.45)) * (0.85 + rng() * 0.4)) // 内容越多越高
+      const width = Math.round(80 + rng() * 50)                                       // 更小更分散
+      const height = Math.round((50 + Math.min(130, len * 0.45)) * (0.85 + rng() * 0.4))
       const variant = Math.floor(rng() * 3)
-      // 均匀铺开+轻微抖动，不堆挤
       const slot = (i + 0.5) / g.length
-      const x = ei * W + slot * (W - width) + (rng() - 0.5) * 30
-      const bottom = Math.round(H * (0.34 + ((i * 0.61 + 0.29) % 1) * 0.26))   // 往上靠，不挤底部
+      const xx = ei * W + slot * (W - width) + (rng() - 0.5) * 16
+      const bottom = Math.round(H * (0.28 + ((i * 0.61 + 0.29) % 1) * 0.36))          // 纵向拉开
       mountains.push({
-        id: b._id, left: Math.round(x), width, height, bottom,
+        id: b._id, left: Math.round(xx), width, height, bottom,
+        delay: ((i % 5) * 0.8).toFixed(1),
         createdAt: b.createdAt || 0,
-        src: '/images/ocean/slab_' + slabFor(b.createdAt) + '_v' + variant + '.png'
+        src: '/images/ocean/slab_' + slabColor(b.createdAt, newest, todayList, dayStart) + '_v' + variant + '.png'
       })
     })
   })
-  let newest = null
+  let newestM = null
   let minBottom = Infinity
-  mountains.forEach((m) => { if (!newest || m.createdAt > newest.createdAt) newest = m; if (m.bottom < minBottom) minBottom = m.bottom })
-  return { mountains, worldWidth, minBottom, newestLeft: newest ? newest.left : 0, newestWidth: newest ? newest.width : 0, labels }
+  mountains.forEach((m) => { if (!newestM || m.createdAt > newestM.createdAt) newestM = m; if (m.bottom < minBottom) minBottom = m.bottom })
+  const boatW = 75
+  let boatX = newestM ? Math.round(newestM.left + newestM.width / 2 - boatW / 2) : Math.round(W * 0.4)
+  boatX = Math.max(12, Math.min(worldWidth - boatW - 12, boatX))
+  const boatBottom = mountains.length ? Math.max(Math.round(H * 0.06), minBottom - 160) : Math.round(H * 0.30)
+  return { mountains, worldWidth, boatX, boatBottom, minBottom, newestLeft: newestM ? newestM.left : 0, newestWidth: newestM ? newestM.width : 0, labels }
 }
 
 module.exports = { buildWorld, centerOn, regionAt, stageOfMemory, layoutBergs, layoutMilestones, layoutMountains, windowSize, hash }
