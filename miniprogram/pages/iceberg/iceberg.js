@@ -116,7 +116,7 @@ Page({
     })
     this.setData({ pages, segs, pageCount: pages.length })
   },
-  setView (e) { this.setData({ view: e.currentTarget.dataset.v }) },
+  toggleView () { this.setData({ view: this.data.view === 'raw' ? 'clean' : 'raw', page: 0 }) },
   prevPage () { if (this.data.page > 0) this.setData({ page: this.data.page - 1 }) },
   nextPage () { if (this.data.page < this.data.pageCount - 1) this.setData({ page: this.data.page + 1 }) },
   onBookTouchStart (e) { this._bx = e.touches[0].clientX },
