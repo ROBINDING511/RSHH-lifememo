@@ -32,7 +32,7 @@
 .hull { position: absolute; bottom: 0; left: 8rpx; width: 104rpx; height: 30rpx; background: #E8402A; clip-path: polygon(0 0, 100% 0, 86% 100%, 14% 100%); }
 @keyframes boatbob { 0%, 100% { transform: translateY(0) rotate(-1deg); } 50% { transform: translateY(-8rpx) rotate(1deg); } }
 /* 金鱼杭航：红身 + 米色喷水 */
-.fish-cruise { position: absolute; z-index: 6; left: 40rpx; bottom: 26%; animation: fishswim 12s ease-in-out infinite; }
+.fish-cruise { position: absolute; z-index: 6; left: 40rpx; bottom: 9%; animation: fishswim 12s ease-in-out infinite; }
 .fishbox { position: relative; width: 160rpx; height: 110rpx; pointer-events: auto; }
 .fish-body { position: absolute; left: 20rpx; top: 30rpx; width: 110rpx; height: 64rpx; background: #E8402A; border-radius: 50% 50% 46% 54% / 60% 60% 40% 40%; box-shadow: 0 0 0 3rpx rgba(242,231,201,.55); }
 .fish-body::after { content: ''; position: absolute; left: 18rpx; bottom: 6rpx; width: 70rpx; height: 22rpx; background: #F2E7C9; border-radius: 50% 50% 40% 60% / 60% 60% 40% 40%; opacity: .85; }
