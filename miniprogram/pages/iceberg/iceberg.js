@@ -253,6 +253,7 @@ Page({
       this._dur = this.audio.duration || 0
       this.setData({ dur: Math.round(this._dur) })
       if (this._seekSec != null) { this.audio.seek(this._seekSec); this._seekSec = null; this.audio.play(); this.setData({ playing: true }) }
+      else if (this._seekFrac != null) { this.audio.seek(this._seekFrac * this._dur); this._seekFrac = null; this.audio.play(); this.setData({ playing: true }) }
     })
     this.audio.onTimeUpdate(() => { this.setData({ cur: Math.round(this.audio.currentTime || 0) }) })
     this.audio.onEnded(() => this.setData({ playing: false, cur: 0 }))
@@ -276,12 +277,13 @@ Page({
   },
   async _playSeek () {
     const a = await this.ensureAudio()
-    if (!a) return
+    if (!a) return wx.showToast({ title: '这段没有录音，无法逐句回听', icon: 'none', duration: 2200 })
     if (this._dur) { a.seek(this._seekSec); this._seekSec = null; a.play(); this.setData({ playing: true }) }
     else a.play()
   },
   playSentence (e) { this.playSentenceByIndex(Number(e.currentTarget.dataset.i)) },
   playSentenceByIndex (i) {
+    if (!this.data.b.audioFileID && !this.data.b.audioURL) return wx.showToast({ title: '这段没有录音，无法逐句回听', icon: 'none', duration: 2200 })
     const sen = this.data.sentences[i]
     const t = sen && sen.evidence && sen.evidence[0] && sen.evidence[0].tStart
     if (t != null) { this._seekSec = t; return this._playSeek() }
@@ -292,7 +294,7 @@ Page({
     this._seekSec = null
     this._seekFrac = before / total
     this.ensureAudio().then((a) => {
-      if (!a) return
+      if (!a) return wx.showToast({ title: '这段没有录音，无法逐句回听', icon: 'none', duration: 2200 })
       if (this._dur) { a.seek(this._seekFrac * this._dur); this._seekFrac = null; a.play(); this.setData({ playing: true }) }
       else a.play()
     })
