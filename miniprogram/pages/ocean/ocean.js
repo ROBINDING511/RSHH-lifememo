@@ -366,6 +366,8 @@ Page({
       this.finishRecording()
       return
     }
+    // 编辑卡还开着时再按住=重新开始录音：旧卡静默落草稿，不带出上一次的历史
+    if (this.data.preview) this.saveDraftNow(true)
     this._holdSource = 'button'
     this._holdY = e.touches && e.touches[0] ? e.touches[0].clientY : 0
     this._holdX = e.touches && e.touches[0] ? e.touches[0].clientX : 0
@@ -856,14 +858,14 @@ Page({
   noop () {},
 
   // 存草稿：点了就存，不弹窗
-  saveDraftNow () {
+  saveDraftNow (silent) {
     const p = this.data.preview
     if (!p) return
     this.stopPreviewVoice()
     draft.save({ wavPath: p.wavPath, text: p.text, reason: '存草稿' })
     this.setData({ preview: null, drafts: draft.list() })
     this.hideBubble(); this.scheduleBubble(20000)
-    ui.toast('存草稿了，随时能找回来', 2200)
+    if (!silent) ui.toast('存草稿了，随时能找回来', 2200)
   },
   // ❌ 删除：进"删除的记忆"，5天内可找回
   async discardToCloud () {
