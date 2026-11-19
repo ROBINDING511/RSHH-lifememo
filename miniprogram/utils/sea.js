@@ -145,7 +145,9 @@ function layoutMountains (icebergs, H, W, birthYear) {
       const width = Math.round(90 + rng() * 70)                                        // 密排 90–160
       const height = Math.round((50 + Math.min(130, len * 0.45)) * (0.85 + rng() * 0.4)) // 内容越多越高
       const variant = Math.floor(rng() * 3)
-      const x = ei * W + ((i * 0.37 + 0.13) % 1) * (W - width)
+      // 均匀铺开+轻微抖动，不堆挤
+      const slot = (i + 0.5) / g.length
+      const x = ei * W + slot * (W - width) + (rng() - 0.5) * 30
       const bottom = Math.round(H * (0.34 + ((i * 0.61 + 0.29) % 1) * 0.26))   // 往上靠，不挤底部
       mountains.push({
         id: b._id, left: Math.round(x), width, height, bottom,
@@ -155,11 +157,13 @@ function layoutMountains (icebergs, H, W, birthYear) {
     })
   })
   let newest = null
-  mountains.forEach((m) => { if (!newest || m.createdAt > newest.createdAt) newest = m })
+  let minBottom = Infinity
+  mountains.forEach((m) => { if (!newest || m.createdAt > newest.createdAt) newest = m; if (m.bottom < minBottom) minBottom = m.bottom })
   const boatW = 95
-  let boatX = newest ? Math.round(newest.left + newest.width + 8) : Math.round(W * 0.4)
-  if (newest && boatX + boatW > worldWidth) boatX = Math.max(0, Math.round(newest.left - boatW - 8))
-  const boatBottom = newest ? Math.max(Math.round(H * 0.12), newest.bottom - 50) : Math.round(H * 0.40)
+  // 船只在水面：纵向在所有山脚之下，横向居最新山正前方 → 绝不压山
+  let boatX = newest ? Math.round(newest.left + newest.width / 2 - boatW / 2) : Math.round(W * 0.4)
+  boatX = Math.max(0, Math.min(worldWidth - boatW, boatX))
+  const boatBottom = mountains.length ? Math.max(Math.round(H * 0.06), minBottom - 160) : Math.round(H * 0.30)
   return { mountains, worldWidth, boatX, boatBottom }
 }
 

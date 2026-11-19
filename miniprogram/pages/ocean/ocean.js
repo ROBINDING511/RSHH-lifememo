@@ -64,9 +64,7 @@ Page({
   onShow () {
     if (this.data.firstLaunch) {
       this.setData({ firstLaunch: false })
-      getApp().globalData.firstLaunch = false   // 清全局，避免编辑模式新开 ocean 再弹引导
-      // 首次进入：生日由鲸鱼气泡引导（称呼在杭航菜单里设置），不跳设置页
-      return
+      getApp().globalData.firstLaunch = false   // 清全局；首屏也要刷新出山/船
     }
     // 视角(pan+zoom)=用户自己的：返回时不碰 movable-view 内部状态，仅重建数据；
     // 只有首次/重启才设定视角（onLoad 从 globalData 恢复）。
