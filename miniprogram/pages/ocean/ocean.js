@@ -446,11 +446,9 @@ Page({
         this.setData({ recording: false, countdown: 0, elapsed: 0, recordMode: '', whalePaused: false, cancelArmed: false })
         this.applyTranscript()
         if (this.cancelRequested) {
+          // 上滑取消=完全收回：不落草稿、不留任何条/卡，界面干净
           this.cancelRequested = false
-          if (wavPath || (this.data.transcript || '').trim()) {
-            draft.save({ wavPath: wavPath || '', text: this.data.transcript, reason: '未说完' })
-            this.setData({ drafts: draft.list(), transcript: '' })
-          }
+          this.setData({ transcript: '', liveTail: '', liveExpanded: false, liveBig: false })
           return
         }
         if (err) {
