@@ -7,14 +7,14 @@
 -->
 <view class="page-ocean ocean-page" bindtouchend="onSceneTouchEnd">
 
-  <!-- A 主背景：用户定稿夜海（干净海，无云无船；云/船由记忆与小船动态生成） -->
-  <image class="night-bg" src="/images/ocean/night-sea-bg.jpg" mode="scaleToFill" />
-
-  <!-- 横向滚轴：左=人生最年轻 右=老年；雪山=记忆；小船飘于山间海上 -->
+  <!-- 横向滚轴：整片海+天空+雪山一起滚过=驶入另一片海；左=年轻 右=老年 -->
   <movable-area class="sea-area" bindtouchstart="onSceneTouchStart">
     <movable-view class="sea-world" direction="horizontal" inertia damping="{{40}}" friction="{{2}}"
       out-of-bounds="{{false}}" disabled="{{movableDisabled}}" bindchange="onSeaChange"
       style="width:{{worldWidth}}px;height:{{worldHeight}}px" x="{{movX}}" y="{{movY}}">
+      <!-- 主背景随世界一起滚动（用户定稿夜海） -->
+      <image class="world-bg" src="/images/ocean/night-sea-bg.jpg" mode="scaleToFill"
+        style="width:{{worldWidth}}px;height:{{worldHeight}}px" />
       <text wx:for="{{stageLabels}}" wx:key="name" class="sea-label" style="left:{{item.left}}px">{{item.name}}之海</text>
       <view wx:for="{{mountains}}" wx:key="id" class="mtn"
         style="left:{{item.left}}px;bottom:{{item.bottom}}px;width:{{item.width}}px"

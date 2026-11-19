@@ -164,3 +164,4 @@
 .top-hint text { font-size: var(--fs-sm); color: var(--c-text); line-height: 1.6; }
 .sea-label { position: absolute; top: 24%; transform: translateX(-50%); font-size: var(--fs-sm); color: rgba(244,215,178,.75); letter-spacing: 2rpx; pointer-events: none; }
 .record-btn.record-lock .record-main { color: #FFFCF6; }
+.world-bg { position: absolute; left: 0; top: 0; z-index: 0; }
