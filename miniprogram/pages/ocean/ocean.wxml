@@ -24,6 +24,10 @@
     </movable-view>
   </movable-area>
 
+  <!-- 固定天空：月亮+星不随海滚走，永远在海上 -->
+  <view class="sky-stars"></view>
+  <view class="sky-moon"></view>
+
   <!-- 小船=杭航：固定视口层、夹在画面内不撞边；山间海上飘；长按说话副入口 -->
   <view class="boat-drift {{boatPaused || recording ? 'paused' : ''}}"
     style="left:{{boatLeft}}px;top:{{boatTop}}px"
