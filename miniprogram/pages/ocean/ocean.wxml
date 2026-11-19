@@ -9,63 +9,57 @@
 
   <!-- ============ 插画海面场景 ============ -->
   <view class="scene" bindtouchstart="onSceneTouchStart">
-    <view class="bg-gradient"></view>
+    <!-- 夜空固定层：深蓝渐变+星+弯月（矢量） -->
+    <view class="sky">
+      <view class="stars"></view>
+      <view class="moon"></view>
+    </view>
 
-    <!-- 整片海向四面八方扩展：2D 可拖世界，拖动如滚地球（海面纹理随世界滚过+各阶段海色晕染） -->
+    <!-- 水平滚轴世界：左=年轻(新·红) 右=久远(深蓝)；山=回忆，高度∝留言量 -->
     <movable-area class="sea-area">
-      <movable-view class="sea-world" direction="all" inertia damping="{{40}}" friction="{{2}}"
+      <movable-view class="sea-world" direction="horizontal" inertia damping="{{40}}" friction="{{2}}"
         out-of-bounds="{{false}}" disabled="{{movableDisabled}}" bindchange="onSeaChange"
-        scale="{{true}}" scale-min="0.6" scale-max="2" scale-value="{{seaScale}}" bindscale="onSeaScale"
+        scale="{{true}}" scale-min="0.6" scale-max="2.5" scale-value="{{seaScale}}" bindscale="onSeaScale"
         style="width:{{worldWidth}}px;height:{{worldHeight}}px" x="{{movX}}" y="{{movY}}">
-        <!-- 代码海：CSS 渐变+浪沫形状，零下载、随世界 pan/zoom 矢量清晰 -->
-        <view class="sea-code" style="width:{{worldWidth}}px;height:{{worldHeight}}px">
-          <view class="sea-foam">
-            <view wx:for="{{foamBlobs}}" wx:key="i" class="foam"
-              style="left:{{item.x}}px;top:{{item.y}}px;width:{{item.w}}px;height:{{item.h}}px"></view>
+        <view class="water" style="width:{{worldWidth}}px"></view>
+        <view wx:for="{{mountains}}" wx:key="id" class="mtn"
+          style="left:{{item.left}}px;bottom:{{item.bottom}}px;width:{{item.width}}px;height:{{item.height}}px;background:{{item.color}}"
+          data-id="{{item.id}}" bindtap="onBergTap" hover-class="mtn-hover" hover-stay-time="80">
+          <view class="mtn-bump" style="background:{{item.color}}"></view>
+          <view class="mtn-flag" wx:if="{{item.flag}}"></view>
+        </view>
+        <!-- 帆船：米色帆+红船身 -->
+        <view class="boat" style="left:{{boatX}}px">
+          <view class="sail sail-l"></view>
+          <view class="sail sail-r"></view>
+          <view class="hull"></view>
+        </view>
+        <!-- 金鱼杭航：红身+米色喷水；长按说话副入口 -->
+        <view class="fish-cruise {{whalePaused || recording ? 'paused' : ''}}">
+          <view class="fishbox" bindtap="onWhaleTap" bindlongpress="onWhaleLongPress" hover-class="whale-hover" hover-stay-time="80">
+            <view class="spout">
+              <view class="drop d1"></view><view class="drop d2"></view><view class="drop d3"></view>
+            </view>
+            <view class="fish-body"></view>
+            <view class="fish-tail"></view>
+            <view class="fish-eye"></view>
+            <!-- 金鱼口中的气泡：生日引导+回答建议 -->
+            <view class="whale-bubble" wx:if="{{!birthYear && !birthSkipped && !recording && !preview}}" catchtap="noop">
+              <text class="wb-q">请问您出生于哪一年？</text>
+              <view class="wb-chips">
+                <view class="wb-chip" wx:for="{{[1950, 1960, 1970, 1980, 1990]}}" wx:key="*this"
+                  hover-class="btn-hover" hover-stay-time="80" data-y="{{item}}" catchtap="pickBirthYear">{{item}}年</view>
+              </view>
+              <picker mode="selector" range="{{birthYears}}" bindchange="onBirthPick">
+                <view class="wb-picker">滚轮选年份</view>
+              </picker>
+              <view class="wb-skip" catchtap="skipBirth">跳过</view>
+              <view class="wb-tail"></view>
+            </view>
           </view>
-        </view>
-        <view class="sea-tint" style="background:{{tintGradient}}"></view>
-        <text wx:for="{{stages}}" wx:key="key" class="stage-label"
-          style="left:{{item.cx}}px;top:{{item.cy}}px">{{item.name}}之海</text>
-        <view wx:for="{{bergs}}" wx:key="id" class="berg"
-          style="left:{{item.left}}px;top:{{item.top}}px;width:{{item.width}}px;opacity:{{item.opacity}};animation:{{item.anim}}"
-          data-id="{{item.id}}" data-i="{{index}}" bindtap="onBergTap"
-          bindlongpress="onBergDragStart" bindtouchmove="onBergDragMove" bindtouchend="onBergDragEnd"
-          hover-class="berg-hover" hover-stay-time="80">
-          <image class="berg-img" src="/images/ocean/berg.png" mode="widthFix" />
-          <view class="berg-flag" wx:if="{{item.flag}}"></view>
-        </view>
-        <!-- 自定义人生节点：小旗标记 -->
-        <view wx:for="{{milestones}}" wx:key="id" class="ms-marker" style="left:{{item.left}}px;top:{{item.top}}px">
-          <view class="ms-flag"></view>
-          <text class="ms-label">{{item.name}}·{{item.age}}岁</text>
         </view>
       </movable-view>
     </movable-area>
-    <!-- 球面曲率暗角：滚动如滚地球的边缘收暗 -->
-    <view class="sea-curve"></view>
-
-    <!-- 鲸鱼杭航：屏幕层游弋（始终可见）+ 自然微动；长按说话副入口 -->
-    <view class="whale-layer">
-      <view class="cruise {{whalePaused || recording ? 'paused' : ''}}">
-        <view class="whalebox" bindtap="onWhaleTap" bindlongpress="onWhaleLongPress" hover-class="whale-hover" hover-stay-time="80">
-          <image class="wf wf-straight" src="/images/ocean/whale.png" mode="aspectFit" />
-          <!-- 鲸鱼口中的气泡：生日引导+回答建议 -->
-          <view class="whale-bubble" wx:if="{{!birthYear && !birthSkipped && !recording && !preview}}" catchtap="noop">
-            <text class="wb-q">请问您出生于哪一年？</text>
-            <view class="wb-chips">
-              <view class="wb-chip" wx:for="{{[1950, 1960, 1970, 1980, 1990]}}" wx:key="*this"
-                hover-class="btn-hover" hover-stay-time="80" data-y="{{item}}" catchtap="pickBirthYear">{{item}}年</view>
-            </view>
-            <picker mode="selector" range="{{birthYears}}" bindchange="onBirthPick">
-              <view class="wb-picker">滚轮选年份</view>
-            </picker>
-            <view class="wb-skip" catchtap="skipBirth">跳过</view>
-            <view class="wb-tail"></view>
-          </view>
-        </view>
-      </view>
-    </view>
   </view>
 
   <!-- ============ 草稿找回（说过的话绝不丢） ============ -->

@@ -99,4 +99,26 @@ function layoutMilestones (regions) {
   })
 }
 
-module.exports = { buildWorld, centerOn, regionAt, stageOfMemory, layoutBergs, layoutMilestones, windowSize, hash }
+// 水平夜海·山=回忆：高度∝留言量；新=红 → 久=深蓝（矢量 CSS 形状，可缩放）
+function lerp (a, b, t) { return Math.round(a + (b - a) * t) }
+function mountainColor (t) {
+  const R = [232, 64, 42], B = [27, 42, 107]
+  return '#' + [0, 1, 2].map((i) => lerp(R[i], B[i], t).toString(16).padStart(2, '0')).join('')
+}
+function layoutMountains (icebergs, H) {
+  const list = (icebergs || []).slice().sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0))  // 左=年轻 右=久远
+  const n = list.length
+  return list.map((b, i) => {
+    const len = (b.text || '').length
+    const height = Math.round(140 + Math.min(320, len * 1.2))
+    const t = n <= 1 ? 0 : i / (n - 1)
+    return {
+      id: b._id, left: 60 + i * 180, width: 150, height,
+      bottom: Math.round(H * 0.30) + (i % 3) * 24,
+      color: mountainColor(t),
+      flag: !!(b.createdAt && Date.now() - b.createdAt < 5 * 60 * 1000)
+    }
+  })
+}
+
+module.exports = { buildWorld, centerOn, regionAt, stageOfMemory, layoutBergs, layoutMilestones, layoutMountains, windowSize, hash }

@@ -8,24 +8,45 @@
 
 /* ============ 场景层 ============ */
 .scene { position: absolute; left: 0; top: 0; right: 0; bottom: 0; overflow: hidden; }
-/* 弱网/加载兜底：插画未到位时先显示柔和海面渐变 */
-.bg-gradient {
-  position: absolute; left: 0; top: 0; right: 0; bottom: 0;
-  background: var(--sea-3);
-}
-.bg-art { position: absolute; left: 0; top: 0; width: 100%; height: 100%; opacity: 0; transition: opacity .8s ease; }
-.bg-art.show { opacity: 1; }
-/* 焦散光斑：让海面「活」起来，radial-gradient 柔边不用滤镜 */
-
-/* 整片海 2D 世界：四面八方可拖（滚地球），海面纹理随世界滚过 + 阶段海色晕染 + 曲率暗角 */
+/* ============ 水平夜海·全矢量（CSS 形状，可缩放，零图片）============ */
+/* 夜空固定层：深蓝渐变 + 星 + 弯月 */
+.sky { position: absolute; left: 0; top: 0; right: 0; height: 38%; background: linear-gradient(180deg, #0A1130 0%, #12275C 70%, #1B3A7A 100%); }
+.stars { position: absolute; left: 0; top: 0; width: 4rpx; height: 4rpx; border-radius: 50%; background: #F5E9C8;
+  box-shadow: 40rpx 30rpx 0 0 #F5E9C8, 120rpx 80rpx 0 -1rpx #E8D9A8, 210rpx 40rpx 0 0 #F5E9C8, 300rpx 110rpx 0 -1rpx #E8D9A8, 380rpx 60rpx 0 0 #F5E9C8, 460rpx 140rpx 0 -1rpx #E8D9A8, 540rpx 30rpx 0 0 #F5E9C8, 620rpx 90rpx 0 -1rpx #E8D9A8, 700rpx 50rpx 0 0 #F5E9C8, 60rpx 160rpx 0 -1rpx #E8D9A8, 170rpx 200rpx 0 0 #F5E9C8, 260rpx 150rpx 0 -1rpx #E8D9A8, 350rpx 220rpx 0 0 #F5E9C8, 440rpx 180rpx 0 -1rpx #E8D9A8, 520rpx 240rpx 0 0 #F5E9C8, 610rpx 200rpx 0 -1rpx #E8D9A8, 690rpx 160rpx 0 0 #F5E9C8, 90rpx 260rpx 0 -1rpx #E8D9A8, 240rpx 280rpx 0 0 #F5E9C8, 400rpx 300rpx 0 -1rpx #E8D9A8, 560rpx 280rpx 0 0 #F5E9C8, 680rpx 300rpx 0 -1rpx #E8D9A8; }
+.moon { position: absolute; right: 200rpx; top: 130rpx; width: 80rpx; height: 80rpx; border-radius: 50%; box-shadow: inset -22rpx 14rpx 0 0 #F5E9C8; }
+/* 水平滚轴世界 */
 .sea-area { position: absolute; left: 0; top: 0; width: 100%; height: 100%; }
 .sea-world { position: relative; }
-/* 海面本身在动：纹理略大于世界并缓慢漂移（无平行线），叠加柔光晕染 */
-/* 代码海：单层线性渐变（真机可靠）+ 浪沫椭圆，零图片下载；在世界内随 pan/zoom 矢量清晰 */
-.sea-code { position: absolute; left: 0; top: 0; background: linear-gradient(180deg, #E9DCA9 0%, #E4D6A4 30%, #C9D3B4 45%, #8FC0CB 62%, #4E89A0 82%, #3A7089 100%); }
-.sea-foam { position: absolute; left: 0; top: 0; width: 100%; height: 100%; overflow: hidden; animation: seaDrift 30s ease-in-out infinite; }
-.foam { position: absolute; border-radius: 50%; background: rgba(255, 250, 235, 0.10); }
-@keyframes seaDrift { 0%, 100% { transform: translate(0, 0); } 50% { transform: translate(30px, 16px); } }
+.water { position: absolute; left: 0; bottom: 0; height: 64%; background: linear-gradient(180deg, #1B3A7A 0%, #16306B 40%, #0E2456 100%); }
+/* 山=回忆：圆顶扁平矢量块，高度∝留言量，新红→久深蓝 */
+.mtn { position: absolute; z-index: 2; border-radius: 46% 54% 0 0 / 88% 96% 0 0; pointer-events: auto; }
+.mtn-bump { position: absolute; left: 18%; top: -14%; width: 44%; height: 30%; border-radius: 50% 50% 0 0 / 100% 100% 0 0; }
+.mtn-hover { opacity: .85; }
+.mtn-flag { position: absolute; left: 50%; top: -40rpx; width: 4rpx; height: 40rpx; background: #8A2B20; }
+.mtn-flag::after { content: ''; position: absolute; left: 4rpx; top: 0; border-top: 12rpx solid transparent; border-bottom: 12rpx solid transparent; border-left: 18rpx solid #D64533; }
+/* 帆船：米色帆 + 红船身 */
+.boat { position: absolute; z-index: 3; bottom: 34%; width: 120rpx; height: 150rpx; animation: boatbob 6s ease-in-out infinite; }
+.sail { position: absolute; bottom: 36rpx; width: 0; height: 0; }
+.sail-l { left: 16rpx; border-right: 34rpx solid #F2E7C9; border-bottom: 96rpx solid transparent; }
+.sail-r { left: 56rpx; border-left: 40rpx solid #F2E7C9; border-bottom: 96rpx solid transparent; }
+.hull { position: absolute; bottom: 0; left: 8rpx; width: 104rpx; height: 30rpx; background: #E8402A; clip-path: polygon(0 0, 100% 0, 86% 100%, 14% 100%); }
+@keyframes boatbob { 0%, 100% { transform: translateY(0) rotate(-1deg); } 50% { transform: translateY(-8rpx) rotate(1deg); } }
+/* 金鱼杭航：红身 + 米色喷水 */
+.fish-cruise { position: absolute; z-index: 6; left: 40rpx; bottom: 26%; animation: fishswim 12s ease-in-out infinite; }
+.fishbox { position: relative; width: 160rpx; height: 110rpx; pointer-events: auto; }
+.fish-body { position: absolute; left: 20rpx; top: 30rpx; width: 110rpx; height: 64rpx; background: #E8402A; border-radius: 50% 50% 46% 54% / 60% 60% 40% 40%; box-shadow: 0 0 0 3rpx rgba(242,231,201,.55); }
+.fish-body::after { content: ''; position: absolute; left: 18rpx; bottom: 6rpx; width: 70rpx; height: 22rpx; background: #F2E7C9; border-radius: 50% 50% 40% 60% / 60% 60% 40% 40%; opacity: .85; }
+.fish-tail { position: absolute; left: 0; top: 38rpx; width: 0; height: 0; border-top: 26rpx solid transparent; border-bottom: 26rpx solid transparent; border-right: 34rpx solid #E8402A; }
+.fish-eye { position: absolute; left: 104rpx; top: 44rpx; width: 10rpx; height: 10rpx; border-radius: 50%; background: #2A1140; }
+.spout { position: absolute; left: 70rpx; top: -30rpx; }
+.drop { position: absolute; width: 12rpx; height: 16rpx; background: #F2E7C9; border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%; animation: spout 1.8s ease-in-out infinite; }
+.d1 { left: 0; top: 0; }
+.d2 { left: 16rpx; top: -14rpx; animation-delay: .3s; }
+.d3 { left: 32rpx; top: 0; animation-delay: .6s; }
+@keyframes spout { 0%, 100% { transform: translateY(0); opacity: .9; } 50% { transform: translateY(-12rpx); opacity: .5; } }
+@keyframes fishswim { 0%, 100% { transform: translate(0, 0); } 25% { transform: translate(60rpx, -10rpx); } 50% { transform: translate(120rpx, 0); } 75% { transform: translate(60rpx, 10rpx); } }
+.fish-cruise.paused, .fish-cruise.paused .fishbox, .fish-cruise.paused .drop { animation-play-state: paused; }
+.whale-hover { opacity: .85; }
 /* 鲸鱼口中的气泡：生日引导+回答建议（随鲸鱼移动） */
 .whale-bubble { position: absolute; left: 50%; bottom: 100%; transform: translateX(-50%); width: 480rpx; margin-bottom: 20rpx; background: rgba(253,252,249,.97); border: 2rpx solid var(--hairline); border-radius: var(--radius-lg); padding: 24rpx; box-shadow: 0 8px 24px rgba(0,0,0,.10); pointer-events: auto; }
 .wb-q { display: block; font-size: var(--fs-md); font-weight: 500; color: var(--c-text); line-height: 1.6; }
@@ -34,46 +55,7 @@
 .wb-picker { margin-top: 16rpx; min-height: 72rpx; display: flex; align-items: center; justify-content: center; border-radius: var(--radius-md); background: var(--c-soft); color: var(--c-text); font-size: var(--fs-sm); }
 .wb-skip { margin-top: 12rpx; text-align: center; color: var(--c-text-2); font-size: var(--fs-xs); text-decoration: underline; }
 .wb-tail { position: absolute; left: 50%; bottom: -14rpx; transform: translateX(-50%); width: 0; height: 0; border-left: 14rpx solid transparent; border-right: 14rpx solid transparent; border-top: 16rpx solid rgba(253,252,249,.97); }
-.sea-tint { position: absolute; left: 0; top: 0; width: 100%; height: 100%; opacity: .35; pointer-events: none; }
-.stage-label { position: absolute; transform: translate(-50%, -50%); color: rgba(18,58,72,.85); background: rgba(255,255,255,.55); padding: 8rpx 28rpx; border-radius: 12rpx; font-size: var(--fs-sm); font-weight: 500; letter-spacing: 0; pointer-events: none; }
-.sea-curve { position: absolute; left: 0; top: 0; right: 0; bottom: 0; pointer-events: none; background: radial-gradient(ellipse at 50% 45%, rgba(20,56,76,0) 58%, rgba(20,56,76,.20) 100%); }
-/* 人生节点小旗 */
-.ms-marker { position: absolute; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; pointer-events: none; }
-.ms-flag { width: 4rpx; height: 48rpx; background: rgba(18,58,72,.55); position: relative; }
-.ms-flag::after { content: ''; position: absolute; top: 0; left: 4rpx; border-top: 14rpx solid transparent; border-bottom: 14rpx solid transparent; border-left: 20rpx solid rgba(179,64,47,.8); }
-.ms-label { margin-top: 6rpx; font-size: var(--fs-xs); color: rgba(18,58,72,.85); background: rgba(255,255,255,.6); padding: 2rpx 14rpx; border-radius: 20rpx; white-space: nowrap; }
-.whale-layer { position: absolute; left: 0; top: 0; right: 0; bottom: 0; z-index: 5; pointer-events: none; }
-.whale-layer .whalebox { pointer-events: auto; }
 
-/* ============ 冰山（回忆，随波摇曳）============ */
-.berg { position: absolute; transform-origin: 50% 55%; pointer-events: auto; will-change: transform; }
-.berg-img { display: block; width: 100%; }
-.berg-hover { opacity: .82; }
-@keyframes sway { 0%, 100% { transform: rotate(-2deg) translate(0, 0); } 50% { transform: rotate(2deg) translate(3rpx, 4rpx); } }
-@keyframes bergdrop { 0% { transform: scale(2.1); opacity: 0; } 55% { transform: scale(.93); opacity: 1; } 100% { transform: scale(1); } }
-
-/* ============ 鲸鱼杭航（冰山间游弋 + 自然微动）============ */
-.cruise { position: absolute; left: 0; top: 0; width: 0; height: 0; animation: cruise 38s ease-in-out infinite; will-change: transform; }
-.whalebox { position: absolute; left: -70rpx; top: -115rpx; width: 140rpx; height: 230rpx; pointer-events: auto; transform-origin: 50% 22%; animation: whalebob 3.2s ease-in-out infinite; }
-/* 摆尾游动：尾姿之间用 ease-in-out 交叉渐变（逐渐弯曲、无硬切），叠加身体连续起伏 → 灵动不机械 */
-.wf { position: absolute; left: 0; top: 0; width: 100%; height: 100%; opacity: 0; }
-/* 单张鲸鱼，尺寸恒定；游动靠 cruise 平移 + whalebob 微摆，不做帧切换（避免忽大忽小） */
-.wf-straight { opacity: 1; }
-.whale-hover { opacity: .85; }
-.cruise.paused, .cruise.paused .whalebox, .cruise.paused .wf { animation-play-state: paused; }
-@keyframes cruise {
-  0% { transform: translate(300rpx, 780rpx); }
-  20% { transform: translate(480rpx, 880rpx); }
-  40% { transform: translate(200rpx, 940rpx); }
-  60% { transform: translate(420rpx, 1000rpx); }
-  80% { transform: translate(160rpx, 840rpx); }
-  100% { transform: translate(300rpx, 780rpx); }
-}
-/* 只平移+微摆头，绝不缩放（避免忽大忽小） */
-@keyframes whalebob {
-  0%, 100% { transform: rotate(-2deg) translateY(0); }
-  50% { transform: rotate(2deg) translateY(-6rpx); }
-}
 
 /* ============ 空态提示（深色胶囊白字，全渐变达标）============ */
 .empty-hint { position: absolute; left: 40rpx; right: 40rpx; top: 24%; display: flex; flex-direction: column; align-items: center; pointer-events: none; z-index: 20; }
@@ -195,10 +177,8 @@
 
 /* ============ 减少动态效果：全停，静态显示 ============ */
 @media (prefers-reduced-motion: reduce) {
-  .cruise, .whalebox, .wf, .berg, .bg-sea-waves { animation: none !important; }
+  .fish-cruise, .fishbox, .drop, .boat { animation: none !important; }
   .sheet-settle { transition: none !important; }
-  .wf-straight { opacity: 1; }
-  .bg-art { transition: none; }
   .record-btn.record-hover { transform: none; }
 }
 /* ============ v2.0 C 门控 / D 字幕 / A9 状态 / A8 情绪 / A3 留白 ============ */

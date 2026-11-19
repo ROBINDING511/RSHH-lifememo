@@ -197,31 +197,23 @@ Page({
   setupWorld (keepPosition) {
     this._suppressScale = true
     setTimeout(() => { this._suppressScale = false }, 400)
-    const w = sea.buildWorld(life.getStages())
-    this._world = w
-    this._regions = w.regions
-    let mx = w.movX, my = w.movY
+    // 水平滚轴世界：宽随回忆数增长，高=视口；左=年轻 右=久远
+    const info = sea.windowSize()
+    const n = Math.max(1, (this._icebergs || []).length)
+    const W = Math.max(info.W, n * 180 + 400)
+    const H = info.H
+    this._world = { worldWidth: W, worldHeight: H }
+    this._regions = []
+    let mx = 0
     if (keepPosition) {
-      const info = sea.windowSize()
       const px = this._movX != null ? this._movX : this.data.movX
-      const py = this._movY != null ? this._movY : this.data.movY
-      const s = this._scale || 1
-      mx = Math.max(-(s * w.worldWidth - info.W), Math.min(0, px))
-      my = Math.max(-(s * w.worldHeight - info.H), Math.min(0, py))
-    }
-    // 代码海浪沫：确定性散点（零图片），随世界 pan/zoom
-    const blobs = []
-    for (let i = 0; i < 16; i++) {
-      const sx = (i * 733) % 97, sy = (i * 397) % 89
-      blobs.push({ i, x: (sx / 97) * w.worldWidth, y: (sy / 89) * w.worldHeight, w: 180 + (i % 5) * 90, h: 40 + (i % 3) * 22 })
+      mx = Math.max(-(W - info.W), Math.min(0, px))
     }
     this.setData({
-      worldWidth: w.worldWidth, worldHeight: w.worldHeight,
-      movX: mx, movY: my, tintGradient: w.tint, stages: w.regions,
+      worldWidth: W, worldHeight: H, movX: mx, movY: 0,
       seaScale: this._scale || 1,   // 重应用用户视角，绝不自动重置
-      foamBlobs: blobs
+      boatX: Math.round(W * 0.55)
     })
-    this.setData({ milestones: sea.layoutMilestones(w.regions) })
   },
 
   async refreshData () {
@@ -233,15 +225,15 @@ Page({
       } else icebergs = await api.listIcebergs()
     } catch (e) { console.warn('数据加载失败（可能未创建集合）', e) }
     this._icebergs = icebergs
-    this.setData({
-      icebergCount: icebergs.length,
-      bergs: sea.layoutBergs(icebergs, this._regions, this.data.birthYear, this.lastPublishedId)
-    })
+    const mountains = sea.layoutMountains(icebergs, sea.windowSize().H)
+    this._mountains = mountains
+    this.setData({ icebergCount: icebergs.length, mountains })
+    this.setupWorld(true)
   },
 
   clearNewBerg (pid) {
-    const i = (this.data.bergs || []).findIndex((b) => b.id === pid)
-    if (i >= 0) this.setData({ [`bergs[${i}].anim`]: this.data.bergs[i].swayAnim })
+    const i = (this.data.mountains || []).findIndex((m) => m.id === pid)
+    if (i >= 0) this.setData({ [`mountains[${i}].flag`]: false })
   },
 
   // 从详情"继续说/补录"进入：编辑模式打开复核卡
@@ -783,11 +775,13 @@ Page({
       wx.hideLoading()
       ui.toast(p.editId ? '补好了，冰山更新了' : '一座新的冰山入海了', 2400)
       await this.refreshData()
-      const g = (this._regions || []).find((x) => x.key === zoneName)
-      if (g) {
-        const c = sea.centerOn(g, this._world, this._scale)
-        this._movX = c.movX; this._movY = c.movY
-        this.setData(c)
+      // 滚到新回忆的山
+      const m = (this._mountains || []).find((x) => x.id === this.lastPublishedId)
+      if (m) {
+        const info = sea.windowSize()
+        const mx = Math.max(-(this.data.worldWidth - info.W), Math.min(0, -(m.left - info.W / 2)))
+        this._movX = mx
+        this.setData({ movX: mx })
       }
       if (this.lastPublishedId) {
         const pid = this.lastPublishedId
