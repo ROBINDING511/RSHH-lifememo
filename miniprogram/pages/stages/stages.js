@@ -10,7 +10,8 @@ Page({
     milestones: life.getMilestones(), msName: '', msAge: '',
     inviteCode: '', bindCode: '', feedQ: '',
     polishStyle: 'light',
-    openMenu: 'sea', cloneConsent: false, showClonePanel: false, nickname: '',
+    openMenu: 'about', cloneConsent: false, showClonePanel: false, nickname: '',
+    showNick: false, showAge: false, ageDisplay: '',
     searchQ: '', searchResults: [],
     voiceState: '', voiceSampleUrl: '',
     listening: false, voiceText: ''
@@ -26,7 +27,7 @@ Page({
     this.recorder = createRecorder()
     this.refreshVoice()
     this.loadAll()
-    this.setData({ polishStyle: wx.getStorageSync('polishStyle') || 'light', cloneConsent: wx.getStorageSync('cloneConsent') === '1', nickname: life.getNickname() })
+    this.setData({ polishStyle: wx.getStorageSync('polishStyle') || 'light', cloneConsent: wx.getStorageSync('cloneConsent') === '1', nickname: life.getNickname(), ageDisplay: this.fmtAge(life.getProfile()) })
   },
   onNick (e) { this.setData({ nickname: e.detail.value }) },
   // 搜索全部回忆
@@ -90,10 +91,20 @@ Page({
       wx.showToast({ title: '导出没成功，再试一次', icon: 'none' })
     }
   },
+  toggleNick () { this.setData({ showNick: !this.data.showNick, showAge: false }) },
+  toggleAge () { this.setData({ showAge: !this.data.showAge, showNick: false }) },
+  fmtAge (p) {
+    if (!p) return ''
+    if (p.mode === 'birthday' && p.birthday) return p.birthday
+    if (p.mode === 'age' && p.age) return p.age + '岁'
+    if (p.year) return p.year + '年'
+    return ''
+  },
   saveNick () {
     const n = (this.data.nickname || '').trim()
     if (!n) return wx.showToast({ title: '先写个称呼', icon: 'none' })
     life.setNickname(n)
+    this.setData({ nickname: n, showNick: false })   // 记好后收起编辑，直接显示在菜单上
     wx.showToast({ title: `好了，${n}`, icon: 'none' })
   },
   // 声音克隆=菜单子功能：默认关闭；主动点开才弹同意框
@@ -180,6 +191,7 @@ Page({
     else if (m === 'age') { if (!this.data.profileAge) return wx.showToast({ title: '填个年龄', icon: 'none' }); p.age = Number(this.data.profileAge) }
     else { if (!this.data.profileYear) return wx.showToast({ title: '填个年份', icon: 'none' }); p.year = Number(this.data.profileYear) }
     life.setProfile(p)
+    this.setData({ ageDisplay: this.fmtAge(life.getProfile()), showAge: false })   // 记好后显示在菜单上
     wx.showToast({ title: '记好了', icon: 'none' })
   },
 
