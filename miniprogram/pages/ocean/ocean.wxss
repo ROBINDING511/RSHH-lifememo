@@ -164,7 +164,7 @@
 /* ============ v2.0 C 门控 / D 字幕 / A9 状态 / A8 情绪 / A3 留白 ============ */
 .record-disabled { opacity: .45; }
 .consent-hint { display: block; text-align: center; color: var(--c-text-2); font-size: var(--fs-xs); margin-top: 12rpx; }
-.live-ctrl { display: flex; gap: 12rpx; margin: 8rpx 0; }
+.live-ctrl { display: flex; gap: 12rpx; margin: 8rpx 0; pointer-events: auto; }
 .live-ctrl-btn { padding: 6rpx 20rpx; border-radius: 24rpx; background: var(--c-soft); color: var(--c-text-2); font-size: var(--fs-xs); }
 .live-ctrl-btn.on { background: var(--c-primary-soft); color: var(--c-primary); }
 .live-text-big { font-size: 56rpx; line-height: 1.9; }

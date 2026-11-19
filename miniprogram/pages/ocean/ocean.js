@@ -487,6 +487,8 @@ Page({
   saveDraftAndStop () {
     if (!this._recActive) return
     this.cancelRequested = true
+    // 立刻收回字幕面板，回到干净海面（不等 onStop 异步）
+    this.setData({ recording: false, cancelArmed: false, lockArmed: false, locked: false, transcript: '', liveTail: '', liveExpanded: false, liveBig: false })
     this.recorder.stop()
     if (wx.vibrateShort) wx.vibrateShort({ type: 'light' })
   },

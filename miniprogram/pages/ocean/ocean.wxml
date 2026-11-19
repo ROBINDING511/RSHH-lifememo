@@ -115,8 +115,8 @@
       <text class="live-asr" wx:if="{{asrHint === 'connecting'}}">正在连线，字马上就来</text>
       <text class="live-asr live-asr-warn" wx:elif="{{asrHint === 'offline'}}">字暂时不出来，别急，松手会自动整理好</text>
       <view class="live-ctrl">
-        <view class="live-ctrl-btn {{liveBig ? 'on' : ''}}" catchtap="toggleLiveBig">大字</view>
-        <view class="live-ctrl-btn" catchtap="toggleLiveExpanded">{{liveExpanded ? '收起' : '看全部'}}</view>
+        <view class="live-ctrl-btn {{liveBig ? 'on' : ''}}" catchtap="toggleLiveBig">放大字</view>
+        <view class="live-ctrl-btn" catchtap="toggleLiveExpanded">{{liveExpanded ? '收起' : '看全文'}}</view>
         <view class="live-ctrl-btn" wx:if="{{!liveFollow}}" catchtap="backLatest">回到最新一句</view>
       </view>
       <scroll-view scroll-y class="live-scroll" scroll-into-view="{{liveFollow ? 't-end' : ''}}" bindscrolltoupper="onLiveScrollTop">
