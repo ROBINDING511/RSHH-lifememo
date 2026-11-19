@@ -161,8 +161,10 @@ Page({
     if (this._va) { this._va.stop(); this._va.destroy(); this._va = null; return }
     this._va = wx.createInnerAudioContext()
     this._va.obeyMuteSwitch = false
-    this._va.src = this.data.voiceSampleUrl
+    this._va.volume = 1
+    this._va.src = String(this.data.voiceSampleUrl).replace(/^http:/, 'https:')   // 真机需 https
     this._va.onEnded(() => { this._va.destroy(); this._va = null })
+    this._va.onError(() => { wx.showToast({ title: '试听没成功，再点一次', icon: 'none' }); this._va.destroy(); this._va = null })
     this._va.play()
   },
   async deleteVoice () {

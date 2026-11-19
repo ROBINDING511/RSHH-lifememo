@@ -40,7 +40,8 @@ Page({
     liveBig: false, liveExpanded: false, liveFollow: true, liveTail: '',
     previewStatus: '', previewEmotion: false,
     // 生日引导：鲸鱼气泡+回答建议（称呼在杭航菜单设置）
-    birthSkipped: false, birthOther: false, birthOtherVal: '',
+    birthSkipped: false, birthOther: false, birthOtherVal: '', birthIdx: 40,
+    bbLeft: 24, bbTop: 200, bbTail: 180,
     greetTitle: '晚上好', greetBody: '今天想聊哪一段？按住下面慢慢说，我听着。', boatBottom: 200,
     birthYears: (() => { const a = []; for (let y = 2010; y >= 1920; y--) a.push(y + '年'); return a })()
   },
@@ -125,7 +126,8 @@ Page({
     if (this._voiceAudio) { this._voiceAudio.stop(); this._voiceAudio.destroy(); this._voiceAudio = null; return }
     this._voiceAudio = wx.createInnerAudioContext()
     this._voiceAudio.obeyMuteSwitch = false
-    this._voiceAudio.src = v.sampleUrl
+    this._voiceAudio.src = String(v.sampleUrl).replace(/^http:/, 'https:')
+    this._voiceAudio.volume = 1
     this._voiceAudio.onEnded(() => { this._voiceAudio.destroy(); this._voiceAudio = null })
     this._voiceAudio.play()
   },
@@ -214,6 +216,7 @@ Page({
       worldWidth: W, worldHeight: H, movX: mx, movY: 0,
       boatX: lay.boatX, boatBottom: lay.boatBottom
     })
+    this.updateBubble()
   },
 
   async refreshData () {
@@ -237,6 +240,7 @@ Page({
       greetBody: icebergs.length ? '今天想聊哪一段？按住下面慢慢说，我听着。' : '海还空着。按住说一段，第一座雪山就落下来。'
     })
     this.setupWorld(true)
+    this.updateBubble()
   },
 
   clearNewBerg (pid) {
@@ -531,6 +535,7 @@ Page({
     ui.toast(`记下了，${y}年`, 2000)
   },
   onBirthPick (e) {
+    this.setData({ birthIdx: Number(e.detail.value) })
     const y = 2010 - Number(e.detail.value)
     const p = life.getProfile() || {}
     life.setProfile(Object.assign({}, p, { mode: 'year', year: y }))
@@ -542,7 +547,19 @@ Page({
     const id = e.currentTarget.dataset.id
     if (id) wx.navigateTo({ url: `/pages/iceberg/iceberg?id=${id}` })
   },
-  onSeaChange (e) { this._movX = e.detail.x; this._movY = e.detail.y },
+  onSeaChange (e) { this._movX = e.detail.x; this._movY = e.detail.y; this.updateBubble() },
+  // 气泡固定视口并夹在画面内，尾指船
+  updateBubble () {
+    const info = sea.windowSize()
+    const W = info.W, H = info.H
+    const bx = (this.data.boatX || 0) + (this.data.movX || 0) + 47
+    const by = H - (this.data.boatBottom || 0) - 142
+    const bw = 220, bh = 150
+    const left = Math.max(8, Math.min(W - bw - 8, bx - 194))
+    const top = Math.max((this.data.capsuleBottom || 88) + 8, Math.min(H - 220, by - bh - 12))
+    const tail = Math.max(12, Math.min(bw - 26, bx - left - 7))
+    this.setData({ bbLeft: Math.round(left), bbTop: Math.round(top), bbTail: Math.round(tail) })
+  },
   // 双指捏合缩放（聚拢缩小 / 打开放大）
   onSeaScale (e) {
     // 只认用户双指捏合（有触摸）；页面重排的伪 scale 事件一律忽略

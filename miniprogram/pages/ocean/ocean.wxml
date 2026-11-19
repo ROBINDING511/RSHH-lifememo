@@ -25,16 +25,10 @@
         style="left:{{boatX}}px;bottom:{{boatBottom}}px"
         bindtap="onWhaleTap" bindlongpress="onWhaleLongPress" hover-class="whale-hover" hover-stay-time="80">
         <image class="boat-img" src="/assets/boat.png" mode="widthFix" />
-        <!-- 帆船"说"出问候/提示（气泡，非顶部卡片） -->
-        <view class="boat-bubble" wx:if="{{(birthYear || birthSkipped) && !recording && !preview}}">
-          <text class="bb-title">{{greetTitle}}</text>
-          <text class="bb-body">{{greetBody}}</text>
-          <view class="bb-tail"></view>
-        </view>
         <!-- 小船上的气泡：生日引导+回答建议 -->
         <view class="whale-bubble" wx:if="{{!birthYear && !birthSkipped && !recording && !preview}}" catchtap="noop">
           <text class="wb-q">请问您出生于哪一年？</text>
-          <picker mode="selector" range="{{birthYears}}" bindchange="onBirthPick">
+          <picker mode="selector" range="{{birthYears}}" value="{{birthIdx}}" bindchange="onBirthPick">
             <view class="wb-field">点一下，滚轮选出生年份</view>
           </picker>
           <view class="wb-later" catchtap="skipBirth">稍后再说</view>
@@ -83,6 +77,14 @@
   </view>
 
 
+
+  <!-- 帆船"说"出问候/提示：固定视口层，永远在画面内 -->
+  <view class="boat-bubble" wx:if="{{(birthYear || birthSkipped) && !recording && !preview}}"
+    style="left:{{bbLeft}}px;top:{{bbTop}}px">
+    <text class="bb-title">{{greetTitle}}</text>
+    <text class="bb-body">{{greetBody}}</text>
+    <view class="bb-tail" style="left:{{bbTail}}px"></view>
+  </view>
 
   <!-- ============ 底部操作区（拇指区） ============ -->
   <view class="dock safe-bottom" wx:if="{{!preview}}">
@@ -137,7 +139,10 @@
         placeholder="这一刻的想法…（有错字可以直接改）"></textarea>
 
       <!-- A9 状态条：说人话，不出现 AI/模型/生成 -->
-      <text class="refine-status" wx:if="{{previewStatus === 'pending'}}">正在帮您顺句子……只顺了顺句子，您说的一个字都没添</text>
+      <view class="refine-status refine-loading" wx:if="{{previewStatus === 'pending'}}">
+        <text>正在理解您说的</text>
+        <view class="dots"><view class="dot"></view><view class="dot"></view><view class="dot"></view></view>
+      </view>
       <text class="refine-status" wx:elif="{{previewStatus === 'done'}}">顺好了，看看像不像您说的</text>
       <text class="refine-status" wx:elif="{{previewStatus === 'failed'}}">这次没顺成，您的原话一个字没少</text>
 
