@@ -53,6 +53,9 @@
 .wb-chips { display: flex; flex-wrap: wrap; gap: 12rpx; margin-top: 16rpx; }
 .wb-chip { padding: 10rpx 24rpx; border-radius: 24rpx; background: var(--c-primary-soft); color: var(--c-primary); font-size: var(--fs-sm); }
 .wb-picker { margin-top: 16rpx; min-height: 72rpx; display: flex; align-items: center; justify-content: center; border-radius: var(--radius-md); background: var(--c-soft); color: var(--c-text); font-size: var(--fs-sm); }
+.wb-other { display: flex; gap: 12rpx; margin-top: 16rpx; }
+.wb-input { flex: 1; min-height: 72rpx; background: var(--c-soft); border: 2rpx solid var(--hairline); border-radius: var(--radius-md); padding: 0 20rpx; font-size: var(--fs-md); }
+.wb-ok { flex: 0 0 140rpx; min-height: 72rpx; display: flex; align-items: center; justify-content: center; background: var(--c-primary); color: #fff; border-radius: var(--radius-md); font-size: var(--fs-sm); }
 .wb-skip { margin-top: 12rpx; text-align: center; color: var(--c-text-2); font-size: var(--fs-xs); text-decoration: underline; }
 .wb-tail { position: absolute; left: 50%; bottom: -14rpx; transform: translateX(-50%); width: 0; height: 0; border-left: 14rpx solid transparent; border-right: 14rpx solid transparent; border-top: 16rpx solid rgba(253,252,249,.97); }
 

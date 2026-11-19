@@ -40,7 +40,7 @@ Page({
     liveBig: false, liveExpanded: false, liveFollow: true, liveTail: '',
     previewStatus: '', previewEmotion: false,
     // 生日引导：鲸鱼气泡+回答建议（称呼在杭航菜单设置）
-    birthSkipped: false,
+    birthSkipped: false, birthOther: false, birthOtherVal: '',
     birthYears: (() => { const a = []; for (let y = 2010; y >= 1920; y--) a.push(y + '年'); return a })()
   },
 
@@ -508,10 +508,21 @@ Page({
   },
   // 生日引导：点建议年份 / 滚轮选 / 跳过
   pickBirthYear (e) {
-    const y = Number(e.currentTarget.dataset.y)
+    const v = e.currentTarget.dataset.y
+    if (v === 'other') { this.setData({ birthOther: true }); return }
+    const y = Number(v)
     const p = life.getProfile() || {}
     life.setProfile(Object.assign({}, p, { mode: 'year', year: y }))
-    this.setData({ birthYear: y })
+    this.setData({ birthYear: y, birthOther: false })
+    ui.toast(`记下了，${y}年`, 2000)
+  },
+  onBirthOtherInput (e) { this.setData({ birthOtherVal: e.detail.value }) },
+  confirmBirthOther () {
+    const y = parseInt(this.data.birthOtherVal, 10)
+    if (!y || y < 1900 || y > 2020) { ui.toast('填个四位年份，如1958', 2000); return }
+    const p = life.getProfile() || {}
+    life.setProfile(Object.assign({}, p, { mode: 'year', year: y }))
+    this.setData({ birthYear: y, birthOther: false })
     ui.toast(`记下了，${y}年`, 2000)
   },
   onBirthPick (e) {
