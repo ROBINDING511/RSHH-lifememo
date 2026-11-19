@@ -861,7 +861,7 @@ Page({
     this.setData({ preview: null, drafts: draft.list() })
     ui.toast('存草稿了，随时能找回来', 2200)
   },
-  // ❌ 化成云：有必要再找回（云朵落回海面），没必要就删除
+  // ❌ 删除：进"删除的记忆"，5天内可找回
   async discardToCloud () {
     const p = this.data.preview
     if (!p) return
@@ -874,13 +874,13 @@ Page({
         zoneName: p.zoneOptions[p.zoneIndex] || '晚年',
         title: p._four || text.slice(0, 4)
       })
-      await api.removeIceberg(created._id)   // deleted=true → 进云朵
+      await api.removeIceberg(created._id)   // deleted=true → 进删除的记忆
       draft.forgetPath(p.wavPath)
       this.setData({ preview: null, drafts: draft.list() })
-      ui.toast('化成云了，在云朵里能找回', 2400)
+      ui.toast('删除了，在"删除的记忆"里5天内可找回', 2400)
       this.refreshData()
     } catch (e) {
-      draft.save({ wavPath: p.wavPath, text: p.text, reason: '化云失败' })
+      draft.save({ wavPath: p.wavPath, text: p.text, reason: '删除失败' })
       this.setData({ preview: null, drafts: draft.list() })
       ui.toast('没化成，先存草稿了', 2400)
     }

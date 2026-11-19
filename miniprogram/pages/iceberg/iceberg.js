@@ -308,16 +308,16 @@ Page({
   },
   async meltIceberg () {
     const r = await new Promise((resolve) => wx.showModal({
-      title: '让这座冰山化成云吗？', content: '它会飘到"云朵"里，5 天后完全飘散。想留住，就早点让它落回海面。',
-      confirmText: '化成云', cancelText: '再看看', confirmColor: '#B3402F', cancelColor: '#1F6478', success: resolve
+      title: '删除这段回忆吗？', content: '删除后放在"删除的记忆"里，5 天内可随时找回。',
+      confirmText: '删除', cancelText: '再看看', confirmColor: '#B3402F', cancelColor: '#1F6478', success: resolve
     }))
     if (!r.confirm) return
     if (wx.vibrateShort) wx.vibrateShort({ type: 'light' })
-    wx.showLoading({ title: '正在化成云…', mask: true })
+    wx.showLoading({ title: '正在删除…', mask: true })
     try {
       await api.removeIceberg(this.id)
       wx.hideLoading()
-      wx.showToast({ title: '化好了，在"云朵"里能找到', icon: 'none', duration: 2400 })
+      wx.showToast({ title: '删除了，在"删除的记忆"里5天内可找回', icon: 'none', duration: 2400 })
       setTimeout(() => wx.navigateBack(), 1200)
     } catch (e) { wx.hideLoading(); wx.showToast({ title: '网络不太好，再试一次', icon: 'none' }) }
   }

@@ -5,6 +5,11 @@
     <text class="sub">小鲸鱼的主菜单 · 点一级展开二级</text>
   </view>
 
+  <!-- 鲸鱼菜单快捷按钮：删除的记忆（5天内可找回） -->
+  <view class="hub-row">
+    <view class="hub-pill" hover-class="btn-hover" hover-stay-time="80" bindtap="goRecycle">删除的记忆</view>
+  </view>
+
   <!-- 一级：我的海 -->
   <view class="menu-group">
     <view class="menu-l1" hover-class="btn-hover" hover-stay-time="80" data-k="sea" bindtap="toggleMenu">
@@ -102,7 +107,6 @@
         </view>
       </view>
       <view class="menu-link" hover-class="btn-hover" hover-stay-time="80" bindtap="goTimeline">二级 · 时间轴（按年翻一生）</view>
-      <view class="menu-link" hover-class="btn-hover" hover-stay-time="80" bindtap="goRecycle">二级 · 云朵（化云的回忆·可找回）</view>
     </view>
   </view>
 

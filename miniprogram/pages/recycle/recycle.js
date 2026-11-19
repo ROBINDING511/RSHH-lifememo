@@ -43,7 +43,7 @@ Page({
     try {
       await api.restoreIceberg(id)
       this.setData({ raining: '' })
-      wx.showToast({ title: '冰山回到了海面', icon: 'none', duration: 2200 })
+      wx.showToast({ title: '记忆找回来了', icon: 'none', duration: 2200 })
       this.load()
     } catch (err) {
       console.error('恢复失败', err)

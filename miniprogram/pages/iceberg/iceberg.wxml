@@ -97,7 +97,7 @@
       <button class="btn-ghost flex1" hover-class="btn-hover" hover-stay-time="80"
         bindtap="onShowIconMenu">放个标记</button>
       <button class="btn-ghost btn-danger-ghost flex1" hover-class="btn-hover" hover-stay-time="80"
-        bindtap="meltIceberg">化成云</button>
+        bindtap="meltIceberg">删除</button>
     </view>
   </view>
 
