@@ -146,7 +146,7 @@ function layoutMountains (icebergs, H, W, birthYear) {
       const height = Math.round((50 + Math.min(130, len * 0.45)) * (0.85 + rng() * 0.4)) // 内容越多越高
       const variant = Math.floor(rng() * 3)
       const x = ei * W + ((i * 0.37 + 0.13) % 1) * (W - width)
-      const bottom = Math.round(H * (0.20 + ((i * 0.61 + 0.29) % 1) * 0.26))
+      const bottom = Math.round(H * (0.34 + ((i * 0.61 + 0.29) % 1) * 0.26))   // 往上靠，不挤底部
       mountains.push({
         id: b._id, left: Math.round(x), width, height, bottom,
         createdAt: b.createdAt || 0,
@@ -159,7 +159,8 @@ function layoutMountains (icebergs, H, W, birthYear) {
   const boatW = 95
   let boatX = newest ? Math.round(newest.left + newest.width + 8) : Math.round(W * 0.4)
   if (newest && boatX + boatW > worldWidth) boatX = Math.max(0, Math.round(newest.left - boatW - 8))
-  return { mountains, worldWidth, boatX, boatBottom: Math.round(H * 0.15) }
+  const boatBottom = newest ? Math.max(Math.round(H * 0.12), newest.bottom - 50) : Math.round(H * 0.40)
+  return { mountains, worldWidth, boatX, boatBottom }
 }
 
 module.exports = { buildWorld, centerOn, regionAt, stageOfMemory, layoutBergs, layoutMilestones, layoutMountains, windowSize, hash }

@@ -25,6 +25,12 @@
         style="left:{{boatX}}px;bottom:{{boatBottom}}px"
         bindtap="onWhaleTap" bindlongpress="onWhaleLongPress" hover-class="whale-hover" hover-stay-time="80">
         <image class="boat-img" src="/assets/boat.png" mode="widthFix" />
+        <!-- 帆船"说"出问候/提示（气泡，非顶部卡片） -->
+        <view class="boat-bubble" wx:if="{{(birthYear || birthSkipped) && !recording && !preview}}">
+          <text class="bb-title">{{greetTitle}}</text>
+          <text class="bb-body">{{greetBody}}</text>
+          <view class="bb-tail"></view>
+        </view>
         <!-- 小船上的气泡：生日引导+回答建议 -->
         <view class="whale-bubble" wx:if="{{!birthYear && !birthSkipped && !recording && !preview}}" catchtap="noop">
           <text class="wb-q">请问您出生于哪一年？</text>
@@ -38,11 +44,6 @@
     </movable-view>
   </movable-area>
 
-  <!-- B 问候卡：奶油黄 -->
-  <view class="card-greet ocean-greet" wx:if="{{!recording && !preview}}" style="top:{{capsuleBottom + 16}}px">
-    <view class="card-title">{{greetTitle}}</view>
-    <view class="card-body">{{greetBody}}</view>
-  </view>
 
   <!-- ============ 草稿找回（说过的话绝不丢） ============ -->
   <view class="draft-bar" wx:if="{{drafts.length && !recording && !preview}}"

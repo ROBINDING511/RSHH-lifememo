@@ -188,3 +188,8 @@
 .night-bg-css { background: linear-gradient(180deg, #030635 0%, #08134F 30%, #053091 55%, #05267A 100%); }
 .wb-field { margin-top: 16rpx; min-height: 88rpx; display: flex; align-items: center; justify-content: center; background: var(--c-surface-2); border: 2rpx solid var(--c-line); border-radius: 24rpx; color: var(--c-accent); font-size: var(--fs-md); }
 .wb-later { margin-top: 12rpx; text-align: center; color: var(--c-text-faint); font-size: var(--fs-xs); }
+/* 帆船气泡：问候/提示由船"说"出 */
+.boat-bubble { position: absolute; left: 50%; bottom: 100%; transform: translateX(-88%); width: 440rpx; margin-bottom: 16rpx; background: var(--c-surface); border-radius: var(--r-card); padding: 24rpx 28rpx; box-shadow: 0 10rpx 30rpx rgba(2,2,31,.35); pointer-events: none; }
+.bb-title { display: block; font-size: var(--fs-md); font-weight: 700; color: var(--c-primary); }
+.bb-body { display: block; margin-top: 8rpx; font-size: var(--fs-sm); line-height: 1.8; color: var(--c-text); }
+.bb-tail { position: absolute; left: 88%; bottom: -14rpx; transform: translateX(-50%); width: 0; height: 0; border-left: 14rpx solid transparent; border-right: 14rpx solid transparent; border-top: 16rpx solid var(--c-surface); }
