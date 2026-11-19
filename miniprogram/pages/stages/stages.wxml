@@ -43,13 +43,11 @@
     </view>
     <view class="menu-l2" wx:if="{{openMenu === 'sea'}}">
       <view class="card">
-        <text class="prof-title">人生节点＝海的开端</text>
-        <text class="ms-invite">按住下面，一次性把您的节点都说出来（年份+事），我听懂后自动填好；每个节点开启一片新海。</text>
+        <text class="prof-title">人生节点</text>
         <view class="voice-hold {{listening ? 'on' : ''}}"
           bindtouchstart="onNodeStart" catchtouchend="onNodeEnd" catchtouchcancel="onNodeEnd">
-          <text>{{listening ? '松开，我听懂就自动填好' : '按住，说你的人生节点'}}</text>
+          <text>{{listening ? '松开，自动填好' : '按住 聆听人生节点'}}</text>
         </view>
-        <text class="voice-eg">比如："2008年和我老婆相识，2011年毕业，2017年9月22号加入阿里巴巴"</text>
         <text class="voice-text" wx:if="{{voiceText}}">{{voiceText}}</text>
         <view class="ms-list">
           <view wx:for="{{milestones}}" wx:key="id" class="ms-row">
@@ -57,7 +55,7 @@
             <text class="ms-name">{{item.name}}</text>
             <view class="ms-del" hover-class="btn-hover" hover-stay-time="80" data-id="{{item.id}}" bindtap="removeMs">×</view>
           </view>
-          <view wx:if="{{!milestones.length}}" class="ms-empty">还没有节点，按住说一段试试</view>
+          <view wx:if="{{!milestones.length}}" class="ms-empty">按住上面，一次说几个节点</view>
         </view>
       </view>
       <view class="menu-link" hover-class="btn-hover" hover-stay-time="80" bindtap="goTimeline">时间轴（按年翻一生）</view>

@@ -159,6 +159,7 @@ Page({
   },
 
   onUnload () {
+    this.clearTick(); if (this._native) { try { this._native.stop() } catch (e) {} }
     if (this._bbTimer) clearTimeout(this._bbTimer)
     if (this._bbLit) clearTimeout(this._bbLit)
     this.releaseAsr()
@@ -410,45 +411,74 @@ Page({
     this._pendingText = null
     this._frameBuf = []
     if (wx.vibrateShort) wx.vibrateShort({ type: 'medium' })
-    this.ensureAsr()
-    this.recorder.start({
-      onFrame: (buf) => { if (this.asr) this.asr.sendFrame(buf); else this._frameBuf.push(buf) },
-      onTick: (s) => this.setData({ elapsed: s }),
-      onCountdown: (left) => {
-        this.setData({ countdown: left })
-        if (left <= 3 && wx.vibrateShort) wx.vibrateShort({ type: 'light' })
-      },
-      onStop: async (wavPath, durationMs, err) => {
-        this._recActive = false
-        this._lastDuration = durationMs
-        this.setData({ recording: false, countdown: 0, elapsed: 0, recordMode: '', boatPaused: false, cancelArmed: false })
-        this.applyTranscript()
-        if (this.cancelRequested) {
-          // 上滑取消=完全收回：不落草稿、不留任何条/卡，界面干净
-          this.cancelRequested = false
-          this.setData({ transcript: '', liveTail: '' })
-          return
-        }
-        if (err) {
-          const em = (err && (err.errMsg || err.message)) || ''
-          if (/auth|permission|deny|authorize/i.test(em)) return this.guideOpenSetting()
-          if (wavPath && durationMs >= 800) {
-            draft.save({ wavPath, text: this.data.transcript, reason: '录音中断' })
-            this.setData({ drafts: draft.list(), transcript: '' })
-            ui.toast('录音中断了，已经帮您存下来', 2600)
-          } else ui.toast('录音中断了，再说一次')
-          return
-        }
-        if (durationMs < 800) { this.setData({ transcript: '', liveTail: '' }); return ui.toast('太短了，多说几句') }
-        const full = (this.data.transcript || '').trim()
+    const plugin = this.nativePlugin()
+    if (plugin) {
+      // 微信原生同声传译：免费、不受自有域名白名单限制；录音+识别一体
+      const mgr = plugin.getRecordRecognitionManager()
+      this._native = mgr
+      mgr.onRecognize = (res) => { if (res && res.result) this.setData({ transcript: res.result, liveTail: res.result.slice(-40) }) }
+      mgr.onStop = (res) => { this.clearTick(); this.handleRecordStop((res && res.tempFilePath) || '', (res && res.duration) || this._elapsedMs || 0, null) }
+      mgr.onError = (e) => { this.clearTick(); this.handleRecordStop('', 0, e) }
+      mgr.start({ lang: 'zh_CN', duration: 60000 })
+      this.startTick()
+    } else {
+      this.ensureAsr()
+      this.recorder.start({
+        onFrame: (buf) => { if (this.asr) this.asr.sendFrame(buf); else this._frameBuf.push(buf) },
+        onTick: (s) => this.setData({ elapsed: s }),
+        onCountdown: (left) => {
+          this.setData({ countdown: left })
+          if (left <= 3 && wx.vibrateShort) wx.vibrateShort({ type: 'light' })
+        },
+        onStop: (w, d, e) => this.handleRecordStop(w, d, e)
+      })
+    }
+  },
+  nativePlugin () { try { return requirePlugin('WechatSI') } catch (e) { return null } },
+  startTick () {
+    this._elapsedMs = 0
+    this.clearTick()
+    this._tick = setInterval(() => {
+      this._elapsedMs += 1000
+      const sec = Math.floor(this._elapsedMs / 1000)
+      const left = 60 - sec
+      this.setData({ elapsed: sec, countdown: left <= 10 && left > 0 ? left : 0 })
+      if (left <= 3 && left > 0 && wx.vibrateShort) wx.vibrateShort({ type: 'light' })
+      if (left <= 0) this.finishRecording()
+    }, 1000)
+  },
+  clearTick () { if (this._tick) { clearInterval(this._tick); this._tick = null } },
+  async handleRecordStop (wavPath, durationMs, err) {
 
-        if (this._appendBase != null) { this._appendBase = null; this.appendToPreview(wavPath, full) }
-        else this.openPreview(wavPath, full)
+      this._recActive = false
+      this._lastDuration = durationMs
+      this.setData({ recording: false, countdown: 0, elapsed: 0, recordMode: '', boatPaused: false, cancelArmed: false })
+      this.applyTranscript()
+      if (this.cancelRequested) {
+        // 上滑取消=完全收回：不落草稿、不留任何条/卡，界面干净
+        this.cancelRequested = false
+        this.setData({ transcript: '', liveTail: '' })
+        return
       }
-    })
+      if (err) {
+        const em = (err && (err.errMsg || err.message)) || ''
+        if (/auth|permission|deny|authorize/i.test(em)) return this.guideOpenSetting()
+        if (wavPath && durationMs >= 800) {
+          draft.save({ wavPath, text: this.data.transcript, reason: '录音中断' })
+          this.setData({ drafts: draft.list(), transcript: '' })
+          ui.toast('录音中断了，已经帮您存下来', 2600)
+        } else ui.toast('录音中断了，再说一次')
+        return
+      }
+      if (durationMs < 800) { this.setData({ transcript: '', liveTail: '' }); return ui.toast('太短了，多说几句') }
+      const full = (this.data.transcript || '').trim()
+
+      if (this._appendBase != null) { this._appendBase = null; this.appendToPreview(wavPath, full) }
+      else this.openPreview(wavPath, full)
+
   },
 
-  finishRecording () { if (this._recActive) this.recorder.stop() },
+  finishRecording () { if (!this._recActive) return; if (this._native) this._native.stop(); else this.recorder.stop() },
 
   saveDraftAndStop () {
     if (!this._recActive) return
@@ -456,7 +486,7 @@ Page({
     // 立刻取消所有已说内容+收回面板，回到初始干净界面（不等 onStop 异步）
     this.setData({ recording: false, cancelArmed: false, lockArmed: false, locked: false, transcript: '', liveTail: '' })
     if (this.asr) this.asr.reset()
-    this.recorder.stop()
+    if (this._native) this._native.stop(); else this.recorder.stop()
     if (wx.vibrateShort) wx.vibrateShort({ type: 'light' })
   },
 

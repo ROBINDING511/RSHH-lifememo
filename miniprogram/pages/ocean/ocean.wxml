@@ -147,7 +147,19 @@
 
 
       <!-- 照片：微信式九宫格，裸 + 添加，无多余解释文案 -->
-      <view class="photo-grid">
+      <view class="attach-row">
+        <view class="photo-add" wx:if="{{preview.photos.length < 9}}"
+          hover-class="btn-hover" hover-stay-time="80" bindtap="addPhoto">
+          <text class="photo-add-plus">＋</text>
+          <text class="photo-add-label">添加图片</text>
+        </view>
+        <view class="voice-check" wx:if="{{preview.wavPath}}"
+          hover-class="btn-hover" hover-stay-time="80" bindtap="playPreviewVoice">
+          <view class="vc-btn {{previewVoicePlaying ? 'vc-on' : ''}}"></view>
+          <text class="vc-text">{{previewVoicePlaying ? '正在播放，点停' : '听听我自己的声音'}}</text>
+        </view>
+      </view>
+      <view class="photo-grid" wx:if="{{preview.photos.length}}">
         <view class="photo-cell" wx:for="{{preview.photos}}" wx:key="*this">
           <image src="{{item}}" mode="aspectFill" class="photo-img"
             data-i="{{index}}" bindtap="previewDraftPhoto" />
@@ -156,25 +168,13 @@
             <text class="photo-del-x">×</text>
           </view>
         </view>
-        <view class="photo-add" wx:if="{{preview.photos.length < 9}}"
-          hover-class="btn-hover" hover-stay-time="80" bindtap="addPhoto">
-          <text class="photo-add-plus">＋</text>
-        </view>
       </view>
 
-      <!-- 微信式 cell：什么时候 / 哪片海，点开选择（有真实预设可选） -->
-      <!-- 什么时候 == 哪片海：只选一次；听到的年份/岁数仅作只读提示 -->
       <text class="time-hint" wx:if="{{preview.timeLabel}}">听到 {{preview.timeLabel}}，落在</text>
       <view class="meta-cell" hover-class="cell-hover" hover-stay-time="80" bindtap="pickZoneSheet">
         <text class="meta-label">哪片海</text>
         <text class="meta-value">{{preview.zoneOptions[preview.zoneIndex]}}之海</text>
         <text class="meta-arrow">›</text>
-      </view>
-
-      <view class="voice-check" wx:if="{{preview.wavPath}}"
-        hover-class="btn-hover" hover-stay-time="80" bindtap="playPreviewVoice">
-        <view class="vc-btn {{previewVoicePlaying ? 'vc-on' : ''}}"></view>
-        <text class="vc-text">{{previewVoicePlaying ? '正在播放，点这里停' : '听听我自己的声音'}}</text>
       </view>
 
       <view class="continue-hold" hover-class="btn-hover" hover-stay-time="80"
