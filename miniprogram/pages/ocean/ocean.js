@@ -42,6 +42,7 @@ Page({
     // 生日引导：鲸鱼气泡+回答建议（称呼在杭航菜单设置）
     birthSkipped: false, birthOther: false, birthOtherVal: '', birthIdx: 40,
     bbLeft: 24, bbTop: 200, bbTail: 180, boatLeft: 160, boatTop: 420,
+    bubbleShow: false, bubbleText: '',
     greetTitle: '晚上好', greetBody: '今天想聊哪一段？按住下面慢慢说，我听着。', boatBottom: 200,
     birthYears: (() => { const a = []; for (let y = 2010; y >= 1920; y--) a.push(y + '年'); return a })()
   },
@@ -60,6 +61,7 @@ Page({
     })
     if (query && query.edit) this.loadForEdit(query.edit)
     wx.authorize({ scope: 'scope.record' }).catch(() => {})   // 进页即申请麦克风，不等按住
+    this.scheduleBubble(20000)
   },
 
   onShow () {
@@ -175,12 +177,16 @@ Page({
   },
 
   onHide () {
+    if (this._bbTimer) clearTimeout(this._bbTimer)
+    if (this._bbLit) clearTimeout(this._bbLit)
     if (this.data.recording) this.saveDraftAndStop()   // 切后台/来电先落草稿
     this.stopPreviewVoice()
     this.releaseAsr()
   },
 
   onUnload () {
+    if (this._bbTimer) clearTimeout(this._bbTimer)
+    if (this._bbLit) clearTimeout(this._bbLit)
     this.releaseAsr()
     this.stopPreviewVoice()
   },
@@ -337,6 +343,7 @@ Page({
     }
     this.stopPreviewVoice()
     this.setData({ preview: null, drafts: draft.list(), previewEmotion: false })
+    this.hideBubble(); this.scheduleBubble(20000)
     ui.toast('歇一歇，话已经帮您存好了', 2600)
   },
 
@@ -548,6 +555,30 @@ Page({
     if (id) wx.navigateTo({ url: `/pages/iceberg/iceberg?id=${id}` })
   },
   onSeaChange (e) { this._movX = e.detail.x; this._movY = e.detail.y; this.updateBubble() },
+  // ---- 提示词飘出节奏：说完话20秒后飘出→亮20秒→无人点静默60秒→换下一条 ----
+  scheduleBubble (delay) {
+    if (this._bbTimer) clearTimeout(this._bbTimer)
+    this._bbTimer = setTimeout(() => this.showBubble(), delay)
+  },
+  showBubble () {
+    const P = [
+      '今天想聊哪一段？按住下面慢慢说。',
+      '小时候最记得的一件事是什么？',
+      '那年您几岁？在做什么？',
+      '有什么话想留给家里人？',
+      '最近有什么开心的小事？'
+    ]
+    this._bbIdx = ((this._bbIdx == null ? -1 : this._bbIdx) + 1) % P.length
+    this.setData({ bubbleShow: true, bubbleText: P[this._bbIdx] })
+    this.updateBubble()
+    if (this._bbLit) clearTimeout(this._bbLit)
+    this._bbLit = setTimeout(() => { this.hideBubble(); this.scheduleBubble(60000) }, 20000)
+  },
+  hideBubble () {
+    if (this._bbLit) clearTimeout(this._bbLit)
+    this.setData({ bubbleShow: false })
+  },
+  onBubbleTap () { this.hideBubble(); this.scheduleBubble(60000) },
   // 船+气泡固定视口并夹在画面内（不撞边），气泡尾指船
   updateBubble () {
     const info = sea.windowSize()
@@ -559,11 +590,11 @@ Page({
     const boatLeft = Math.max(12, Math.min(W - boatW - 12, center - boatW / 2))
     const baseY = lay.minBottom != null ? H - lay.minBottom : H * 0.62
     const boatTop = Math.max(H * 0.40, Math.min(H - boatH - 90, baseY + 6))
-    const bw = 200, bh = 132
+    const bw = 150, bh = 64
     const bx = boatLeft + boatW / 2
     const left = Math.max(8, Math.min(W - bw - 8, bx - bw / 2))
-    const top = Math.max((this.data.capsuleBottom || 88) + 8, boatTop - bh - 10)
-    const tail = Math.max(12, Math.min(bw - 24, bx - left - 6))
+    const top = Math.max((this.data.capsuleBottom || 88) + 8, boatTop - bh - 8)
+    const tail = Math.max(10, Math.min(bw - 20, bx - left - 5))
     this.setData({
       boatLeft: Math.round(boatLeft), boatTop: Math.round(boatTop),
       bbLeft: Math.round(left), bbTop: Math.round(top), bbTail: Math.round(tail)
@@ -829,6 +860,7 @@ Page({
       this.stopPreviewVoice()
       wavs.forEach((w) => draft.forgetPath(w))
       this.setData({ preview: null, publishing: false, drafts: draft.list() })
+    this.hideBubble(); this.scheduleBubble(20000)
       wx.hideLoading()
       ui.toast(p.editId ? '补好了，冰山更新了' : '一座新的冰山入海了', 2400)
       await this.refreshData()
@@ -903,6 +935,7 @@ Page({
     this.stopPreviewVoice()
     draft.save({ wavPath: p.wavPath, text: p.text, reason: '暂未发布' })
     this.setData({ preview: null, drafts: draft.list(), sheetDy: 0 })
+    this.hideBubble(); this.scheduleBubble(20000)
     ui.toast('存好了，随时能找回来', 2200)
   },
   // 按压轻震（无超调回弹）
@@ -916,6 +949,7 @@ Page({
     this.stopPreviewVoice()
     draft.save({ wavPath: p.wavPath, text: p.text, reason: '存草稿' })
     this.setData({ preview: null, drafts: draft.list() })
+    this.hideBubble(); this.scheduleBubble(20000)
     ui.toast('存草稿了，随时能找回来', 2200)
   },
   // ❌ 删除：进"删除的记忆"，5天内可找回
@@ -934,11 +968,13 @@ Page({
       await api.removeIceberg(created._id)   // deleted=true → 进删除的记忆
       draft.forgetPath(p.wavPath)
       this.setData({ preview: null, drafts: draft.list() })
+    this.hideBubble(); this.scheduleBubble(20000)
       ui.toast('删除了，在"删除的记忆"里5天内可找回', 2400)
       this.refreshData()
     } catch (e) {
       draft.save({ wavPath: p.wavPath, text: p.text, reason: '删除失败' })
       this.setData({ preview: null, drafts: draft.list() })
+    this.hideBubble(); this.scheduleBubble(20000)
       ui.toast('没化成，先存草稿了', 2400)
     }
   }

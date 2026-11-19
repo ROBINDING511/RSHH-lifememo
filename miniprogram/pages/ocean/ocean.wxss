@@ -23,7 +23,7 @@
 .boat-drift.paused { animation-play-state: paused; }
 .whale-hover { opacity: .85; }
 /* 鲸鱼口中的气泡：生日引导+回答建议（随鲸鱼移动） */
-.whale-bubble { position: absolute; left: 50%; bottom: 100%; transform: translateX(-50%); width: 440rpx; margin-bottom: 16rpx; background: var(--c-surface); border-radius: var(--r-card); padding: 20rpx 24rpx; box-shadow: 0 6rpx 18rpx rgba(2,2,31,.28); pointer-events: auto; }
+.whale-bubble { position: absolute; left: 50%; bottom: 100%; transform: translateX(-85%); width: 400rpx; margin-bottom: 16rpx; background: var(--c-surface); border-radius: var(--r-card); padding: 20rpx 24rpx; box-shadow: 0 6rpx 18rpx rgba(2,2,31,.28); pointer-events: auto; }
 .wb-q { display: block; font-size: var(--fs-lg); font-weight: 700; color: var(--c-text); line-height: 1.6; }
 .wb-chips { display: flex; flex-wrap: wrap; gap: 12rpx; margin-top: 16rpx; }
 .wb-chip { padding: 10rpx 24rpx; border-radius: 24rpx; background: var(--c-primary-soft); color: var(--c-primary); font-size: var(--fs-sm); }
@@ -32,7 +32,7 @@
 .wb-input { flex: 1; min-height: 72rpx; background: var(--c-soft); border: 2rpx solid var(--hairline); border-radius: var(--radius-md); padding: 0 20rpx; font-size: var(--fs-md); }
 .wb-ok { flex: 0 0 140rpx; min-height: 72rpx; display: flex; align-items: center; justify-content: center; background: var(--c-primary); color: #fff; border-radius: var(--radius-md); font-size: var(--fs-sm); }
 .wb-skip { margin-top: 12rpx; text-align: center; color: var(--c-text-2); font-size: var(--fs-xs); text-decoration: underline; }
-.wb-tail { position: absolute; left: 50%; bottom: -14rpx; transform: translateX(-50%); width: 0; height: 0; border-left: 14rpx solid transparent; border-right: 14rpx solid transparent; border-top: 16rpx solid rgba(253,252,249,.97); }
+.wb-tail { position: absolute; left: 85%; bottom: -14rpx; transform: translateX(-50%); width: 0; height: 0; border-left: 14rpx solid transparent; border-right: 14rpx solid transparent; border-top: 16rpx solid rgba(253,252,249,.97); }
 
 
 /* ============ 空态提示（深色胶囊白字，全渐变达标）============ */
@@ -189,10 +189,10 @@
 .wb-field { margin-top: 16rpx; min-height: 88rpx; display: flex; align-items: center; justify-content: center; background: var(--c-surface-2); border: 2rpx solid var(--c-line); border-radius: 24rpx; color: var(--c-accent); font-size: var(--fs-md); }
 .wb-later { margin-top: 12rpx; text-align: center; color: var(--c-text-faint); font-size: var(--fs-xs); }
 /* 帆船气泡：问候/提示由船"说"出 */
-.boat-bubble { position: absolute; width: 400rpx; background: var(--c-surface); border-radius: var(--r-card); padding: 20rpx 24rpx; box-shadow: 0 6rpx 18rpx rgba(2,2,31,.28); pointer-events: none; z-index: 25; }
-.bb-title { display: block; font-size: var(--fs-md); font-weight: 700; color: var(--c-primary); letter-spacing: 1rpx; }
-.bb-body { display: block; margin-top: 6rpx; font-size: var(--fs-sm); line-height: 1.8; color: var(--c-text-soft); }
-.bb-tail { position: absolute; bottom: -12rpx; width: 0; height: 0; border-left: 12rpx solid transparent; border-right: 12rpx solid transparent; border-top: 14rpx solid var(--c-surface); }
+.boat-bubble { position: absolute; width: 300rpx; background: rgba(255,252,246,.94); border-radius: 28rpx; padding: 12rpx 20rpx; box-shadow: 0 4rpx 14rpx rgba(2,2,31,.25); pointer-events: auto; z-index: 25; }
+
+.bb-text { display: block; font-size: var(--fs-sm); line-height: 1.6; color: var(--c-text); }
+.bb-tail { position: absolute; bottom: -10rpx; width: 0; height: 0; border-left: 10rpx solid transparent; border-right: 10rpx solid transparent; border-top: 12rpx solid rgba(255,252,246,.94); }
 
 .refine-status { font-size: var(--fs-xs); color: var(--c-text-soft); }
 .refine-loading { display: flex; align-items: center; gap: 8rpx; }
