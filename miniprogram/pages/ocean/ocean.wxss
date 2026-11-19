@@ -57,7 +57,6 @@
 .live-timer { color: var(--c-text-2); font-size: var(--fs-sm); }
 .live-asr { display: block; color: var(--c-text-2); font-size: var(--fs-xs); margin-top: 8rpx; }
 .live-asr-warn { color: #8A5A15; }
-.live-scroll { max-height: 360rpx; margin-top: 16rpx; }
 .live-text { color: var(--c-text); font-size: var(--fs-xxl); line-height: 1.6; letter-spacing: 0; }
 .live-countdown { display: flex; align-items: baseline; gap: 10rpx; margin-top: 12rpx; }
 .live-countdown-num { color: var(--c-countdown); font-size: 64rpx; font-weight: 700; line-height: 1; }
@@ -127,10 +126,6 @@
   .record-btn.record-hover { transform: none; }
 }
 /* ============ v2.0 C 门控 / D 字幕 / A9 状态 / A8 情绪 / A3 留白 ============ */
-.live-ctrl { display: flex; gap: 12rpx; margin: 8rpx 0; pointer-events: auto; }
-.live-ctrl-btn { padding: 6rpx 20rpx; border-radius: 24rpx; background: var(--c-soft); color: var(--c-text-2); font-size: var(--fs-xs); }
-.live-ctrl-btn.on { background: var(--c-primary-soft); color: var(--c-primary); }
-.live-text-big { font-size: 56rpx; line-height: 1.9; }
 .refine-status { display: block; margin-top: 16rpx; color: var(--c-text-2); font-size: var(--fs-sm); }
 .emotion-box { margin-top: 20rpx; padding: 24rpx; background: var(--c-soft); border-radius: var(--radius-md); }
 .emotion-text { display: block; color: var(--c-text); font-size: var(--fs-md); line-height: 1.8; }

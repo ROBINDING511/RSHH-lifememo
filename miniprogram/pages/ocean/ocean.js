@@ -29,7 +29,7 @@ Page({
     sheetDy: 0, sheetSettle: true,
     // v2.0 C 门控 / D 字幕 / A9 状态 / A8 情绪
     locked: false, lockArmed: false,
-    liveBig: false, liveExpanded: false, liveFollow: true, liveTail: '',
+    liveTail: '',
     previewStatus: '', previewEmotion: false,
     // 生日引导：鲸鱼气泡+回答建议（称呼在杭航菜单设置）
     bbLeft: 24, bbTop: 200, bbTail: 180, boatLeft: 160, boatTop: 420,
@@ -282,10 +282,6 @@ Page({
     this.setData({ transcript: t, liveTail: seg.slice(-2).join('') })
   },
   // D 字幕：上滑读历史停跟随 / 回到最新 / 大字 / 看全部
-  onLiveScrollTop () { if (this.data.liveFollow) this.setData({ liveFollow: false }) },
-  backLatest () { this.setData({ liveFollow: true }) },
-  toggleLiveBig () { this.setData({ liveBig: !this.data.liveBig }) },
-  toggleLiveExpanded () { this.setData({ liveExpanded: !this.data.liveExpanded, liveFollow: true }) },
 
   // A3 留白：这段不想说 → 记 blanks，AI 禁提，温和安抚
   markBlank (topic) {
@@ -430,7 +426,7 @@ Page({
         if (this.cancelRequested) {
           // 上滑取消=完全收回：不落草稿、不留任何条/卡，界面干净
           this.cancelRequested = false
-          this.setData({ transcript: '', liveTail: '', liveExpanded: false, liveBig: false })
+          this.setData({ transcript: '', liveTail: '' })
           return
         }
         if (err) {
@@ -458,7 +454,7 @@ Page({
     if (!this._recActive) return
     this.cancelRequested = true
     // 立刻取消所有已说内容+收回面板，回到初始干净界面（不等 onStop 异步）
-    this.setData({ recording: false, cancelArmed: false, lockArmed: false, locked: false, transcript: '', liveTail: '', liveExpanded: false, liveBig: false })
+    this.setData({ recording: false, cancelArmed: false, lockArmed: false, locked: false, transcript: '', liveTail: '' })
     if (this.asr) this.asr.reset()
     this.recorder.stop()
     if (wx.vibrateShort) wx.vibrateShort({ type: 'light' })

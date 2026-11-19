@@ -105,15 +105,7 @@
       </view>
       <text class="live-asr" wx:if="{{asrHint === 'connecting'}}">正在连线，字马上就来</text>
       <text class="live-asr live-asr-warn" wx:elif="{{asrHint === 'offline'}}">字暂时不出来，别急，松手会自动整理好</text>
-      <view class="live-ctrl">
-        <view class="live-ctrl-btn {{liveBig ? 'on' : ''}}" catchtap="toggleLiveBig">放大字</view>
-        <view class="live-ctrl-btn" catchtap="toggleLiveExpanded">{{liveExpanded ? '收起' : '看全文'}}</view>
-        <view class="live-ctrl-btn" wx:if="{{!liveFollow}}" catchtap="backLatest">回到最新一句</view>
-      </view>
-      <scroll-view scroll-y class="live-scroll" scroll-into-view="{{liveFollow ? 't-end' : ''}}" bindscrolltoupper="onLiveScrollTop">
-        <text class="live-text {{liveBig ? 'live-text-big' : ''}}">{{liveExpanded ? transcript : (liveTail || transcript) || '您慢慢说，字马上出来…'}}</text>
-        <text id="t-end"></text>
-      </scroll-view>
+      <text class="live-text">{{liveTail || transcript || '您慢慢说，字马上出来…'}}</text>
       <view class="live-countdown" wx:if="{{countdown > 0}}">
         <text class="live-countdown-num">{{countdown}}</text>
         <text class="live-countdown-label">秒后自动结束</text>
