@@ -317,8 +317,8 @@ Page({
     try {
       await api.removeIceberg(this.id)
       wx.hideLoading()
-      wx.showToast({ title: '删除了，在"删除的记忆"里5天内可找回', icon: 'none', duration: 2400 })
-      setTimeout(() => wx.navigateBack(), 1200)
+      getApp().globalData.topHint = '删除了，在"删除的记忆"里5天可以找回'
+      wx.navigateBack()   // 立刻回主页面，顶端小字提示
     } catch (e) { wx.hideLoading(); wx.showToast({ title: '网络不太好，再试一次', icon: 'none' }) }
   }
 })

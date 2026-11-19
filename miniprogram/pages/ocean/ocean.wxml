@@ -79,6 +79,11 @@
 
 
 
+  <!-- 顶端略小提示（删除回执等） -->
+  <view class="top-hint" wx:if="{{topHint}}" style="top:{{capsuleBottom + 12}}px">
+    <text>{{topHint}}</text>
+  </view>
+
   <!-- 帆船飘出的小提示：亮20秒→无人点静默60秒→换下一条 -->
   <view class="boat-bubble" wx:if="{{bubbleShow && (birthYear || birthSkipped) && !recording && !preview}}"
     style="left:{{bbLeft}}px;top:{{bbTop}}px" bindtap="onBubbleTap">

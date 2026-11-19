@@ -42,7 +42,7 @@ Page({
     // 生日引导：鲸鱼气泡+回答建议（称呼在杭航菜单设置）
     birthSkipped: false, birthOther: false, birthOtherVal: '', birthIdx: 40,
     bbLeft: 24, bbTop: 200, bbTail: 180, boatLeft: 160, boatTop: 420,
-    bubbleShow: false, bubbleText: '',
+    bubbleShow: false, bubbleText: '', topHint: '',
     greetTitle: '晚上好', greetBody: '今天想聊哪一段？按住下面慢慢说，我听着。', boatBottom: 200,
     birthYears: (() => { const a = []; for (let y = 2010; y >= 1920; y--) a.push(y + '年'); return a })()
   },
@@ -61,6 +61,8 @@ Page({
     })
     if (query && query.edit) this.loadForEdit(query.edit)
     wx.authorize({ scope: 'scope.record' }).catch(() => {})   // 进页即申请麦克风，不等按住
+    const th = getApp().globalData.topHint
+    if (th) { getApp().globalData.topHint = ''; this.showTopHint(th) }
     this.scheduleBubble(20000)
   },
 
@@ -579,6 +581,12 @@ Page({
     this.setData({ bubbleShow: false })
   },
   onBubbleTap () { this.hideBubble(); this.scheduleBubble(60000) },
+  // 顶端略小提示（删除回执等），4秒自动消
+  showTopHint (t) {
+    if (this._thTimer) clearTimeout(this._thTimer)
+    this.setData({ topHint: t })
+    this._thTimer = setTimeout(() => this.setData({ topHint: '' }), 4000)
+  },
   // 船+气泡固定视口并夹在画面内（不撞边），气泡尾指船
   updateBubble () {
     const info = sea.windowSize()
@@ -969,7 +977,7 @@ Page({
       draft.forgetPath(p.wavPath)
       this.setData({ preview: null, drafts: draft.list() })
     this.hideBubble(); this.scheduleBubble(20000)
-      ui.toast('删除了，在"删除的记忆"里5天内可找回', 2400)
+      this.showTopHint('删除了，在"删除的记忆"里5天可以找回')
       this.refreshData()
     } catch (e) {
       draft.save({ wavPath: p.wavPath, text: p.text, reason: '删除失败' })
