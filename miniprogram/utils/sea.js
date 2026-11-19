@@ -99,24 +99,28 @@ function layoutMilestones (regions) {
   })
 }
 
-// 水平夜海·山=回忆：高度∝留言量；新=红 → 久=深蓝（矢量 CSS 形状，可缩放）
+// 水平夜海·雪山=回忆：高度∝留言量；颜色按天数：今天=红 → 1~5天 浅蓝→深蓝 渐变沉淀
 function lerp (a, b, t) { return Math.round(a + (b - a) * t) }
-function mountainColor (t) {
-  const R = [232, 64, 42], B = [27, 42, 107]
-  return '#' + [0, 1, 2].map((i) => lerp(R[i], B[i], t).toString(16).padStart(2, '0')).join('')
+function hex2rgb (h) { return [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)] }
+function lerpHex (h1, h2, t) {
+  const a = hex2rgb(h1), b = hex2rgb(h2)
+  return '#' + [0, 1, 2].map((i) => lerp(a[i], b[i], t).toString(16).padStart(2, '0')).join('')
+}
+function mountainColor (createdAt) {
+  const days = Math.floor((Date.now() - (createdAt || Date.now())) / 86400000)
+  if (days <= 0) return '#F94830'                      // 今天最新=红
+  const t = Math.min(1, (days - 1) / 4)               // 1天浅蓝 → 5天最深蓝
+  return lerpHex('#09A8F1', '#05267A', t)
 }
 function layoutMountains (icebergs, H) {
   const list = (icebergs || []).slice().sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0))  // 左=年轻 右=久远
-  const n = list.length
   return list.map((b, i) => {
     const len = (b.text || '').length
     const height = Math.round(140 + Math.min(320, len * 1.2))
-    const t = n <= 1 ? 0 : i / (n - 1)
     return {
-      id: b._id, left: 60 + i * 180, width: 150, height,
+      id: b._id, left: 60 + i * 260, width: 150, height,
       bottom: Math.round(H * 0.30) + (i % 3) * 24,
-      color: mountainColor(t),
-      flag: !!(b.createdAt && Date.now() - b.createdAt < 5 * 60 * 1000)
+      color: mountainColor(b.createdAt)
     }
   })
 }

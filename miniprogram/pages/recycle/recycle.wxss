@@ -17,8 +17,8 @@
   display: flex; flex-direction: column; align-items: stretch; gap: 20rpx;
   background: var(--c-card); border-radius: var(--radius-lg);
   padding: 32rpx 28rpx; margin-bottom: 24rpx;
-  border: 2rpx solid rgba(31, 100, 120, 0.06);
-  box-shadow: 0 6rpx 24rpx rgba(31, 100, 120, 0.10);
+  border: 2rpx solid rgba(9, 8, 86, 0.06);
+  box-shadow: 0 6rpx 24rpx rgba(9, 8, 86, 0.10);
 }
 .cloud-top { display: flex; align-items: center; gap: 20rpx; }
 .cloud-img { width: 120rpx; height: 88rpx; flex-shrink: 0; }

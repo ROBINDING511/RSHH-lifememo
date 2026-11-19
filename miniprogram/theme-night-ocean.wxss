@@ -1,0 +1,163 @@
+/* ==========================================================================
+   人生海海 · 夜海主题 v2 (night-hero + warm-paper conversation)
+   视觉分区:
+     A 主界面头图 = 夜晚小船插画(小船/海/雪山云板块), 夜色仅存在于头图区;
+     B 问候卡 = 奶油黄(#FDDAAC) 保留;
+     C 交流/阅读界面 = 暖白简单干净, 墨蓝文字, 不再大面积蓝底。
+   来源: assets/boat_night.svg/.png (c4 定稿); 插画色板锚定 style_spec(未改)。
+   暖白为产品决定的 UI 表面色(插画本身不变)。
+   约束: 正文>=34rpx / 阅读>=48rpx / 触控>=88rpx / 行高1.9 / AA / 减少动态。
+   ========================================================================== */
+
+page {
+  /* ---- C 区: 暖白交流界面 ---- */
+  --c-bg:        #FBF7EF;  /* 暖白页底 */
+  --c-surface:   #FFFCF6;  /* 暖白卡片 */
+  --c-surface-2: #F4EDE0;  /* 暖沙次级面/状态条 */
+  --c-text:      #090856;  /* 墨蓝正文(夜紫) */
+  --c-text-soft: rgba(9,8,86,0.72);
+  --c-text-faint:rgba(9,8,86,0.45);  /* 留白灰字 */
+  --c-primary:   #053091;  /* 夜蓝=主行动(暖白底上) */
+  --c-on-primary:#FDDAAC;  /* 奶油字 on 夜蓝 */
+  --c-primary-soft: rgba(5,48,145,0.08);
+  --c-accent:    #0363D5;  /* 大蓝云=链接/方言标(暖白上保 AA) */
+  --c-accent-soft: rgba(3,99,213,0.10);
+  --c-warm:      #F76755;  /* 暖红点缀 */
+  --c-danger:    #F94830;
+  --c-danger-soft: rgba(249,72,48,0.10);
+  --c-on-danger: #090856;
+  --c-moon:      #FBD3A3;
+  --c-line:      rgba(9,8,86,0.14);
+  --c-shadow:    rgba(9,8,86,0.10);
+
+  /* ---- A/B 区: 夜色头图 + 奶油问候卡 ---- */
+  --n-bg:      #030635;
+  --n-surface: #053091;
+  --n-text:    #F4D7B2;
+  --n-greet:   #FDDAAC;   /* 问候卡奶油黄(保留) */
+  --n-on-greet:#090856;
+
+  /* ---- 造型: 云 slab 拱顶平底 ---- */
+  --r-card: 44rpx 44rpx 12rpx 12rpx;
+  --r-pill: 999rpx;
+  --r-sheet: 44rpx 44rpx 0 0;
+
+  /* ---- 字阶/行高/触控 ---- */
+  --fs-cap: 28rpx; --fs-body: 34rpx; --fs-title: 44rpx; --fs-read: 48rpx;
+  --lh: 1.9; --touch: 88rpx;
+  --sp-1: 8rpx; --sp-2: 16rpx; --sp-3: 24rpx; --sp-4: 32rpx; --sp-5: 48rpx;
+
+  /* ---- 纹理: 仅头图用夜纹; 暖白区极轻纸纹 ---- */
+  --grain: none;
+  --sky-brush: none;
+}
+
+/* 页面默认底=暖白: 即使根节点漏加 .page-ocean / app.json 仍为夜色, 也不露蓝底 */
+page { background: var(--c-bg); }
+
+/* ---- C 区页面: 暖白干净底, 极轻纸纹垫底 ---- */
+.page-ocean {
+  min-height: 100vh; background: var(--c-bg);
+  color: var(--c-text); font-size: var(--fs-body); line-height: var(--lh);
+  position: relative;
+}
+
+
+
+/* ---- A 区头图: 小船+海+雪山 作为主界面 ---- */
+.hero-ocean { position: relative; background: var(--n-bg); overflow: hidden; }
+.hero-ocean .night-hero { width: 100%; display: block; }
+
+
+/* ---- B 区问候卡: 奶油黄保留, 叠在头图下缘 ---- */
+.card-greet {
+  position: relative; margin: -60rpx var(--sp-3) var(--sp-3);
+  background: var(--n-greet); color: var(--n-on-greet);
+  border-radius: var(--r-card); padding: var(--sp-4);
+  box-shadow: 0 10rpx 30rpx var(--c-shadow);
+}
+.card-greet .card-title { color: var(--n-on-greet); }
+.card-greet .card-body  { color: var(--n-on-greet); }
+
+/* ---- C 区卡片: 暖白简单干净 ---- */
+.card-night {
+  position: relative; overflow: hidden;
+  background: var(--c-surface); color: var(--c-text);
+  border-radius: var(--r-card);
+  padding: var(--sp-4); margin: var(--sp-3);
+  box-shadow: 0 6rpx 20rpx var(--c-shadow);
+}
+
+
+.card-night--sand { background: var(--c-surface-2); }
+.card-night--moon { background: var(--n-greet); color: var(--n-on-greet); }
+.card-night--moon .card-title, .card-night--moon .card-body { color: var(--n-on-greet); }
+
+.card-title { font-size: var(--fs-title); font-weight: 700; color: var(--c-primary); margin-bottom: var(--sp-2); }
+.card-body  { font-size: var(--fs-body); color: var(--c-text); }
+.card-cap   { font-size: var(--fs-cap); color: var(--c-text-soft); }
+
+/* ---- 按钮: 夜蓝底奶油字 / 暖白描边 / 红底墨字 ---- */
+.btn-night {
+  min-height: var(--touch); min-width: var(--touch);
+  display:flex; align-items:center; justify-content:center;
+  padding: 0 var(--sp-5); border:none; border-radius: var(--r-pill);
+  background: var(--c-primary); color: var(--c-on-primary);
+  font-size: var(--fs-body); font-weight: 700; line-height: 1.4;
+  transition: transform .12s ease, opacity .12s ease;
+}
+.btn-night::after { border: none; }
+.btn-night.btn-hover { transform: scale(.97); opacity: .9; }
+.btn-night--ghost { background: transparent; color: var(--c-text); border: 2rpx solid var(--c-line); }
+.btn-night--danger { background: var(--c-danger); color: var(--c-on-danger); }
+.btn-night--accent { background: var(--c-accent); color: #FFFCF6; }
+.btn-night--block { width: 100%; }
+
+
+/* ---- 标签/方言/疑点/留白 (暖白上) ---- */
+.tag-night {
+  display:inline-flex; align-items:center; min-height:56rpx;
+  padding: 0 var(--sp-3); border-radius: var(--r-pill);
+  background: var(--c-primary-soft); color: var(--c-text); font-size: var(--fs-cap);
+}
+.tag-night--dialect { background: var(--c-accent-soft); color: var(--c-accent); }
+.tag-night--warm { background: var(--c-warm); color: #FFFCF6; }
+.doubt-night {
+  color: var(--c-text); background: var(--c-danger-soft);
+  text-decoration: underline; text-decoration-color: var(--c-danger);
+  text-underline-offset: 6rpx; text-decoration-thickness: 4rpx;
+  padding: var(--sp-2) var(--sp-1); border-radius: 12rpx;
+}
+
+.blank-night { color: var(--c-text-faint); }
+
+/* ---- 字幕/半屏/翻书/导航 (暖白干净); .status-night 为可选(产品已确认默认不显示) ---- */
+.status-night {
+  display:flex; align-items:center; min-height: var(--touch);
+  padding: 0 var(--sp-4); margin: var(--sp-3);
+  border-radius: var(--r-card);
+  background: var(--c-surface-2); color: var(--c-text); font-size: var(--fs-body);
+}
+.subtitle-night {
+  background: var(--c-surface); border: 2rpx solid var(--c-line); border-radius: 24rpx;
+  padding: var(--sp-3) var(--sp-4);
+  font-size: var(--fs-read); line-height: var(--lh); color: var(--c-text);
+}
+.sheet-night {
+  background: var(--c-surface); border-radius: var(--r-sheet);
+  padding: var(--sp-4) var(--sp-4) calc(var(--sp-4) + env(safe-area-inset-bottom));
+  color: var(--c-text);
+}
+.book-night {
+  background: var(--c-surface); border-radius: var(--r-card);
+  padding: var(--sp-5) var(--sp-4);
+  font-size: var(--fs-read); line-height: var(--lh); color: var(--c-text);
+  min-height: 60vh; box-shadow: 0 6rpx 20rpx var(--c-shadow);
+}
+.nav-night { background: var(--c-bg); color: var(--c-text); }
+.tabbar-night { background: var(--c-surface); border-top: 2rpx solid var(--c-line); color: var(--c-text-soft); }
+.tabbar-night .active { color: var(--c-primary); }
+
+@media (prefers-reduced-motion: reduce) {
+  .btn-night, .card-night, .book-night { transition: none !important; animation: none !important; }
+}

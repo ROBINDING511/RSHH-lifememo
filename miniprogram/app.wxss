@@ -1,141 +1,232 @@
-/* finesse · register=h5 · morph=A-app-shell · A=warm-paper+teal · B=400/500 · C=bottom-thumb+sheet
- * D=CSS-only · E=watercolor-sea · SOUL=6 SPECTACLE=2 DENSITY=4 · unslop+brief aligned
- * app.wxss — 全局设计系统（unslop _redesign 分支）
- * 方向：安静、温暖、不催促。世界=水彩纸与海。
- * 铬件（导航/按钮/卡片/文字）全部安静纸面 + 单一墨青强调；
- * 富色只留在唯一的内容时刻——ocean 的日落水彩海与鲸鱼。
- * 暖中性阶（warm ramp）+ 发丝描边 + 中性微阴影；无 hue 渐变/无彩 glow/无 emoji。
- * 适老化保留：正文≥34rpx、触控≥88rpx、字重 400/500。
- * unslop by @heydamir (CC BY 4.0) 方法适配。
+/* app.wxss — 夜海主题 v2（drop-in handoff）+ 旧类名映射
+ * 三分区: A 头图夜色(仅海洋背景) / B 问候奶油黄 / C 交流暖白干净。
+ * 页面旧类名(.card/.btn-primary/...)在此映射到夜海造型，整站换肤。
  */
+/* 夜海主题类内联（@import 在真机/模拟器有兼容问题，改内联） */
+
 page {
-  /* ---- 暖中性阶（纸）---- */
-  --c-bg: #F7F4EE;             /* 页面底 */
-  --c-card: #FDFBF7;           /* 卡片 */
-  --c-soft: #EFE9DF;           /* raised：输入/次按钮/active */
-  --hairline: rgba(31, 27, 22, 0.08);  /* 发丝描边 = 主文字 8% */
+  /* ---- C 区: 暖白交流界面 ---- */
+  --c-bg:        #FBF7EF;  /* 暖白页底 */
+  --c-surface:   #FFFCF6;  /* 暖白卡片 */
+  --c-surface-2: #F4EDE0;  /* 暖沙次级面/状态条 */
+  --c-text:      #090856;  /* 墨蓝正文(夜紫) */
+  --c-text-soft: rgba(9,8,86,0.72);
+  --c-text-faint:rgba(9,8,86,0.45);  /* 留白灰字 */
+  --c-primary:   #053091;  /* 夜蓝=主行动(暖白底上) */
+  --c-on-primary:#FDDAAC;  /* 奶油字 on 夜蓝 */
+  --c-primary-soft: rgba(5,48,145,0.08);
+  --c-accent:    #0363D5;  /* 大蓝云=链接/方言标(暖白上保 AA) */
+  --c-accent-soft: rgba(3,99,213,0.10);
+  --c-warm:      #F76755;  /* 暖红点缀 */
+  --c-danger:    #F94830;
+  --c-danger-soft: rgba(249,72,48,0.10);
+  --c-on-danger: #090856;
+  --c-moon:      #FBD3A3;
+  --c-line:      rgba(9,8,86,0.14);
+  --c-shadow:    rgba(9,8,86,0.10);
 
-  /* ---- 单一强调（海青，世界=水）---- */
-  --c-primary: #1F6478;        /* 白字 6.66:1 */
-  --c-primary-deep: #17505F;   /* 按压 */
-  --c-primary-soft: #E3EEEF;   /* 强调浅底（选中） */
-  --c-on-primary: #FFFFFF;
+  /* ---- A/B 区: 夜色头图 + 奶油问候卡 ---- */
+  --n-bg:      #030635;
+  --n-surface: #053091;
+  --n-text:    #F4D7B2;
+  --n-greet:   #FDDAAC;   /* 问候卡奶油黄(保留) */
+  --n-on-greet:#090856;
 
-  /* ---- 文字三档 ---- */
-  --c-text: #1F1B16;           /* 主 */
-  --c-text-2: #5E554A;         /* 次 */
-  --c-muted: #7B7266;          /* 弱（仅 meta） */
+  /* ---- 造型: 云 slab 拱顶平底 ---- */
+  --r-card: 44rpx 44rpx 12rpx 12rpx;
+  --r-pill: 999rpx;
+  --r-sheet: 44rpx 44rpx 0 0;
 
-  /* ---- 语义（ toned ）---- */
-  --c-danger: #B3402F;
-  --c-danger-soft: #F7E8E4;
-  --c-countdown: #B3261E;
+  /* ---- 字阶/行高/触控 ---- */
+  --fs-cap: 28rpx; --fs-body: 34rpx; --fs-title: 44rpx; --fs-read: 48rpx;
+  --lh: 1.9; --touch: 88rpx;
+  --sp-1: 8rpx; --sp-2: 16rpx; --sp-3: 24rpx; --sp-4: 32rpx; --sp-5: 48rpx;
 
-  /* ---- 兼容旧引用 ---- */
-  --c-sand: #E8DCC8;
-  --c-teal-wash: #E2EDEB;
-  --sea-warm-rgb: 255, 243, 214;
-  --sea-deep-rgb: 20, 56, 76;
-  --caustic-rgb: 255, 249, 230;
-  --hint-cap-rgb: 16, 48, 66;
-  --ripple-rgb: 255, 255, 255;
-  --c-bird: #26404F;
-  --sea-0: #C9E7ED; --sea-1: #ACD7DF; --sea-2: #8CBFCC; --sea-3: #6FA6B8;
-  --sea-4: #548EA4; --sea-5: #417C95; --sea-6: #387089;
+  /* ---- 纹理: 仅头图用夜纹; 暖白区极轻纸纹 ---- */
+  --grain: none;
+  --sky-brush: none;
+}
 
-  /* ---- 字号（适老阶梯）---- */
-  --fs-xs: 30rpx;
+page {
+  /* 旧圆角名 → 夜海造型 */
+  --radius-md: 24rpx;
+  --radius-lg: 44rpx 44rpx 12rpx 12rpx;
+  --radius-xl: 44rpx 44rpx 0 0;
+  /* 旧字号名 → 夜海字阶 */
+  --fs-xs: 28rpx;
   --fs-sm: 30rpx;
   --fs-md: 34rpx;
   --fs-lg: 36rpx;
-  --fs-xl: 40rpx;
+  --fs-xl: 44rpx;
   --fs-xxl: 48rpx;
-
-  /* ---- 触控 ---- */
   --tap-min: 88rpx;
   --tap-comfortable: 96rpx;
-
-  /* ---- 间距（8rpx=4px 网格）---- */
-  --sp-1: 8rpx;
-  --sp-2: 16rpx;
-  --sp-3: 24rpx;
-  --sp-4: 32rpx;
-  --sp-5: 40rpx;
-
-  /* ---- 圆角（控制10px/卡片12px/面板16px，非全 pill）---- */
-  --radius-md: 20rpx;
-  --radius-lg: 24rpx;
-  --radius-xl: 32rpx;
-
+  --c-card: var(--c-surface);
+  --c-soft: var(--c-surface-2);
+  --c-text-2: var(--c-text-soft);
+  --c-muted: var(--c-text-faint);
+  --c-danger-soft: rgba(249, 72, 48, 0.10);
+  --c-primary-deep: #04266F;
+  --hairline: var(--c-line);
   background: var(--c-bg);
-  font-family: -apple-system, 'PingFang SC', 'Helvetica Neue', sans-serif;
-  font-size: var(--fs-md);
   color: var(--c-text);
-  line-height: 1.8;
-  letter-spacing: 0;
-  -webkit-tap-highlight-color: transparent;   /* h5 触摸法则：去掉点按灰闪 */
+  font-size: var(--fs-md);
+  line-height: 1.9;
 }
-view, button, input, textarea { -webkit-tap-highlight-color: transparent; }
 
-/* 子页面底：安静纸面（去掉彩色渐变 wash） */
+/* 旧根类 → 暖白干净 */
+.page { min-height: 100vh; background: var(--c-bg); color: var(--c-text); position: relative; }
 .wash-bg { background: var(--c-bg); }
 
-/* ============ 按钮：实心强调 / raised+发丝 / 语义软底 ============ */
+/* 旧卡片 → 夜海暖白卡 */
+.card {
+  background: var(--c-surface); color: var(--c-text);
+  border-radius: var(--r-card); padding: var(--sp-4); margin: var(--sp-3);
+  box-shadow: 0 6rpx 20rpx var(--c-shadow);
+  border: none;
+}
+
+/* 旧按钮 → 夜海按钮 */
 .btn-primary {
   display: flex; align-items: center; justify-content: center;
-  background: var(--c-primary);
-  color: var(--c-on-primary);
-  border-radius: var(--radius-md);
-  font-size: var(--fs-lg);
-  height: 96rpx;
-  line-height: 1;
-  font-weight: 500;
-  letter-spacing: 0;
+  min-height: var(--touch); padding: 0 var(--sp-5);
+  background: var(--c-primary); color: var(--c-on-primary);
+  border-radius: var(--r-pill); font-size: var(--fs-md); font-weight: 700; line-height: 1.4;
+  border: none;
 }
 .btn-primary::after { border: none; }
-.btn-primary { transition: transform 0.12s cubic-bezier(0.22, 1, 0.36, 1), background-color 0.12s; }
-.btn-primary.btn-hover { background: var(--c-primary-deep); transform: scale(0.97); }
-
+.btn-primary.btn-hover { transform: scale(.97); opacity: .9; }
 .btn-ghost {
   display: flex; align-items: center; justify-content: center;
-  background: var(--c-soft);
-  border: 2rpx solid var(--hairline);
-  color: var(--c-text);
-  border-radius: var(--radius-md);
-  font-size: var(--fs-md);
-  height: 88rpx;
-  line-height: 1;
-  font-weight: 500;
-  box-sizing: border-box;
+  min-height: var(--touch); padding: 0 var(--sp-5);
+  background: transparent; color: var(--c-text);
+  border: 2rpx solid var(--c-line); border-radius: var(--r-pill);
+  font-size: var(--fs-md); font-weight: 500; line-height: 1.4; box-sizing: border-box;
 }
 .btn-ghost::after { border: none; }
-.btn-ghost { transition: transform 0.12s cubic-bezier(0.22, 1, 0.36, 1), background-color 0.12s; }
-.btn-ghost.btn-hover { background: #E7E0D4; transform: scale(0.97); }
+.btn-ghost.btn-hover { background: var(--c-primary-soft); transform: scale(.97); }
+.btn-danger-ghost { background: var(--c-danger-soft); border-color: transparent; color: var(--c-danger); }
+.btn-danger-ghost.btn-hover { background: var(--c-danger); color: var(--c-on-danger); }
 
-.btn-danger-ghost { background: var(--c-danger-soft); border-color: rgba(179, 64, 47, 0.16); color: var(--c-danger); }
-.btn-danger-ghost.btn-hover { background: #F2DED8; transform: scale(0.98); }
-
-/* ============ 纸卡片：发丝描边 + 中性微阴影 ============ */
-.card {
-  background: var(--c-card);
-  border-radius: var(--radius-lg);
-  padding: var(--sp-5);
-  border: 2rpx solid var(--hairline);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-}
-
-.text-secondary { color: var(--c-text-2); font-size: var(--fs-sm); }
+.text-secondary { color: var(--c-text-soft); font-size: var(--fs-sm); }
 .text-large { font-size: var(--fs-lg); line-height: 1.7; }
 .flex1 { flex: 1; }
-
 .safe-bottom { padding-bottom: calc(env(safe-area-inset-bottom) + 24rpx); }
 
-/* ============ 克制入场：仅一次 fade+rise，小 stagger（无 spring）============ */
-@keyframes enterRise { from { opacity: 0; transform: translateY(12rpx); } to { opacity: 1; transform: none; } }
-.enter { animation: enterRise 0.3s cubic-bezier(0.22, 1, 0.36, 1) both; }
-/* 详情转场：背景淡入 + 容器微缩放上升（简化共享元素） */
-@keyframes detailIn { from { opacity: 0; transform: translateY(16rpx) scale(0.98); } to { opacity: 1; transform: none; } }
-.detail-enter { animation: detailIn 0.3s cubic-bezier(0.22, 1, 0.36, 1) both; }
+/* 标题/副标题 */
+.head { padding: 40rpx 32rpx 24rpx; }
+.title { display: block; font-size: var(--fs-xl); font-weight: 700; color: var(--c-primary); }
+.sub { display: block; margin-top: 12rpx; font-size: var(--fs-sm); color: var(--c-text-soft); line-height: 1.7; }
+/* 列表入场 */
+.enter { animation: enterIn .4s ease both; }
+@keyframes enterIn { from { opacity: 0; transform: translateY(16rpx); } to { opacity: 1; transform: none; } }
+
+/* 页面默认底=暖白: 即使根节点漏加 .page-ocean / app.json 仍为夜色, 也不露蓝底 */
+page { background: var(--c-bg); }
+
+/* ---- C 区页面: 暖白干净底, 极轻纸纹垫底 ---- */
+.page-ocean {
+  min-height: 100vh; background: var(--c-bg);
+  color: var(--c-text); font-size: var(--fs-body); line-height: var(--lh);
+  position: relative;
+}
+
+
+
+/* ---- A 区头图: 小船+海+雪山 作为主界面 ---- */
+.hero-ocean { position: relative; background: var(--n-bg); overflow: hidden; }
+.hero-ocean .night-hero { width: 100%; display: block; }
+
+
+/* ---- B 区问候卡: 奶油黄保留, 叠在头图下缘 ---- */
+.card-greet {
+  position: relative; margin: -60rpx var(--sp-3) var(--sp-3);
+  background: var(--n-greet); color: var(--n-on-greet);
+  border-radius: var(--r-card); padding: var(--sp-4);
+  box-shadow: 0 10rpx 30rpx var(--c-shadow);
+}
+.card-greet .card-title { color: var(--n-on-greet); }
+.card-greet .card-body  { color: var(--n-on-greet); }
+
+/* ---- C 区卡片: 暖白简单干净 ---- */
+.card-night {
+  position: relative; overflow: hidden;
+  background: var(--c-surface); color: var(--c-text);
+  border-radius: var(--r-card);
+  padding: var(--sp-4); margin: var(--sp-3);
+  box-shadow: 0 6rpx 20rpx var(--c-shadow);
+}
+
+
+.card-night--sand { background: var(--c-surface-2); }
+.card-night--moon { background: var(--n-greet); color: var(--n-on-greet); }
+.card-night--moon .card-title, .card-night--moon .card-body { color: var(--n-on-greet); }
+
+.card-title { font-size: var(--fs-title); font-weight: 700; color: var(--c-primary); margin-bottom: var(--sp-2); }
+.card-body  { font-size: var(--fs-body); color: var(--c-text); }
+.card-cap   { font-size: var(--fs-cap); color: var(--c-text-soft); }
+
+/* ---- 按钮: 夜蓝底奶油字 / 暖白描边 / 红底墨字 ---- */
+.btn-night {
+  min-height: var(--touch); min-width: var(--touch);
+  display:flex; align-items:center; justify-content:center;
+  padding: 0 var(--sp-5); border:none; border-radius: var(--r-pill);
+  background: var(--c-primary); color: var(--c-on-primary);
+  font-size: var(--fs-body); font-weight: 700; line-height: 1.4;
+  transition: transform .12s ease, opacity .12s ease;
+}
+.btn-night::after { border: none; }
+.btn-night.btn-hover { transform: scale(.97); opacity: .9; }
+.btn-night--ghost { background: transparent; color: var(--c-text); border: 2rpx solid var(--c-line); }
+.btn-night--danger { background: var(--c-danger); color: var(--c-on-danger); }
+.btn-night--accent { background: var(--c-accent); color: #FFFCF6; }
+.btn-night--block { width: 100%; }
+
+
+/* ---- 标签/方言/疑点/留白 (暖白上) ---- */
+.tag-night {
+  display:inline-flex; align-items:center; min-height:56rpx;
+  padding: 0 var(--sp-3); border-radius: var(--r-pill);
+  background: var(--c-primary-soft); color: var(--c-text); font-size: var(--fs-cap);
+}
+.tag-night--dialect { background: var(--c-accent-soft); color: var(--c-accent); }
+.tag-night--warm { background: var(--c-warm); color: #FFFCF6; }
+.doubt-night {
+  color: var(--c-text); background: var(--c-danger-soft);
+  text-decoration: underline; text-decoration-color: var(--c-danger);
+  text-underline-offset: 6rpx; text-decoration-thickness: 4rpx;
+  padding: var(--sp-2) var(--sp-1); border-radius: 12rpx;
+}
+
+.blank-night { color: var(--c-text-faint); }
+
+/* ---- 字幕/半屏/翻书/导航 (暖白干净); .status-night 为可选(产品已确认默认不显示) ---- */
+.status-night {
+  display:flex; align-items:center; min-height: var(--touch);
+  padding: 0 var(--sp-4); margin: var(--sp-3);
+  border-radius: var(--r-card);
+  background: var(--c-surface-2); color: var(--c-text); font-size: var(--fs-body);
+}
+.subtitle-night {
+  background: var(--c-surface); border: 2rpx solid var(--c-line); border-radius: 24rpx;
+  padding: var(--sp-3) var(--sp-4);
+  font-size: var(--fs-read); line-height: var(--lh); color: var(--c-text);
+}
+.sheet-night {
+  background: var(--c-surface); border-radius: var(--r-sheet);
+  padding: var(--sp-4) var(--sp-4) calc(var(--sp-4) + env(safe-area-inset-bottom));
+  color: var(--c-text);
+}
+.book-night {
+  background: var(--c-surface); border-radius: var(--r-card);
+  padding: var(--sp-5) var(--sp-4);
+  font-size: var(--fs-read); line-height: var(--lh); color: var(--c-text);
+  min-height: 60vh; box-shadow: 0 6rpx 20rpx var(--c-shadow);
+}
+.nav-night { background: var(--c-bg); color: var(--c-text); }
+.tabbar-night { background: var(--c-surface); border-top: 2rpx solid var(--c-line); color: var(--c-text-soft); }
+.tabbar-night .active { color: var(--c-primary); }
+
 @media (prefers-reduced-motion: reduce) {
-  .enter, .detail-enter { animation: none !important; }
+  .btn-night, .card-night, .book-night { transition: none !important; animation: none !important; }
 }

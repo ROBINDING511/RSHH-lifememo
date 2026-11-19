@@ -41,6 +41,7 @@ Page({
     previewStatus: '', previewEmotion: false,
     // 生日引导：鲸鱼气泡+回答建议（称呼在杭航菜单设置）
     birthSkipped: false, birthOther: false, birthOtherVal: '',
+    greetTitle: '晚上好', greetBody: '今天想聊哪一段？按住下面慢慢说，我听着。', boatBottom: 200,
     birthYears: (() => { const a = []; for (let y = 2010; y >= 1920; y--) a.push(y + '年'); return a })()
   },
 
@@ -75,7 +76,6 @@ Page({
       this.setData({ milestones: sea.layoutMilestones(this._regions || life.getStages()) })
     }
     this.setData({ birthYear: life.getBirthYear(), drafts: draft.list(), whalePaused: false })
-    if (!this.data.recConsent) this.askConsent()   // C 门控放在进页时，按住说话手势不被弹窗打断
     this.refreshData()
     this.refreshPrompt()
     this.refreshToday()
@@ -201,7 +201,7 @@ Page({
     // 水平滚轴世界：宽随回忆数增长，高=视口；左=年轻 右=久远
     const info = sea.windowSize()
     const n = Math.max(1, (this._icebergs || []).length)
-    const W = Math.max(info.W, n * 180 + 400)
+    const W = Math.max(info.W, n * 260 + 400)
     const H = info.H
     this._world = { worldWidth: W, worldHeight: H }
     this._regions = []
@@ -210,10 +210,13 @@ Page({
       const px = this._movX != null ? this._movX : this.data.movX
       mx = Math.max(-(W - info.W), Math.min(0, px))
     }
+    // 小船落在雪山之间的海上（不压山）
+    const m = this._mountains || []
+    const boatX = m.length >= 2 ? m[0].left + m[0].width + 10
+      : m.length === 1 ? m[0].left + m[0].width + 10 : 160
     this.setData({
       worldWidth: W, worldHeight: H, movX: mx, movY: 0,
-      seaScale: this._scale || 1,   // 重应用用户视角，绝不自动重置
-      boatX: Math.round(W * 0.55)
+      boatX, boatBottom: Math.round(H * 0.24)
     })
   },
 
@@ -228,7 +231,12 @@ Page({
     this._icebergs = icebergs
     const mountains = sea.layoutMountains(icebergs, sea.windowSize().H)
     this._mountains = mountains
-    this.setData({ icebergCount: icebergs.length, mountains })
+    const nick = life.getNickname()
+    this.setData({
+      icebergCount: icebergs.length, mountains,
+      greetTitle: nick ? `${nick}，想聊哪一段？` : '晚上好',
+      greetBody: icebergs.length ? '今天想聊哪一段？按住下面慢慢说，我听着。' : '海还空着。按住说一段，第一座雪山就落下来。'
+    })
     this.setupWorld(true)
   },
 
