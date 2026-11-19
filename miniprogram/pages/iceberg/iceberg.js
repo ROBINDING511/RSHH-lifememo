@@ -36,6 +36,25 @@ Page({
   },
   onShow () {
     this.load()
+  },
+  onTitleInput (e) { this.setData({ 'b.title': e.detail.value }) },
+  async saveTitle () {
+    const t = (this.data.b.title || '').trim()
+    if (!t || t === this._lastTitle) return
+    this._lastTitle = t
+    try { await api.updateIceberg(this.id, { title: t }) } catch (e) {}
+  },
+  async pickSea () {
+    const stages = life.getStages()
+    const names = stages.map((x) => x.name + '之海')
+    const r = await new Promise((res) => wx.showActionSheet({ itemList: names, success: (x) => res(x.tapIndex), fail: () => res(-1) }))
+    if (r < 0) return
+    const zone = stages[r].name
+    try {
+      await api.updateIceberg(this.id, { zoneName: zone })
+      this.setData({ 'b.zoneName': zone })
+      wx.showToast({ title: '已移到' + zone + '之海', icon: 'none' })
+    } catch (e) { wx.showToast({ title: '网络不太好，再试一次', icon: 'none' }) }
     const n = Number(wx.getStorageSync('view_' + this.id) || 0)
     wx.setStorageSync('view_' + this.id, n + 1)
     this.setData({ viewCount: n + 1 })
@@ -48,6 +67,7 @@ Page({
   },
 
   async load () {
+    this._lastTitle = null
     this.stopAudio()
     this._audioLocal = null
     wx.showLoading({ title: '正在打开…', mask: true })

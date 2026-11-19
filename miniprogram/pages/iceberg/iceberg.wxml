@@ -8,12 +8,15 @@
 <view class="page wash-bg detail-enter" wx:if="{{b}}">
   <view class="berg-head card">
     <view class="berg-head-row">
-      <image class="berg-icon" wx:if="{{iconFile}}" src="{{iconFile}}" mode="aspectFit" />
-      <view class="berg-titles">
-        <text class="berg-title">{{b.title}}</text>
-        <text class="berg-meta">{{b.memoryTime}} · {{b.zoneName}}之海</text>
+      <input class="berg-title-input" value="{{b.title}}" maxlength="12"
+        bindinput="onTitleInput" bindblur="saveTitle" />
+      <view class="sea-badge" hover-class="btn-hover" hover-stay-time="80" bindtap="pickSea">
+        <view class="sea-glyph"></view>
+        <text class="sea-name">{{b.zoneName}}之海</text>
+        <text class="sea-arrow">›</text>
       </view>
     </view>
+    <text class="berg-meta" wx:if="{{timeLabel}}">{{timeLabel}}</text>
   </view>
 
   <view class="berg-body card">
