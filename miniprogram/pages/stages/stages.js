@@ -180,7 +180,8 @@ Page({
     const b = e.detail.value
     if (!b) return
     life.setProfile(Object.assign({}, life.getProfile() || {}, { mode: 'birthday', birthday: b }))
-    this.setData({ profileBirthday: b, ageDisplay: this.fmtAge(life.getProfile()) })
+    this.setData({ profileBirthday: b, ageDisplay: this.fmtAge(life.getProfile()), milestones: life.getMilestones() })
+    this.syncDraft()   // 生日填好后岁数自动换算，海边界同步
     wx.showToast({ title: '记好了，' + b, icon: 'none' })
   },
 
@@ -285,7 +286,6 @@ Page({
     this.setData({ voiceText: text })
     if (!text || !text.trim()) return wx.showToast({ title: '没听清，按住再说一次', icon: 'none' })
     const by = life.getBirthYear()
-    if (!by) return wx.showToast({ title: '先在"关于我"填出生年月，才能换算成岁', icon: 'none', duration: 2600 })
     wx.showLoading({ title: '正在听懂您的节点…', mask: true })
     let nodes = []
     try {
@@ -304,17 +304,18 @@ Page({
       const year = parseInt(n.year, 10)
       const name = String(n.name || '').trim().slice(0, 8)
       if (!name || !isFinite(year)) return
-      const age = year - by
-      if (age < 0 || age > 120) return
-      const key = name + '@' + age
+      const age = by != null ? year - by : null
+      if (age != null && (age < 0 || age > 120)) return
+      const key = name + '@' + year
       if (seen[key]) return
       seen[key] = 1
-      life.addMilestone(name, age)
+      life.addMilestone(name, age, year)
       added++
     })
     this.setData({ milestones: life.getMilestones() })
     this.syncDraft()
     wx.showToast({ title: added ? '听懂了，填好' + added + '个节点' : '这些节点已经有了', icon: 'none', duration: 2400 })
+    if (added && by == null) setTimeout(() => wx.showToast({ title: '方便的话在"关于我"填出生年月，岁数会自动算', icon: 'none', duration: 2600 }), 2500)
   },
   onNodeEnd () { if (this.data.listening) this.recorder.stop() },
   onUnload () { if (this.asr) this.asr.close(); if (this.recorder.recording) this.recorder.stop() }

@@ -616,12 +616,11 @@ Page({
     const by = life.getBirthYear()
     const name = String(ns.name || '').trim().slice(0, 8)
     if (!name) return null
-    if (!by) { this.showTopHint('先在"关于我"填出生年月，才能开新海'); return null }
     const year = parseInt(ns.year, 10)
     if (!isFinite(year)) { this.showTopHint('没说清哪一年，先记在原海'); return null }
-    const age = year - by
-    if (age < 0 || age > 120) return null
-    life.addMilestone(name, age)
+    const age = by != null ? year - by : null
+    if (age != null && (age < 0 || age > 120)) return null
+    life.addMilestone(name, age, year)
     this.showTopHint('听懂了：新开「' + name + '」之海，这段记在里面')
     return name
   },
