@@ -16,9 +16,9 @@
       out-of-bounds="{{false}}" disabled="{{movableDisabled}}" bindchange="onSeaChange"
       style="width:{{worldWidth}}px;height:{{worldHeight}}px" x="{{movX}}" y="{{movY}}">
       <view wx:for="{{mountains}}" wx:key="id" class="mtn"
-        style="left:{{item.left}}px;bottom:{{item.bottom}}px;width:{{item.width}}px;height:{{item.height}}px;background:{{item.color}}"
+        style="left:{{item.left}}px;bottom:{{item.bottom}}px;width:{{item.width}}px"
         data-id="{{item.id}}" bindtap="onBergTap" hover-class="mtn-hover" hover-stay-time="80">
-        <view class="mtn-bump" style="background:{{item.color}}"></view>
+        <image class="mtn-img" src="{{item.src}}" mode="widthFix" />
       </view>
       <!-- 小船=杭航：山间海上飘，轻微左右摇；长按说话副入口 -->
       <view class="boat-drift {{whalePaused || recording ? 'paused' : ''}}"

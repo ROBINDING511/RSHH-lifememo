@@ -106,21 +106,23 @@ function lerpHex (h1, h2, t) {
   const a = hex2rgb(h1), b = hex2rgb(h2)
   return '#' + [0, 1, 2].map((i) => lerp(a[i], b[i], t).toString(16).padStart(2, '0')).join('')
 }
-function mountainColor (createdAt) {
+// 雪山素材=用户定稿SVG的真实云slab（含纹理/颗粒）；今天=红，随天数沉淀到深蓝
+function slabFor (createdAt) {
   const days = Math.floor((Date.now() - (createdAt || Date.now())) / 86400000)
-  if (days <= 0) return '#F94830'                      // 今天最新=红
-  const t = Math.min(1, (days - 1) / 4)               // 1天浅蓝 → 5天最深蓝
-  return lerpHex('#09A8F1', '#05267A', t)
+  if (days <= 0) return 'red'        // 今天最新=红slab
+  if (days <= 2) return 'blue1'      // 浅蓝
+  if (days <= 4) return 'blue3'      // 中蓝
+  return 'deep'                      // 5天+ 最深蓝
 }
 function layoutMountains (icebergs, H) {
   const list = (icebergs || []).slice().sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0))  // 左=年轻 右=久远
   return list.map((b, i) => {
     const len = (b.text || '').length
-    const height = Math.round(140 + Math.min(320, len * 1.2))
+    const width = Math.round(120 + Math.min(120, len * 0.6))   // 留言越多山越大
     return {
-      id: b._id, left: 60 + i * 260, width: 150, height,
+      id: b._id, left: 60 + i * 340, width,
       bottom: Math.round(H * 0.30) + (i % 3) * 24,
-      color: mountainColor(b.createdAt)
+      src: '/images/ocean/slab_' + slabFor(b.createdAt) + '.png'
     }
   })
 }

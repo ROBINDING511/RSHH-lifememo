@@ -82,7 +82,6 @@ Page({
     this.refreshReactions()
     this.refreshVoice()
     setTimeout(() => this.preheatAsr(), 600)   // 延后预热，首屏更快
-    wx.authorize({ scope: 'scope.record' }).catch(() => {})  // 预热授权：0 延迟开口
   },
 
   // 提示脚手架：一次一个问题（家人投喂的优先）
@@ -201,7 +200,7 @@ Page({
     // 水平滚轴世界：宽随回忆数增长，高=视口；左=年轻 右=久远
     const info = sea.windowSize()
     const n = Math.max(1, (this._icebergs || []).length)
-    const W = Math.max(info.W, n * 260 + 400)
+    const W = Math.max(info.W, n * 340 + 400)
     const H = info.H
     this._world = { worldWidth: W, worldHeight: H }
     this._regions = []
@@ -212,8 +211,8 @@ Page({
     }
     // 小船落在雪山之间的海上（不压山）
     const m = this._mountains || []
-    const boatX = m.length >= 2 ? m[0].left + m[0].width + 10
-      : m.length === 1 ? m[0].left + m[0].width + 10 : 160
+    const boatX = m.length >= 2 ? m[0].left + m[0].width + 20
+      : m.length === 1 ? m[0].left + m[0].width + 20 : 160
     this.setData({
       worldWidth: W, worldHeight: H, movX: mx, movY: 0,
       boatX, boatBottom: Math.round(H * 0.24)
