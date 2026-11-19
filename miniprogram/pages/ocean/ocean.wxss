@@ -90,6 +90,7 @@
 .record-btn.record-hover { background: var(--c-primary-deep); transform: scale(0.98); }
 .record-btn.record-on { background: var(--c-primary-deep); }
 .record-btn.record-cancel { background: var(--c-danger); }
+.record-btn.record-lock { background: var(--c-primary-deep); }
 .record-main { color: #fff; font-size: var(--fs-lg); font-weight: 500; letter-spacing: 0; line-height: 1.2; }
 
 /* ============ 实时转写面板（微信式按住说话，0 延迟弹出）============ */

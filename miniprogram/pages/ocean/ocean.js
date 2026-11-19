@@ -36,6 +36,7 @@ Page({
     sheetDy: 0, sheetSettle: true,
     // v2.0 C 门控 / D 字幕 / A9 状态 / A8 情绪
     recConsent: false,
+    locked: false, lockArmed: false,
     liveBig: false, liveExpanded: false, liveFollow: true, liveTail: '',
     previewStatus: '', previewEmotion: false,
     // 生日引导：鲸鱼气泡+回答建议（称呼在杭航菜单设置）
@@ -371,22 +372,36 @@ Page({
 
   // ==================== 录音（按住说话） ====================
   onHoldStart (e) {
+    // 免按住(锁定)中：点一下=结束
+    if (this.data.locked) {
+      this._lockTap = true
+      this.setData({ locked: false })
+      this.finishRecording()
+      return
+    }
     this._holdSource = 'button'
     this._holdY = e.touches && e.touches[0] ? e.touches[0].clientY : 0
+    this._holdX = e.touches && e.touches[0] ? e.touches[0].clientX : 0
     this.startRecording('hold')
   },
 
+  // 微信式手势：上滑=取消，右滑=锁定免按住
   onHoldMove (e) {
-    if (!this.data.recording || this._holdSource !== 'button') return
-    const y = e.touches && e.touches[0] ? e.touches[0].clientY : 0
-    const armed = (this._holdY - y) > 80
-    if (armed !== this.data.cancelArmed) this.setData({ cancelArmed: armed })
+    if (!this.data.recording || this._holdSource !== 'button' || this.data.locked) return
+    const t = e.touches && e.touches[0] ? e.touches[0] : {}
+    const up = (this._holdY - (t.clientY || 0)) > 80
+    const right = ((t.clientX || 0) - this._holdX) > 80 && !up
+    if (up !== this.data.cancelArmed || right !== this.data.lockArmed) {
+      this.setData({ cancelArmed: up, lockArmed: right })
+    }
   },
   onHoldEnd () {
+    if (this._lockTap) { this._lockTap = false; return }   // 锁定态的"点一下结束"已在 touchstart 处理
     if (!this.data.recording) return
-    const cancel = this.data.cancelArmed
-    this.setData({ cancelArmed: false })
+    const cancel = this.data.cancelArmed, lock = this.data.lockArmed
+    this.setData({ cancelArmed: false, lockArmed: false })
     if (cancel) this.saveDraftAndStop()
+    else if (lock) this.setData({ locked: true })   // 右滑锁定：松手继续录(免按住)
     else this.finishRecording()
   },
   onWhaleLongPress () {

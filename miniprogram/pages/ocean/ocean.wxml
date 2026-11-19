@@ -111,11 +111,11 @@
 
   <!-- ============ 底部操作区（拇指区） ============ -->
   <view class="dock safe-bottom" wx:if="{{!preview}}">
-    <view class="record-btn {{recording ? (cancelArmed ? 'record-cancel' : 'record-on') : ''}}"
+    <view class="record-btn {{locked ? 'record-on' : (recording ? (cancelArmed ? 'record-cancel' : (lockArmed ? 'record-lock' : 'record-on')) : '')}}"
       hover-class="record-hover" hover-stay-time="80"
       bindtouchstart="onHoldStart" bindtouchmove="onHoldMove"
       catchtouchend="onHoldEnd" catchtouchcancel="onHoldEnd">
-      <text class="record-main">{{recording ? (cancelArmed ? '松开 取消' : '松开 发送') : '按住 说话'}}</text>
+      <text class="record-main">{{locked ? '点一下 结束' : (recording ? (cancelArmed ? '松开 取消' : (lockArmed ? '松开 免按住' : '松开 发送')) : '按住 说话')}}</text>
     </view>
 
   </view>
@@ -144,7 +144,7 @@
         <text class="live-countdown-num">{{countdown}}</text>
         <text class="live-countdown-label">秒后自动结束</text>
       </view>
-      <text class="live-hint">{{cancelArmed ? '松开即取消，话会存进草稿' : '上滑取消 · 松手发送'}}</text>
+      <text class="live-hint">{{cancelArmed ? '松开即取消，话会存进草稿' : (locked ? '免按住中 · 点按钮结束' : (lockArmed ? '松开后继续录，不用一直按' : '上滑取消 · 右滑免按住 · 松手发送'))}}</text>
     </view>
   </view>
 
