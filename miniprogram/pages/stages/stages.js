@@ -11,6 +11,7 @@ Page({
     inviteCode: '', bindCode: '', feedQ: '',
     polishStyle: 'light',
     openMenu: 'sea', cloneConsent: false, nickname: '',
+    searchQ: '', searchResults: [],
     voiceState: '', voiceSampleUrl: '',
     listening: false, voiceText: ''
   },
@@ -24,9 +25,24 @@ Page({
     })
     this.recorder = createRecorder()
     this.refreshVoice()
+    this.loadAll()
     this.setData({ polishStyle: wx.getStorageSync('polishStyle') || 'light', cloneConsent: wx.getStorageSync('cloneConsent') === '1', nickname: life.getNickname() })
   },
   onNick (e) { this.setData({ nickname: e.detail.value }) },
+  // 搜索全部回忆
+  async loadAll () {
+    try { this._all = await api.listIcebergs() } catch (e) { this._all = [] }
+  },
+  onSearch (e) {
+    const q = (e.detail.value || '').trim()
+    this.setData({ searchQ: q })
+    if (!q) { this.setData({ searchResults: [] }); return }
+    const all = this._all || []
+    const hit = all.filter((b) => [b.title, b.text, b.zoneName, b.memoryTime].some((v) => (v || '').includes(q)))
+    this.setData({ searchResults: hit.slice(0, 20) })
+  },
+  clearSearch () { this.setData({ searchQ: '', searchResults: [] }) },
+  goDetail (e) { wx.navigateTo({ url: '/pages/iceberg/iceberg?id=' + e.currentTarget.dataset.id }) },
   saveNick () {
     const n = (this.data.nickname || '').trim()
     if (!n) return wx.showToast({ title: '先写个称呼', icon: 'none' })

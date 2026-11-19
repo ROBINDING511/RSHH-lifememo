@@ -10,7 +10,21 @@
     <view class="hub-pill" hover-class="btn-hover" hover-stay-time="80" bindtap="goRecycle">删除的记忆</view>
   </view>
 
+  <!-- 搜索框：搜全部回忆 -->
+  <view class="search-box">
+    <input class="search-input" value="{{searchQ}}" placeholder="搜回忆：标题 / 内容 / 哪片海 / 年份" bindinput="onSearch" confirm-type="search" />
+    <view class="search-clear" wx:if="{{searchQ}}" hover-class="btn-hover" hover-stay-time="80" bindtap="clearSearch">×</view>
+  </view>
+  <view class="search-results" wx:if="{{searchQ}}">
+    <view class="search-item" wx:for="{{searchResults}}" wx:key="_id" hover-class="btn-hover" hover-stay-time="80" data-id="{{item._id}}" bindtap="goDetail">
+      <text class="search-title">{{item.title}}</text>
+      <text class="search-meta">{{item.memoryTime}} · {{item.zoneName}}之海</text>
+    </view>
+    <view class="search-empty" wx:if="{{!searchResults.length}}">没找到相关回忆</view>
+  </view>
+
   <!-- 一级：我的海 -->
+  <view wx:if="{{!searchQ}}">
   <view class="menu-group">
     <view class="menu-l1" hover-class="btn-hover" hover-stay-time="80" data-k="sea" bindtap="toggleMenu">
       <text class="menu-l1-t">我的海</text>
@@ -158,5 +172,6 @@
     </view>
   </view>
 
+  </view>
   <view class="safe-bottom"></view>
 </view>
