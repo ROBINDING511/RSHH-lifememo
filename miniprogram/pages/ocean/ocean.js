@@ -41,7 +41,7 @@ Page({
     previewStatus: '', previewEmotion: false,
     // 生日引导：鲸鱼气泡+回答建议（称呼在杭航菜单设置）
     birthSkipped: false, birthOther: false, birthOtherVal: '', birthIdx: 40,
-    bbLeft: 24, bbTop: 200, bbTail: 180,
+    bbLeft: 24, bbTop: 200, bbTail: 180, boatLeft: 160, boatTop: 420,
     greetTitle: '晚上好', greetBody: '今天想聊哪一段？按住下面慢慢说，我听着。', boatBottom: 200,
     birthYears: (() => { const a = []; for (let y = 2010; y >= 1920; y--) a.push(y + '年'); return a })()
   },
@@ -548,17 +548,26 @@ Page({
     if (id) wx.navigateTo({ url: `/pages/iceberg/iceberg?id=${id}` })
   },
   onSeaChange (e) { this._movX = e.detail.x; this._movY = e.detail.y; this.updateBubble() },
-  // 气泡固定视口并夹在画面内，尾指船
+  // 船+气泡固定视口并夹在画面内（不撞边），气泡尾指船
   updateBubble () {
     const info = sea.windowSize()
     const W = info.W, H = info.H
-    const bx = (this.data.boatX || 0) + (this.data.movX || 0) + 47
-    const by = H - (this.data.boatBottom || 0) - 142
-    const bw = 220, bh = 150
-    const left = Math.max(8, Math.min(W - bw - 8, bx - 194))
-    const top = Math.max((this.data.capsuleBottom || 88) + 8, Math.min(H - 220, by - bh - 12))
-    const tail = Math.max(12, Math.min(bw - 26, bx - left - 7))
-    this.setData({ bbLeft: Math.round(left), bbTop: Math.round(top), bbTail: Math.round(tail) })
+    const lay = this._lay || {}
+    const movX = this.data.movX || 0
+    const center = (lay.newestLeft || 0) + movX + (lay.newestWidth || 0) / 2
+    const boatW = 75, boatH = 112
+    const boatLeft = Math.max(12, Math.min(W - boatW - 12, center - boatW / 2))
+    const baseY = lay.minBottom != null ? H - lay.minBottom : H * 0.62
+    const boatTop = Math.max(H * 0.40, Math.min(H - boatH - 90, baseY + 6))
+    const bw = 200, bh = 132
+    const bx = boatLeft + boatW / 2
+    const left = Math.max(8, Math.min(W - bw - 8, bx - bw / 2))
+    const top = Math.max((this.data.capsuleBottom || 88) + 8, boatTop - bh - 10)
+    const tail = Math.max(12, Math.min(bw - 24, bx - left - 6))
+    this.setData({
+      boatLeft: Math.round(boatLeft), boatTop: Math.round(boatTop),
+      bbLeft: Math.round(left), bbTop: Math.round(top), bbTail: Math.round(tail)
+    })
   },
   // 双指捏合缩放（聚拢缩小 / 打开放大）
   onSeaScale (e) {

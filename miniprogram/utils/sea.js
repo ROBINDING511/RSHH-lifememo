@@ -164,7 +164,7 @@ function layoutMountains (icebergs, H, W, birthYear) {
   let boatX = newest ? Math.round(newest.left + newest.width / 2 - boatW / 2) : Math.round(W * 0.4)
   boatX = Math.max(0, Math.min(worldWidth - boatW, boatX))
   const boatBottom = mountains.length ? Math.max(Math.round(H * 0.06), minBottom - 160) : Math.round(H * 0.30)
-  return { mountains, worldWidth, boatX, boatBottom }
+  return { mountains, worldWidth, boatX, boatBottom, minBottom, newestLeft: newest ? newest.left : 0, newestWidth: newest ? newest.width : 0 }
 }
 
 module.exports = { buildWorld, centerOn, regionAt, stageOfMemory, layoutBergs, layoutMilestones, layoutMountains, windowSize, hash }
