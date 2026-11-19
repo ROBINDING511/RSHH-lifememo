@@ -8,7 +8,6 @@ Page({
   data: {
     items: [],
     loading: true,
-    raining: '' // 正在下雨（恢复动画）的冰山 id
   },
 
   onShow () { this.load() },
@@ -35,23 +34,26 @@ Page({
   },
 
   // 云下雨：恢复冰山
-  async rain (e) {
+  // 编辑：回到海洋编辑卡，可直接存为冰山
+  editCloud (e) {
+    wx.navigateTo({ url: '/pages/ocean/ocean?edit=' + e.currentTarget.dataset.id })
+  },
+  // 删除：彻底清除（不可恢复），一次确认
+  async purgeCloud (e) {
     const id = e.currentTarget.dataset.id
-    if (this.data.raining) return // 防连点
-    this.setData({ raining: id })
-    if (wx.vibrateShort) wx.vibrateShort({ type: 'light' })
+    const ok = await new Promise((res) => wx.showModal({
+      title: '彻底删除这段记忆？', content: '删除后就找不回来了。', confirmText: '彻底删除', cancelText: '再想想',
+      confirmColor: '#F94830', success: (r) => res(r.confirm), fail: () => res(false)
+    }))
+    if (!ok) return
     try {
-      await api.restoreIceberg(id)
-      this.setData({ raining: '' })
-      wx.showToast({ title: '记忆找回来了', icon: 'none', duration: 2200 })
+      await wx.cloud.database().collection('icebergs').doc(id).remove()
+      wx.showToast({ title: '已彻底删除', icon: 'none' })
       this.load()
     } catch (err) {
-      console.error('恢复失败', err)
-      this.setData({ raining: '' })
-      wx.showToast({ title: '网络不太好，再试一次', icon: 'none', duration: 2400 })
+      wx.showToast({ title: '网络不太好，再试一次', icon: 'none' })
     }
   },
-
   goOcean () {
     const pages = getCurrentPages()
     if (pages.length > 1) wx.navigateBack()

@@ -800,7 +800,7 @@ Page({
       if (p.editId) {
         let audioFileID = ''
         if (audioPath) audioFileID = (await wx.cloud.uploadFile({ cloudPath: `voices/${Date.now()}_edit.wav`, filePath: audioPath })).fileID
-        await api.updateIceberg(p.editId, { text: body, audioFileID, zoneName, memoryTime: timeValue })
+        await api.updateIceberg(p.editId, { text: body, audioFileID, zoneName, memoryTime: timeValue, deleted: false })   // 编辑后重新成为活冰山
         created = { _id: p.editId, audioFileID }
       } else {
         // 先落文字记录（秒回），音频/照片后台上传再挂上 → 不再久等"冰山生成中"
