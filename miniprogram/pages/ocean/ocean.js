@@ -386,10 +386,11 @@ Page({
     if (this._lockTap) { this._lockTap = false; return }   // 锁定态的"点一下结束"已在 touchstart 处理
     if (!this.data.recording) return
     const cancel = this.data.cancelArmed, lock = this.data.lockArmed
-    this.setData({ cancelArmed: false, lockArmed: false })
-    if (cancel) this.saveDraftAndStop()
-    else if (lock) this.setData({ locked: true })   // 右滑锁定：松手继续录(免按住)
-    else this.finishRecording()
+    if (cancel) { this.saveDraftAndStop(); return }
+    if (lock) { this.setData({ locked: true, cancelArmed: false, lockArmed: false }); return }   // 右滑固定：换色+松手继续录
+    // 松手=立刻退出语音识别卡片，再邀请编辑（onStop 开复核卡）
+    this.setData({ recording: false, cancelArmed: false, lockArmed: false })
+    this.finishRecording()
   },
   onBoatLongPress () {
     if (this.data.recording || this.data.preview) return
@@ -440,7 +441,7 @@ Page({
           } else ui.toast('录音中断了，再说一次')
           return
         }
-        if (durationMs < 800) return ui.toast('太短了，多说几句')
+        if (durationMs < 800) { this.setData({ transcript: '', liveTail: '' }); return ui.toast('太短了，多说几句') }
         const full = (this.data.transcript || '').trim()
 
         if (this._appendBase != null) { this._appendBase = null; this.appendToPreview(wavPath, full) }
@@ -454,8 +455,9 @@ Page({
   saveDraftAndStop () {
     if (!this._recActive) return
     this.cancelRequested = true
-    // 立刻收回字幕面板，回到干净海面（不等 onStop 异步）
+    // 立刻取消所有已说内容+收回面板，回到初始干净界面（不等 onStop 异步）
     this.setData({ recording: false, cancelArmed: false, lockArmed: false, locked: false, transcript: '', liveTail: '', liveExpanded: false, liveBig: false })
+    if (this.asr) this.asr.reset()
     this.recorder.stop()
     if (wx.vibrateShort) wx.vibrateShort({ type: 'light' })
   },

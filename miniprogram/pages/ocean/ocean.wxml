@@ -94,7 +94,7 @@
 
   <!-- ============ 底部操作区（拇指区） ============ -->
   <view class="dock safe-bottom" wx:if="{{!preview}}">
-    <view class="record-btn {{locked ? 'record-on' : (recording ? (cancelArmed ? 'record-cancel' : (lockArmed ? 'record-lock' : 'record-on')) : '')}}"
+    <view class="record-btn {{locked ? 'record-lock' : (recording ? (cancelArmed ? 'record-cancel' : (lockArmed ? 'record-lock' : 'record-on')) : '')}}"
       hover-class="record-hover" hover-stay-time="80"
       bindtouchstart="onHoldStart" bindtouchmove="onHoldMove"
       catchtouchend="onHoldEnd" catchtouchcancel="onHoldEnd">
