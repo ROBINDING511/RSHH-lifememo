@@ -114,15 +114,27 @@ function slabFor (createdAt) {
   if (days <= 4) return 'blue3'      // 中蓝
   return 'deep'                      // 5天+ 最深蓝
 }
+// seeded rng（同背景生成器 mjs）：每座山宽/高/包包形态稳定随机
+function mulberry (a) {
+  return function () {
+    a |= 0; a = (a + 0x6D2B79F5) | 0
+    let t = Math.imul(a ^ (a >>> 15), 1 | a)
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296
+  }
+}
 function layoutMountains (icebergs, H) {
   const list = (icebergs || []).slice().sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0))  // 左=年轻 右=久远
   return list.map((b, i) => {
+    const rng = mulberry(hash(b._id || String(i)) + 7)
     const len = (b.text || '').length
-    const width = Math.round(120 + Math.min(120, len * 0.6))   // 留言越多山越大
+    const width = Math.round(120 + rng() * 80)                                       // 山宽随机 120–200
+    const height = Math.round((60 + Math.min(150, len * 0.5)) * (0.85 + rng() * 0.4)) // 内容越多越高 × 随机
+    const variant = Math.floor(rng() * 3)                                            // 包包/坡形态三选一
     return {
-      id: b._id, left: 60 + i * 340, width,
+      id: b._id, left: 60 + i * 340, width, height,
       bottom: Math.round(H * 0.30) + (i % 3) * 24,
-      src: '/images/ocean/slab_' + slabFor(b.createdAt) + '.png'
+      src: '/images/ocean/slab_' + slabFor(b.createdAt) + '_v' + variant + '.png'
     }
   })
 }

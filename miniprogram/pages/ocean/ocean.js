@@ -58,6 +58,7 @@ Page({
       seaScale: this._scale
     })
     if (query && query.edit) this.loadForEdit(query.edit)
+    wx.authorize({ scope: 'scope.record' }).catch(() => {})   // 进页即申请麦克风，不等按住
   },
 
   onShow () {

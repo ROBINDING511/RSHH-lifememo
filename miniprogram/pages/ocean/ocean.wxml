@@ -18,7 +18,7 @@
       <view wx:for="{{mountains}}" wx:key="id" class="mtn"
         style="left:{{item.left}}px;bottom:{{item.bottom}}px;width:{{item.width}}px"
         data-id="{{item.id}}" bindtap="onBergTap" hover-class="mtn-hover" hover-stay-time="80">
-        <image class="mtn-img" src="{{item.src}}" mode="widthFix" />
+        <image class="mtn-img" src="{{item.src}}" mode="scaleToFill" style="height:{{item.height}}px" />
       </view>
       <!-- 小船=杭航：山间海上飘，轻微左右摇；长按说话副入口 -->
       <view class="boat-drift {{whalePaused || recording ? 'paused' : ''}}"
@@ -28,19 +28,10 @@
         <!-- 小船上的气泡：生日引导+回答建议 -->
         <view class="whale-bubble" wx:if="{{!birthYear && !birthSkipped && !recording && !preview}}" catchtap="noop">
           <text class="wb-q">请问您出生于哪一年？</text>
-          <view class="wb-chips">
-            <view class="wb-chip" wx:for="{{[1950, 1960, 1970, 1980, 1990]}}" wx:key="*this"
-              hover-class="btn-hover" hover-stay-time="80" data-y="{{item}}" catchtap="pickBirthYear">{{item}}年</view>
-            <view class="wb-chip" hover-class="btn-hover" hover-stay-time="80" data-y="other" catchtap="pickBirthYear">其它年份</view>
-          </view>
-          <view class="wb-other" wx:if="{{birthOther}}">
-            <input class="wb-input" type="number" value="{{birthOtherVal}}" placeholder="如 1958" bindinput="onBirthOtherInput" />
-            <view class="wb-ok" hover-class="btn-hover" hover-stay-time="80" catchtap="confirmBirthOther">记好了</view>
-          </view>
           <picker mode="selector" range="{{birthYears}}" bindchange="onBirthPick">
-            <view class="wb-picker">滚轮选年份</view>
+            <view class="wb-field">点一下，滚轮选出生年份</view>
           </picker>
-          <view class="wb-skip" catchtap="skipBirth">跳过</view>
+          <view class="wb-later" catchtap="skipBirth">稍后再说</view>
           <view class="wb-tail"></view>
         </view>
       </view>

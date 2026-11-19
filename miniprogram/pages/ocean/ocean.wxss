@@ -186,3 +186,5 @@
 .wb-skip { color: var(--c-text-soft); }
 .wb-input { background: var(--c-surface-2); color: var(--c-text); }
 .night-bg-css { background: linear-gradient(180deg, #030635 0%, #08134F 30%, #053091 55%, #05267A 100%); }
+.wb-field { margin-top: 16rpx; min-height: 88rpx; display: flex; align-items: center; justify-content: center; background: var(--c-surface-2); border: 2rpx solid var(--c-line); border-radius: 24rpx; color: var(--c-accent); font-size: var(--fs-md); }
+.wb-later { margin-top: 12rpx; text-align: center; color: var(--c-text-faint); font-size: var(--fs-xs); }
