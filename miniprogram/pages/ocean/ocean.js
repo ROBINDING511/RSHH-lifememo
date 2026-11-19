@@ -42,7 +42,7 @@ Page({
     // 生日引导：鲸鱼气泡+回答建议（称呼在杭航菜单设置）
     birthSkipped: false, birthOther: false, birthOtherVal: '', birthIdx: 40,
     bbLeft: 24, bbTop: 200, bbTail: 180, boatLeft: 160, boatTop: 420,
-    bubbleShow: false, bubbleText: '', topHint: '',
+    bubbleShow: false, bubbleText: '', stageLabels: [], topHint: '',
     greetTitle: '晚上好', greetBody: '今天想聊哪一段？按住下面慢慢说，我听着。', boatBottom: 200,
     birthYears: (() => { const a = []; for (let y = 2010; y >= 1920; y--) a.push(y + '年'); return a })()
   },
@@ -243,7 +243,7 @@ Page({
     const mountains = lay.mountains
     const nick = life.getNickname()
     this.setData({
-      icebergCount: icebergs.length, mountains,
+      icebergCount: icebergs.length, mountains, stageLabels: lay.labels || [],
       greetTitle: nick ? `${nick}，想聊哪一段？` : '晚上好',
       greetBody: icebergs.length ? '今天想聊哪一段？按住下面慢慢说，我听着。' : '海还空着。按住说一段，第一座雪山就落下来。'
     })

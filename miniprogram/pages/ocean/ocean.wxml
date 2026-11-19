@@ -15,6 +15,7 @@
     <movable-view class="sea-world" direction="horizontal" inertia damping="{{40}}" friction="{{2}}"
       out-of-bounds="{{false}}" disabled="{{movableDisabled}}" bindchange="onSeaChange"
       style="width:{{worldWidth}}px;height:{{worldHeight}}px" x="{{movX}}" y="{{movY}}">
+      <text wx:for="{{stageLabels}}" wx:key="name" class="sea-label" style="left:{{item.left}}px">{{item.name}}之海</text>
       <view wx:for="{{mountains}}" wx:key="id" class="mtn"
         style="left:{{item.left}}px;bottom:{{item.bottom}}px;width:{{item.width}}px"
         data-id="{{item.id}}" bindtap="onBergTap" hover-class="mtn-hover" hover-stay-time="80">

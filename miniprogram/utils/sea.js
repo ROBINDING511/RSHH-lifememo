@@ -134,11 +134,12 @@ function layoutMountains (icebergs, H, W, birthYear) {
   }
   const groups = {}
   list.forEach((b) => { const e = eraOf(b); (groups[e] = groups[e] || []).push(b) })
-  const eras = Object.keys(groups).map(Number).sort((a, b) => a - b)   // 左=年轻 右=老年
-  const worldWidth = Math.max(W, eras.length * W)
+  // 每片海(含空海)都占一屏 → 新加的节点海左右滑能看到
+  const worldWidth = Math.max(W, stages.length * W)
+  const labels = stages.map((s, ei) => ({ left: Math.round(ei * W + W / 2), name: s.name }))
   const mountains = []
-  eras.forEach((e, ei) => {
-    const g = groups[e].sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0))
+  stages.forEach((s, ei) => {
+    const g = (groups[ei] || []).sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0))
     g.forEach((b, i) => {
       const rng = mulberry(hash(b._id || String(i)) + 7)
       const len = (b.text || '').length
@@ -164,7 +165,7 @@ function layoutMountains (icebergs, H, W, birthYear) {
   let boatX = newest ? Math.round(newest.left + newest.width / 2 - boatW / 2) : Math.round(W * 0.4)
   boatX = Math.max(0, Math.min(worldWidth - boatW, boatX))
   const boatBottom = mountains.length ? Math.max(Math.round(H * 0.06), minBottom - 160) : Math.round(H * 0.30)
-  return { mountains, worldWidth, boatX, boatBottom, minBottom, newestLeft: newest ? newest.left : 0, newestWidth: newest ? newest.width : 0 }
+  return { mountains, worldWidth, boatX, boatBottom, minBottom, newestLeft: newest ? newest.left : 0, newestWidth: newest ? newest.width : 0, labels }
 }
 
 module.exports = { buildWorld, centerOn, regionAt, stageOfMemory, layoutBergs, layoutMilestones, layoutMountains, windowSize, hash }

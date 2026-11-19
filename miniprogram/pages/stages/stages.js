@@ -243,9 +243,18 @@ Page({
   onMsAge (e) { this.setData({ msAge: e.detail.value }) },
   addMs () {
     const name = (this.data.msName || '').trim()
-    const age = parseInt(this.data.msAge, 10)
+    const raw = String(this.data.msAge || '').trim()
     if (!name) return wx.showToast({ title: '写个节点名字', icon: 'none' })
-    if (!isFinite(age)) return wx.showToast({ title: '填几岁', icon: 'none' })
+    let age = NaN
+    const ym = raw.match(/^(19|20)\d{2}/)                      // 支持 2017 / 2017.6.8 / 2017-6-8
+    if (ym) {
+      const by = life.getBirthYear()
+      if (!by) return wx.showToast({ title: '先在"关于我"填出生年份，才能换算几岁', icon: 'none', duration: 2600 })
+      age = parseInt(ym[0], 10) - by
+    } else {
+      age = parseInt(raw, 10)
+    }
+    if (!isFinite(age) || age < 0 || age > 120) return wx.showToast({ title: '填几岁，或填年份如2017', icon: 'none' })
     const ms = life.addMilestone(name, age)   // 加节点 = 开启一片新海
     this._draft = life.getStages().map((s) => ({ name: s.name, to: s.to, flag: s.flag }))
     this.setData({ milestones: ms, msName: '', msAge: '' })

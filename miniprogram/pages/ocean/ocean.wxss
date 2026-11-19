@@ -203,3 +203,4 @@
 @keyframes dotjump { 0%, 100% { transform: translateY(0); opacity: .4; } 50% { transform: translateY(-6rpx); opacity: 1; } }
 .top-hint { position: absolute; left: 48rpx; right: 48rpx; z-index: 30; text-align: center; background: rgba(255,252,246,.92); border-radius: 999rpx; padding: 10rpx 24rpx; box-shadow: 0 4rpx 14rpx rgba(2,2,31,.25); pointer-events: none; }
 .top-hint text { font-size: var(--fs-sm); color: var(--c-text); line-height: 1.6; }
+.sea-label { position: absolute; top: 24%; transform: translateX(-50%); font-size: var(--fs-sm); color: rgba(244,215,178,.75); letter-spacing: 2rpx; pointer-events: none; }
