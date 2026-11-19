@@ -8,6 +8,7 @@
   <!-- 鲸鱼菜单快捷按钮：删除的记忆（5天内可找回） -->
   <view class="hub-row">
     <view class="hub-pill" hover-class="btn-hover" hover-stay-time="80" bindtap="goRecycle">删除的记忆</view>
+    <view class="hub-pill" hover-class="btn-hover" hover-stay-time="80" bindtap="openClone">声音克隆</view>
   </view>
 
   <!-- 搜索框：搜全部回忆 -->
@@ -32,7 +33,7 @@
     </view>
     <view class="menu-l2" wx:if="{{openMenu === 'sea'}}">
       <view class="card">
-        <text class="prof-title">二级 · 几片海、叫什么、到几岁</text>
+        <text class="prof-title">几片海、叫什么、到几岁</text>
         <view class="stage-bar">
           <view wx:for="{{stages}}" wx:key="key" class="seg"
             style="left:{{item.from}}%;width:{{item.dispTo-item.from+1}}%;background:{{item.color}}"></view>
@@ -52,7 +53,7 @@
       </view>
 
       <view class="card">
-        <text class="prof-title">二级 · 人生节点＝海的开端</text>
+        <text class="prof-title">人生节点＝海的开端</text>
         <text class="ms-invite">每个转折点开启一片新的海；删掉节点，两片海合并。</text>
         <view class="ms-list">
           <view wx:for="{{milestones}}" wx:key="id" class="ms-row">
@@ -70,13 +71,13 @@
       </view>
 
       <view class="card">
-        <text class="prof-title">二级 · 怎么称呼你</text>
+        <text class="prof-title">怎么称呼你</text>
         <input class="field" type="nickname" value="{{nickname}}" placeholder="点一下可填微信昵称，或自己写" bindinput="onNick" />
         <view class="prof-save" hover-class="btn-hover" hover-stay-time="80" bindtap="saveNick">记好了</view>
       </view>
 
       <view class="card">
-        <text class="prof-title">二级 · 你的年纪（把"…岁"换算成年份）</text>
+        <text class="prof-title">你的年纪（把"…岁"换算成年份）</text>
         <view class="mode-tabs">
           <view class="tab {{profileMode==='birthday'?'on':''}}" hover-class="btn-hover" hover-stay-time="80" bindtap="setMode" data-m="birthday">生日</view>
           <view class="tab {{profileMode==='age'?'on':''}}" hover-class="btn-hover" hover-stay-time="80" bindtap="setMode" data-m="age">年龄</view>
@@ -112,7 +113,7 @@
     </view>
     <view class="menu-l2" wx:if="{{openMenu === 'recall'}}">
       <view class="card">
-        <text class="prof-title">二级 · AI 文字梳理风格</text>
+        <text class="prof-title">AI 文字梳理风格</text>
         <text class="ms-invite">鲸鱼帮您顺文字时按您选的来；原话和原声永远保留，随时可还原。</text>
         <view class="style-row">
           <view class="style-opt {{polishStyle === 'verbatim' ? 'on' : ''}}" hover-class="btn-hover" hover-stay-time="80" data-s="verbatim" bindtap="setStyle">忠实原文</view>
@@ -120,8 +121,8 @@
           <view class="style-opt {{polishStyle === 'written' ? 'on' : ''}}" hover-class="btn-hover" hover-stay-time="80" data-s="written" bindtap="setStyle">口语顺成书面语</view>
         </view>
       </view>
-      <view class="menu-link" hover-class="btn-hover" hover-stay-time="80" bindtap="goTimeline">二级 · 时间轴（按年翻一生）</view>
-      <view class="menu-link" hover-class="btn-hover" hover-stay-time="80" bindtap="exportBook">二级 · 导出回忆录（按年文稿+原声）</view>
+      <view class="menu-link" hover-class="btn-hover" hover-stay-time="80" bindtap="goTimeline">时间轴（按年翻一生）</view>
+      <view class="menu-link" hover-class="btn-hover" hover-stay-time="80" bindtap="exportBook">导出回忆录（按年文稿+原声）</view>
     </view>
   </view>
 
@@ -133,7 +134,7 @@
     </view>
     <view class="menu-l2" wx:if="{{openMenu === 'family'}}">
       <view class="card">
-        <text class="prof-title">二级 · 邀请 / 绑定 / 投喂</text>
+        <text class="prof-title">邀请 / 绑定 / 投喂</text>
         <text class="ms-invite">邀请孩子后，孩子可看你的海、投喂问题、点"想听/抱抱"回流给你。</text>
         <view class="ms-add">
           <view class="ms-add-btn" style="flex:1" hover-class="btn-hover" hover-stay-time="80" bindtap="inviteFamily">生成邀请码</view>
@@ -160,7 +161,7 @@
       <text class="menu-l1-x">{{openMenu === 'sound' ? '收起' : '展开'}}</text>
     </view>
     <view class="menu-l2" wx:if="{{openMenu === 'sound'}}">
-      <view class="menu-link" hover-class="btn-hover" hover-stay-time="80" bindtap="openClone">二级 · 声音克隆（{{cloneConsent ? '已开启' : '未开启'}}）</view>
+      <view class="menu-link" hover-class="btn-hover" hover-stay-time="80" bindtap="openClone">声音克隆（{{cloneConsent ? '已开启' : '未开启'}}）</view>
       <view class="card" wx:if="{{cloneConsent && showClonePanel}}">
         <text class="prof-title">妈妈的声音（克隆）</text>
         <text class="ms-invite">{{voiceState==='frozen' ? '已固化：不再自动克隆；删除后会重新克隆。' : voiceState==='review' ? '克隆好了，回海洋听听像不像。' : '正在收集您的声音，自动克隆中…'}}</text>
