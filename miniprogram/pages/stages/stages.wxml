@@ -121,6 +121,7 @@
         </view>
       </view>
       <view class="menu-link" hover-class="btn-hover" hover-stay-time="80" bindtap="goTimeline">二级 · 时间轴（按年翻一生）</view>
+      <view class="menu-link" hover-class="btn-hover" hover-stay-time="80" bindtap="exportBook">二级 · 导出回忆录（按年文稿+原声）</view>
     </view>
   </view>
 

@@ -43,6 +43,53 @@ Page({
   },
   clearSearch () { this.setData({ searchQ: '', searchResults: [] }) },
   goDetail (e) { wx.navigateTo({ url: '/pages/iceberg/iceberg?id=' + e.currentTarget.dataset.id }) },
+  // 导出回忆录：按年编排文稿 + 原声链接，可分享/复制/预览
+  async exportBook () {
+    wx.showLoading({ title: '正在编排回忆录…', mask: true })
+    try {
+      const all = (this._all && this._all.length) ? this._all : await api.listIcebergs()
+      if (!all.length) { wx.hideLoading(); wx.showToast({ title: '还没有回忆可导出', icon: 'none' }); return }
+      const ids = all.map((b) => b.audioFileID).filter(Boolean)
+      const urlMap = {}
+      if (ids.length) {
+        const r = await wx.cloud.getTempFileURL({ fileList: ids })
+        ;(r.fileList || []).forEach((f) => { if (f.tempFileURL) urlMap[f.fileID] = f.tempFileURL })
+      }
+      const groups = {}
+      all.forEach((b) => {
+        const y = /^\d{4}$/.test(String(b.memoryTime || '')) ? b.memoryTime + '年' : '记不清的'
+        ;(groups[y] = groups[y] || []).push(b)
+      })
+      const years = Object.keys(groups).sort((a, b) => (a === '记不清的' ? 1 : b === '记不清的' ? -1 : a.localeCompare(b)))
+      const nick = life.getNickname()
+      let txt = `人生海海 · 回忆录\n${nick ? nick + ' 的回忆' : '我的回忆'}\n导出时间：${new Date().toLocaleString()}\n共 ${all.length} 段\n`
+      years.forEach((y) => {
+        txt += `\n【${y}】\n`
+        groups[y].forEach((b) => {
+          txt += `\n· ${b.title || '一段回忆'}\n`
+          txt += `${b.text || ''}\n`
+          if (b.audioFileID && urlMap[b.audioFileID]) txt += `原声：${urlMap[b.audioFileID]}\n`
+        })
+      })
+      const fs = wx.getFileSystemManager()
+      const path = `${wx.env.USER_DATA_PATH}/人生海海-回忆录.txt`
+      fs.writeFileSync(path, txt, 'utf8')
+      wx.hideLoading()
+      this._bookPath = path
+      this._bookTxt = txt
+      wx.showActionSheet({
+        itemList: ['分享给微信好友', '复制全文', '打开预览'],
+        success: (r) => {
+          if (r.tapIndex === 0) wx.shareFileMessage({ filePath: path, fileName: '人生海海-回忆录.txt' }).catch(() => wx.showToast({ title: '分享未成功', icon: 'none' }))
+          else if (r.tapIndex === 1) wx.setClipboardData({ data: txt, success: () => wx.showToast({ title: '已复制全文', icon: 'none' }) })
+          else wx.openDocument({ filePath: path, fileType: 'txt', showMenu: true }).catch(() => wx.showToast({ title: '预览未成功', icon: 'none' }))
+        }
+      })
+    } catch (e) {
+      wx.hideLoading()
+      wx.showToast({ title: '导出没成功，再试一次', icon: 'none' })
+    }
+  },
   saveNick () {
     const n = (this.data.nickname || '').trim()
     if (!n) return wx.showToast({ title: '先写个称呼', icon: 'none' })
