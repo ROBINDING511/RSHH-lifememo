@@ -858,29 +858,29 @@ Page({
     if (!silent) ui.toast('存草稿了，随时能找回来', 2200)
   },
   // ❌ 删除：进"删除的记忆"，5天内可找回
-  async discardToCloud () {
+  // ❌ 关闭未发布文字=直接进垃圾桶，无二次确认；界面立刻收回，云端后台落删除
+  discardToCloud () {
     const p = this.data.preview
     if (!p) return
     this.stopPreviewVoice()
     const text = (p.text || '').trim() || '（这段只留了声音）'
-    try {
-      const created = await api.createIceberg({
-        text, audioPath: p.wavPath, photos: p.photos,
-        timeValue: p._autoYear ? String(p._autoYear) : (p.zoneOptions[p.zoneIndex] || '说不清了'),
-        zoneName: p.zoneOptions[p.zoneIndex] || '晚年',
-        title: p._four || text.slice(0, 4)
-      })
-      await api.removeIceberg(created._id)   // deleted=true → 进删除的记忆
-      draft.forgetPath(p.wavPath)
-      this.setData({ preview: null, drafts: draft.list() })
-    this.hideBubble(); this.scheduleBubble(20000)
-      this.showTopHint('删除了，在"删除的记忆"里5天可以找回')
-      this.refreshData()
-    } catch (e) {
-      draft.save({ wavPath: p.wavPath, text: p.text, reason: '删除失败' })
-      this.setData({ preview: null, drafts: draft.list() })
-    this.hideBubble(); this.scheduleBubble(20000)
-      ui.toast('没化成，先存草稿了', 2400)
+    const payload = {
+      text, audioPath: p.wavPath, photos: p.photos,
+      timeValue: p._autoYear ? String(p._autoYear) : (p.zoneOptions[p.zoneIndex] || '说不清了'),
+      zoneName: p.zoneOptions[p.zoneIndex] || '晚年',
+      title: p._four || text.slice(0, 4)
     }
-  }
+    draft.forgetPath(p.wavPath)
+    this.setData({ preview: null, drafts: draft.list() })
+    this.hideBubble(); this.scheduleBubble(20000)
+    this.showTopHint('删除了，在"删除的记忆"里5天可以找回')
+    api.createIceberg(payload)
+      .then((created) => api.removeIceberg(created._id))   // deleted=true → 删除的记忆
+      .then(() => this.refreshData())
+      .catch(() => {
+        draft.save({ wavPath: p.wavPath, text: p.text, reason: '删除失败' })
+        this.setData({ drafts: draft.list() })
+        this.showTopHint('没删成，先存草稿了')
+      })
+  },
 })
