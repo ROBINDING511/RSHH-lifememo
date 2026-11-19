@@ -200,8 +200,8 @@ Page({
     setTimeout(() => { this._suppressScale = false }, 400)
     // 水平滚轴世界：宽随回忆数增长，高=视口；左=年轻 右=久远
     const info = sea.windowSize()
-    const n = Math.max(1, (this._icebergs || []).length)
-    const W = Math.max(info.W, n * 340 + 400)
+    const lay = this._lay || { worldWidth: info.W, boatX: Math.round(info.W * 0.4), boatBottom: Math.round(info.H * 0.15) }
+    const W = Math.max(info.W, lay.worldWidth)
     const H = info.H
     this._world = { worldWidth: W, worldHeight: H }
     this._regions = []
@@ -209,14 +209,12 @@ Page({
     if (keepPosition) {
       const px = this._movX != null ? this._movX : this.data.movX
       mx = Math.max(-(W - info.W), Math.min(0, px))
+    } else {
+      mx = Math.max(-(W - info.W), Math.min(0, -(lay.boatX - info.W / 2)))   // 首屏对准最新山+船
     }
-    // 小船落在雪山之间的海上（不压山）
-    const m = this._mountains || []
-    const boatX = m.length >= 2 ? m[0].left + m[0].width + 20
-      : m.length === 1 ? m[0].left + m[0].width + 20 : 160
     this.setData({
       worldWidth: W, worldHeight: H, movX: mx, movY: 0,
-      boatX, boatBottom: Math.round(H * 0.24)
+      boatX: lay.boatX, boatBottom: lay.boatBottom
     })
   },
 
@@ -229,8 +227,11 @@ Page({
       } else icebergs = await api.listIcebergs()
     } catch (e) { console.warn('数据加载失败（可能未创建集合）', e) }
     this._icebergs = icebergs
-    const mountains = sea.layoutMountains(icebergs, sea.windowSize().H)
-    this._mountains = mountains
+    const info0 = sea.windowSize()
+    const lay = sea.layoutMountains(icebergs, info0.H, info0.W, this.data.birthYear)
+    this._mountains = lay.mountains
+    this._lay = lay
+    const mountains = lay.mountains
     const nick = life.getNickname()
     this.setData({
       icebergCount: icebergs.length, mountains,

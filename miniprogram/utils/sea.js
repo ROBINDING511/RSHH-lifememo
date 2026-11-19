@@ -123,20 +123,43 @@ function mulberry (a) {
     return ((t ^ (t >>> 14)) >>> 0) / 4294967296
   }
 }
-function layoutMountains (icebergs, H) {
-  const list = (icebergs || []).slice().sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0))  // 左=年轻 右=久远
-  return list.map((b, i) => {
-    const rng = mulberry(hash(b._id || String(i)) + 7)
-    const len = (b.text || '').length
-    const width = Math.round(120 + rng() * 80)                                       // 山宽随机 120–200
-    const height = Math.round((60 + Math.min(150, len * 0.5)) * (0.85 + rng() * 0.4)) // 内容越多越高 × 随机
-    const variant = Math.floor(rng() * 3)                                            // 包包/坡形态三选一
-    return {
-      id: b._id, left: 60 + i * 340, width, height,
-      bottom: Math.round(H * 0.30) + (i % 3) * 24,
-      src: '/images/ocean/slab_' + slabFor(b.createdAt) + '_v' + variant + '.png'
-    }
+// 一个年代=一屏宽；山在海上密排；小船与最新生成的山在一起
+function layoutMountains (icebergs, H, W, birthYear) {
+  const list = (icebergs || []).slice()
+  const stages = life.getStages()
+  const eraOf = (b) => {
+    const z = stageOfMemory(b, birthYear)
+    const i = stages.findIndex((s) => s.name === z.name || s.key === z.key)
+    return i < 0 ? stages.length : i
+  }
+  const groups = {}
+  list.forEach((b) => { const e = eraOf(b); (groups[e] = groups[e] || []).push(b) })
+  const eras = Object.keys(groups).map(Number).sort((a, b) => a - b)   // 左=年轻 右=老年
+  const worldWidth = Math.max(W, eras.length * W)
+  const mountains = []
+  eras.forEach((e, ei) => {
+    const g = groups[e].sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0))
+    g.forEach((b, i) => {
+      const rng = mulberry(hash(b._id || String(i)) + 7)
+      const len = (b.text || '').length
+      const width = Math.round(90 + rng() * 70)                                        // 密排 90–160
+      const height = Math.round((50 + Math.min(130, len * 0.45)) * (0.85 + rng() * 0.4)) // 内容越多越高
+      const variant = Math.floor(rng() * 3)
+      const x = ei * W + ((i * 0.37 + 0.13) % 1) * (W - width)
+      const bottom = Math.round(H * (0.20 + ((i * 0.61 + 0.29) % 1) * 0.26))
+      mountains.push({
+        id: b._id, left: Math.round(x), width, height, bottom,
+        createdAt: b.createdAt || 0,
+        src: '/images/ocean/slab_' + slabFor(b.createdAt) + '_v' + variant + '.png'
+      })
+    })
   })
+  let newest = null
+  mountains.forEach((m) => { if (!newest || m.createdAt > newest.createdAt) newest = m })
+  const boatW = 95
+  let boatX = newest ? Math.round(newest.left + newest.width + 8) : Math.round(W * 0.4)
+  if (newest && boatX + boatW > worldWidth) boatX = Math.max(0, Math.round(newest.left - boatW - 8))
+  return { mountains, worldWidth, boatX, boatBottom: Math.round(H * 0.15) }
 }
 
 module.exports = { buildWorld, centerOn, regionAt, stageOfMemory, layoutBergs, layoutMilestones, layoutMountains, windowSize, hash }
