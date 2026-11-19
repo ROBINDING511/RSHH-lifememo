@@ -11,15 +11,6 @@
 .prof-input { min-height: 88rpx; display: flex; align-items: center; justify-content: center; background: var(--c-soft); border: 2rpx solid rgba(9,8,86,.15); border-radius: var(--radius-md); color: var(--c-primary); font-size: var(--fs-md); font-weight: 500; text-align: center; }
 .prof-save { margin-top: 16rpx; min-height: 80rpx; display: flex; align-items: center; justify-content: center; background: var(--c-primary); color: #fff; border-radius: var(--radius-md); font-size: var(--fs-md); }
 
-.stage-bar { position: relative; height: 40rpx; margin: 8rpx 8rpx 24rpx; border-radius: 20rpx; overflow: hidden; background: var(--c-soft); }
-.seg { position: absolute; top: 0; height: 100%; }
-.stage-row2 { display: flex; align-items: center; gap: 12rpx; min-height: 96rpx; }
-.num-box { width: 120rpx; min-height: 80rpx; background: var(--c-soft); border: 2rpx solid rgba(9,8,86,.15); border-radius: var(--radius-md); text-align: center; font-size: var(--fs-md); color: var(--c-text); font-weight: 600; }
-.num-box[disabled] { color: var(--c-text-2); background: transparent; border-color: transparent; }
-.num-open { display: flex; align-items: center; justify-content: center; color: var(--c-text-2); font-weight: 500; background: transparent; border-color: transparent; }
-.dash { color: var(--c-text-2); font-size: var(--fs-md); }
-.unit { color: var(--c-text-2); font-size: var(--fs-sm); margin-right: 8rpx; }
-.stage-swatch { width: 32rpx; height: 32rpx; border-radius: 8rpx; }
 /* 主菜单：一级 + 二级 */
 .menu-group { margin: 0 0 20rpx; }
 .menu-l1 { display: flex; align-items: center; justify-content: space-between; min-height: 96rpx; padding: 0 28rpx; background: var(--c-card); border: 2rpx solid var(--hairline); border-radius: var(--radius-lg); box-shadow: 0 1px 2px rgba(0,0,0,.05); }
@@ -32,12 +23,7 @@
 .style-opt.on { background: var(--c-primary-soft); color: var(--c-primary); font-weight: 500; }
 .hub-row { display: flex; gap: 16rpx; margin: 0 0 24rpx; }
 .hub-pill { flex: 1; min-height: 88rpx; display: flex; align-items: center; justify-content: center; background: var(--c-card); border: 2rpx solid var(--hairline); border-radius: var(--radius-md); color: var(--c-text); font-size: var(--fs-md); font-weight: 500; box-sizing: border-box; }
-.stage-rows { display: flex; flex-direction: column; gap: 16rpx; }
 .ms-list { display: flex; flex-direction: column; gap: 12rpx; }
-.stage-name { flex: 1; font-size: var(--fs-md); color: var(--c-text); font-weight: 500; }
-.name-box { flex: 1; min-height: 80rpx; background: var(--c-soft); border: 2rpx solid rgba(9,8,86,.15); border-radius: var(--radius-md); padding: 0 16rpx; font-size: var(--fs-md); color: var(--c-text); font-weight: 500; box-sizing: border-box; }
-.range-from { flex: 0 0 64rpx; text-align: right; font-size: var(--fs-sm); color: var(--c-text-2); }
-.add-sea { margin-top: 16rpx; min-height: 88rpx; display: flex; align-items: center; justify-content: center; background: var(--c-card); border: 2rpx solid rgba(9,8,86,.28); border-radius: 999rpx; color: var(--c-primary); font-size: var(--fs-sm); box-sizing: border-box; }
 
 /* 自定义人生节点 */
 .ms-invite { display: block; font-size: var(--fs-xs); color: var(--c-text-2); line-height: 1.6; margin-bottom: 16rpx; }

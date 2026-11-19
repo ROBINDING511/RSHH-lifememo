@@ -8,19 +8,13 @@ const draft = require('../../utils/draft')
 const life = require('../../utils/life')
 const sea = require('../../utils/sea')
 const ui = require('../../utils/ui')
-const prompts = require('../../utils/prompts')
 
 Page({
   data: {
     capsuleBottom: 88,
     // 场景
-    bgLoaded: false,
-    bergs: [],
-    milestones: [],
-    stages: [],
     worldWidth: 0, worldHeight: 0, movX: 0, movY: 0, seaScale: 1,
-    tintGradient: '',
-    whalePaused: false,
+    boatPaused: false,
     movableDisabled: false,
     birthYear: null,
     // 录音
@@ -30,12 +24,10 @@ Page({
     preview: null, previewVoicePlaying: false, publishing: false,
     drafts: [], icebergCount: 0,
     // 提示脚手架 / 那年今日 / 家人 / 声音克隆 / 环境音
-    prompt: '', todayMemory: null,
     familyOwner: null, familyReactCount: 0,
     voiceReview: null, voiceState: 'collecting',
     sheetDy: 0, sheetSettle: true,
     // v2.0 C 门控 / D 字幕 / A9 状态 / A8 情绪
-    recConsent: false,
     locked: false, lockArmed: false,
     liveBig: false, liveExpanded: false, liveFollow: true, liveTail: '',
     previewStatus: '', previewEmotion: false,
@@ -43,7 +35,6 @@ Page({
     birthSkipped: false, birthOther: false, birthOtherVal: '', birthIdx: 40,
     bbLeft: 24, bbTop: 200, bbTail: 180, boatLeft: 160, boatTop: 420,
     bubbleShow: false, bubbleText: '', stageLabels: [], topHint: '',
-    greetTitle: '晚上好', greetBody: '今天想聊哪一段？按住下面慢慢说，我听着。', boatBottom: 200,
     birthYears: (() => { const a = []; for (let y = 2010; y >= 1920; y--) a.push(y + '年'); return a })()
   },
 
@@ -52,12 +43,10 @@ Page({
     this.previewAudio = null
     this.recorder = createRecorder()
     // 视角缩放=用户自己的，会话内持久（仅重启重置）
-    this._scale = getApp().globalData.seaScale || 1
     this.setData({
       firstLaunch: getApp().globalData.firstLaunch,
       capsuleBottom: this.safeTop(),
       familyOwner: wx.getStorageSync('familyOwner') || null,
-      seaScale: this._scale
     })
     if (query && query.edit) this.loadForEdit(query.edit)
     wx.authorize({ scope: 'scope.record' }).catch(() => {})   // 进页即申请麦克风，不等按住
@@ -77,11 +66,9 @@ Page({
       this.setupWorld(false)
       this._worldInited = true
     } else {
-      this.setData({ milestones: sea.layoutMilestones(this._regions || life.getStages()) })
     }
-    this.setData({ birthYear: life.getBirthYear(), drafts: draft.list(), whalePaused: false })
+    this.setData({ birthYear: life.getBirthYear(), drafts: draft.list(), boatPaused: false })
     this.refreshData()
-    this.refreshPrompt()
     this.refreshToday()
     this.refreshReactions()
     this.refreshVoice()
@@ -89,20 +76,6 @@ Page({
   },
 
   // 提示脚手架：一次一个问题（家人投喂的优先）
-  async refreshPrompt () {
-    let fed = null
-    if (!this.data.familyOwner) {
-      try {
-        const r = (await wx.cloud.callFunction({ name: 'family', data: { action: 'questions' } })).result || {}
-        if (r.data && r.data.length) {
-          fed = r.data[0].text
-          wx.cloud.callFunction({ name: 'family', data: { action: 'useQuestion', id: r.data[0]._id } }).catch(() => {})
-        }
-      } catch (e) { /* 未部署 family 时静默 */ }
-    }
-    this.setData({ prompt: fed || prompts.pick(null, this.data.prompt) })
-  },
-  nextPrompt () { this.setData({ prompt: prompts.pick(null, this.data.prompt) }) },
 
   // 家人反应回流计数（长辈侧）
   async refreshReactions () {
@@ -204,8 +177,6 @@ Page({
   // ==================== 世界 / 布局 ====================
   // keepPosition=true 时保留上次游到的位置（从详情返回不回到中央）
   setupWorld (keepPosition) {
-    this._suppressScale = true
-    setTimeout(() => { this._suppressScale = false }, 400)
     // 水平滚轴世界：宽随回忆数增长，高=视口；左=年轻 右=久远
     const info = sea.windowSize()
     const lay = this._lay || { worldWidth: info.W, boatX: Math.round(info.W * 0.4), boatBottom: Math.round(info.H * 0.15) }
@@ -221,8 +192,7 @@ Page({
       mx = Math.max(-(W - info.W), Math.min(0, -(lay.boatX - info.W / 2)))   // 首屏对准最新山+船
     }
     this.setData({
-      worldWidth: W, worldHeight: H, movX: mx, movY: 0,
-      boatX: lay.boatX, boatBottom: lay.boatBottom
+      worldWidth: W, worldHeight: H, movX: mx, movY: 0, boatBottom: lay.boatBottom
     })
     this.updateBubble()
   },
@@ -241,11 +211,8 @@ Page({
     this._mountains = lay.mountains
     this._lay = lay
     const mountains = lay.mountains
-    const nick = life.getNickname()
     this.setData({
       icebergCount: icebergs.length, mountains, stageLabels: lay.labels || [],
-      greetTitle: nick ? `${nick}，想聊哪一段？` : '晚上好',
-      greetBody: icebergs.length ? '今天想聊哪一段？按住下面慢慢说，我听着。' : '海还空着。按住说一段，第一座雪山就落下来。'
     })
     this.setupWorld(true)
     this.updateBubble()
@@ -424,7 +391,7 @@ Page({
     else if (lock) this.setData({ locked: true })   // 右滑锁定：松手继续录(免按住)
     else this.finishRecording()
   },
-  onWhaleLongPress () {
+  onBoatLongPress () {
     if (this.data.recording || this.data.preview) return
     this._holdSource = 'whale'
     this.startRecording('hold')
@@ -455,7 +422,7 @@ Page({
       onStop: async (wavPath, durationMs, err) => {
         this._recActive = false
         this._lastDuration = durationMs
-        this.setData({ recording: false, countdown: 0, elapsed: 0, recordMode: '', whalePaused: false, cancelArmed: false })
+        this.setData({ recording: false, countdown: 0, elapsed: 0, recordMode: '', boatPaused: false, cancelArmed: false })
         this.applyTranscript()
         if (this.cancelRequested) {
           // 上滑取消=完全收回：不落草稿、不留任何条/卡，界面干净
@@ -516,35 +483,16 @@ Page({
   },
 
   // ==================== 场景触摸 ====================
-  onBgLoad () { if (!this.data.bgLoaded) this.setData({ bgLoaded: true }) },
-  onSceneTouchStart () { this._seaTouching = true; if (!this.data.whalePaused) this.setData({ whalePaused: true }) },
+  onSceneTouchStart () { this._seaTouching = true; if (!this.data.boatPaused) this.setData({ boatPaused: true }) },
   onSceneTouchEnd () {
     this._seaTouching = false
     if (this.data.recording && this._holdSource === 'whale') return this.finishRecording()
-    if (!this.data.recording && this.data.whalePaused) this.setData({ whalePaused: false })
+    if (!this.data.recording && this.data.boatPaused) this.setData({ boatPaused: false })
   },
-  onWhaleTap () {
+  onBoatTap () {
     wx.navigateTo({ url: '/pages/stages/stages' })
   },
   // 生日引导：点建议年份 / 滚轮选 / 跳过
-  pickBirthYear (e) {
-    const v = e.currentTarget.dataset.y
-    if (v === 'other') { this.setData({ birthOther: true }); return }
-    const y = Number(v)
-    const p = life.getProfile() || {}
-    life.setProfile(Object.assign({}, p, { mode: 'year', year: y }))
-    this.setData({ birthYear: y, birthOther: false })
-    ui.toast(`记下了，${y}年`, 2000)
-  },
-  onBirthOtherInput (e) { this.setData({ birthOtherVal: e.detail.value }) },
-  confirmBirthOther () {
-    const y = parseInt(this.data.birthOtherVal, 10)
-    if (!y || y < 1900 || y > 2020) { ui.toast('填个四位年份，如1958', 2000); return }
-    const p = life.getProfile() || {}
-    life.setProfile(Object.assign({}, p, { mode: 'year', year: y }))
-    this.setData({ birthYear: y, birthOther: false })
-    ui.toast(`记下了，${y}年`, 2000)
-  },
   onBirthPick (e) {
     this.setData({ birthIdx: Number(e.detail.value) })
     const y = 2010 - Number(e.detail.value)
@@ -611,54 +559,7 @@ Page({
     })
   },
   // 双指捏合缩放（聚拢缩小 / 打开放大）
-  onSeaScale (e) {
-    // 只认用户双指捏合（有触摸）；页面重排的伪 scale 事件一律忽略
-    if (this._suppressScale || !this._seaTouching) return
-    this._scale = e.detail.scale
-    getApp().globalData.seaScale = e.detail.scale   // 会话内记住用户视角
-    this.setData({ seaScale: e.detail.scale })
-  },
 
-  onBergDragStart (e) {
-    this._dragId = e.currentTarget.dataset.id
-    this._dragIdx = Number(e.currentTarget.dataset.i)
-    this.setData({ movableDisabled: true })
-    if (wx.vibrateShort) wx.vibrateShort({ type: 'light' })
-    ui.toast('拖到别的海，松手放下', 1600)
-  },
-  onBergDragMove (e) {
-    if (!this._dragId || e.currentTarget.dataset.id !== this._dragId) return
-    const b = this.data.bergs[this._dragIdx]
-    if (!b) return
-    const p = this._worldPoint(e.touches[0])
-    this.setData({ [`bergs[${this._dragIdx}].left`]: p.x - b.width / 2, [`bergs[${this._dragIdx}].top`]: p.y - b.width / 2 })
-  },
-  async onBergDragEnd (e) {
-    if (!this._dragId) return
-    const id = this._dragId, i = this._dragIdx
-    this._dragId = null
-    this.setData({ movableDisabled: false })
-    const b = this.data.bergs[i]
-    if (!b) return
-    const t = (e.changedTouches && e.changedTouches[0]) || {}
-    const p = t.clientX != null ? this._worldPoint(t) : { x: b.left + b.width / 2, y: b.top + b.width / 2 }
-    const g = sea.regionAt(this._regions, p.x, p.y)
-    if (!g) return this.refreshData()
-    const r = g.r || 120
-    const offX = Math.max(-0.85, Math.min(0.85, (p.x - g.cx) / r))
-    const offY = Math.max(-0.85, Math.min(0.85, (p.y - g.cy) / r))
-    try {
-      await api.updateIceberg(id, { zoneName: g.key, offX, offY })
-      ui.toast('移到' + g.key + '之海', 1800)
-    } catch (err) { ui.toast('没移过去，再试试') }
-    this.refreshData()
-  },
-  _worldPoint (touch) {
-    const mx = this._movX != null ? this._movX : this.data.movX
-    const my = this._movY != null ? this._movY : this.data.movY
-    const s = this._scale || 1
-    return { x: (touch.clientX - mx) / s, y: (touch.clientY - my) / s }
-  },
 
   // ==================== 草稿 / 复核 / 发布 ====================
   recoverDraft () {

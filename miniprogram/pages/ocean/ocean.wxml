@@ -25,12 +25,12 @@
   </movable-area>
 
   <!-- 小船=杭航：固定视口层、夹在画面内不撞边；山间海上飘；长按说话副入口 -->
-  <view class="boat-drift {{whalePaused || recording ? 'paused' : ''}}"
+  <view class="boat-drift {{boatPaused || recording ? 'paused' : ''}}"
     style="left:{{boatLeft}}px;top:{{boatTop}}px"
-    bindtap="onWhaleTap" bindlongpress="onWhaleLongPress" hover-class="whale-hover" hover-stay-time="80">
+    bindtap="onBoatTap" bindlongpress="onBoatLongPress" hover-class="boat-hover" hover-stay-time="80">
     <image class="boat-img" src="/assets/boat.png" mode="widthFix" />
     <!-- 小船上的气泡：生日引导+回答建议 -->
-    <view class="whale-bubble" wx:if="{{!birthYear && !birthSkipped && !recording && !preview}}" catchtap="noop">
+    <view class="birth-bubble" wx:if="{{!birthYear && !birthSkipped && !recording && !preview}}" catchtap="noop">
       <text class="wb-q">请问您出生于哪一年？</text>
       <picker mode="selector" range="{{birthYears}}" value="{{birthIdx}}" bindchange="onBirthPick">
         <view class="wb-field">点一下，滚轮选出生年份</view>

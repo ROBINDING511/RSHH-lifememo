@@ -132,7 +132,6 @@ Page({
     this.setData({ cloneConsent: false, showClonePanel: false })
     wx.showToast({ title: '已关闭，不再收集克隆样本', icon: 'none' })
   },
-  noop () {},
   // 主菜单：一级展开/收起二级
   toggleMenu (e) {
     const k = e.currentTarget.dataset.k
@@ -198,33 +197,6 @@ Page({
   },
 
   // ---- 海：改名 / 改边界 / 增删片数 ----
-  onNameInput (e) {
-    const i = Number(e.currentTarget.dataset.i)
-    this._draft[i].name = e.detail.value || ('海' + (i + 1))
-    this.syncDraft()
-  },
-  onToInput (e) {
-    const i = Number(e.currentTarget.dataset.i)
-    if (i >= this._draft.length - 1) return   // 最后一片是"以后"
-    const v = parseInt(e.detail.value, 10)
-    if (!isFinite(v)) return
-    const lo = i === 0 ? 1 : this._draft[i - 1].to + 1
-    const hi = this._draft[i + 1].to - 1
-    this._draft[i].to = Math.max(lo, Math.min(hi, v))
-    this.syncDraft()
-  },
-  addSea () {
-    const last = this._draft[this._draft.length - 1]
-    const prev = this._draft[this._draft.length - 2]
-    const mid = Math.round((prev.to + last.to) / 2)
-    this._draft.splice(this._draft.length - 1, 0, { name: '新海', to: Math.max(prev.to + 1, mid), flag: true })
-    this.syncDraft()
-  },
-  removeSea (e) {
-    if (this._draft.length <= 2) return wx.showToast({ title: '至少留两片海', icon: 'none' })
-    this._draft.splice(Number(e.currentTarget.dataset.i), 1)
-    this.syncDraft()
-  },
   resetDefault () {
     life.resetStages()
     this._draft = life.getStages().map((s) => ({ name: s.name, to: s.to, flag: s.flag }))
