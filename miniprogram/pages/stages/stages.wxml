@@ -2,7 +2,6 @@
 <view class="page wash-bg">
   <view class="head">
     <text class="title">杭航</text>
-    <text class="sub">小船的主菜单 · 点一级展开二级</text>
   </view>
 
   <!-- 搜索框：搜全部回忆 -->
@@ -23,7 +22,6 @@
   <view class="menu-group">
     <view class="menu-l1" hover-class="btn-hover" hover-stay-time="80" data-k="about" bindtap="toggleMenu">
       <text class="menu-l1-t">关于我</text>
-      <text class="menu-l1-x">{{openMenu === 'about' ? '收起' : '展开'}}</text>
     </view>
     <view class="menu-l2" wx:if="{{openMenu === 'about'}}">
       <view class="menu-link" hover-class="btn-hover" hover-stay-time="80" bindtap="toggleNick">怎么称呼你{{nickname ? '：' + nickname : ''}}</view>
@@ -42,7 +40,6 @@
   <view class="menu-group">
     <view class="menu-l1" hover-class="btn-hover" hover-stay-time="80" data-k="sea" bindtap="toggleMenu">
       <text class="menu-l1-t">我的海</text>
-      <text class="menu-l1-x">{{openMenu === 'sea' ? '收起' : '展开'}}</text>
     </view>
     <view class="menu-l2" wx:if="{{openMenu === 'sea'}}">
       <view class="card">
@@ -72,7 +69,6 @@
   <view class="menu-group">
     <view class="menu-l1" hover-class="btn-hover" hover-stay-time="80" data-k="ai" bindtap="toggleMenu">
       <text class="menu-l1-t">AI+</text>
-      <text class="menu-l1-x">{{openMenu === 'ai' ? '收起' : '展开'}}</text>
     </view>
     <view class="menu-l2" wx:if="{{openMenu === 'ai'}}">
       <view class="card">
@@ -105,7 +101,6 @@
   <view class="menu-group">
     <view class="menu-l1" hover-class="btn-hover" hover-stay-time="80" data-k="family" bindtap="toggleMenu">
       <text class="menu-l1-t">家人共建</text>
-      <text class="menu-l1-x">{{openMenu === 'family' ? '收起' : '展开'}}</text>
     </view>
     <view class="menu-l2" wx:if="{{openMenu === 'family'}}">
       <view class="card">
