@@ -10,7 +10,7 @@ Page({
     milestones: life.getMilestones(), msName: '', msAge: '',
     inviteCode: '', bindCode: '', feedQ: '',
     polishStyle: 'light',
-    openMenu: 'sea', cloneConsent: false, nickname: '',
+    openMenu: 'sea', cloneConsent: false, showClonePanel: false, nickname: '',
     searchQ: '', searchResults: [],
     voiceState: '', voiceSampleUrl: '',
     listening: false, voiceText: ''
@@ -96,26 +96,30 @@ Page({
     life.setNickname(n)
     wx.showToast({ title: `好了，${n}`, icon: 'none' })
   },
-  // 声纹=敏感个人信息：单独同意开关（默认关）
-  toggleCloneConsent () {
+  // 声音克隆=菜单子功能：默认关闭；主动点开才弹同意框
+  openClone () {
     if (this.data.cloneConsent) {
-      wx.setStorageSync('cloneConsent', '0')
-      this.setData({ cloneConsent: false })
-      wx.showToast({ title: '已关闭，不再收集克隆样本', icon: 'none' })
+      this.setData({ showClonePanel: !this.data.showClonePanel })
       return
     }
     wx.showModal({
-      title: '克隆您的声音，需要您单独同意',
-      content: '声音特征属于敏感个人信息。同意后才会用您的录音克隆一个"您的声音"，仅存在您的云空间、可随时删除；不同意完全不影响记录回忆。',
-      confirmText: '同意克隆', cancelText: '不同意',
+      title: '克隆您的声音，需要您同意',
+      content: '用您的录音做一个"您的声音"，只存您自己的云空间、随时可删；不同意完全不影响记录回忆。',
+      confirmText: '同意并开启', cancelText: '不同意',
       success: (r) => {
         if (r.confirm) {
           wx.setStorageSync('cloneConsent', '1')
-          this.setData({ cloneConsent: true })
-          wx.showToast({ title: '已同意，开始收集声音', icon: 'none' })
+          this.setData({ cloneConsent: true, showClonePanel: true })
+          this.refreshVoice()
+          wx.showToast({ title: '已开启，开始收集声音', icon: 'none' })
         }
       }
     })
+  },
+  closeClone () {
+    wx.setStorageSync('cloneConsent', '0')
+    this.setData({ cloneConsent: false, showClonePanel: false })
+    wx.showToast({ title: '已关闭，不再收集克隆样本', icon: 'none' })
   },
   noop () {},
   // 主菜单：一级展开/收起二级
