@@ -614,6 +614,20 @@ Page({
     return out
   },
 
+  // 用户口述请求开新海：按提到的年份换算岁数→加节点开海→整段文字归入该海
+  applyNewSea (ns) {
+    const by = life.getBirthYear()
+    const name = String(ns.name || '').trim().slice(0, 8)
+    if (!name) return null
+    if (!by) { this.showTopHint('先在"关于我"填出生年月，才能开新海'); return null }
+    const year = parseInt(ns.year, 10)
+    if (!isFinite(year)) { this.showTopHint('没说清哪一年，先记在原海'); return null }
+    const age = year - by
+    if (age < 0 || age > 120) return null
+    life.addMilestone(name, age)
+    this.showTopHint('听懂了：新开「' + name + '」之海，这段记在里面')
+    return name
+  },
   async refinePreview (wavPath, text) {
     let finalText = (text || '').trim()
     if (this.asr) {
@@ -633,12 +647,20 @@ Page({
     }
     p = this.data.preview
     if (!p || p.wavPath !== wavPath) return
+    // 听懂"把这段变成一片新的海"→自动开海，并把整段记进这片海
+    let newSeaName = null
+    if (r && r.newSea && r.newSea.name) newSeaName = this.applyNewSea(r.newSea)
     const stages = life.getStages()
     // 默认保留讲述者原话（逐字）；AI 小标题可选、可一键还原
     const upd = { 'preview.rawText': finalText, 'preview.audioOnly': !finalText && !!wavPath, 'preview.zoneOptions': stages.map((s) => s.key), 'preview._aiTitle': (r && r.title) || '', 'preview._four': (r && r.four) || '', 'preview.showTitle': false }
     // AI 标题直接加在文字上方（不可关，但可在框内直接点改）；四字名字另存 _four
     if (finalText) upd['preview.text'] = (r && r.title) ? `${r.title}\n${finalText}` : finalText
     Object.assign(upd, this.computeTimeZone(finalText))
+    if (newSeaName) {
+      const idx = stages.findIndex((s) => s.name === newSeaName || s.key === newSeaName)
+      if (idx >= 0) { upd['preview.zoneIndex'] = idx; upd['preview.zoneName'] = stages[idx].name }
+      if (r.newSea.year) upd['preview._autoYear'] = parseInt(r.newSea.year, 10)
+    }
     this.setData(upd)
     if (this.data.previewStatus !== 'failed') this.setData({ previewStatus: 'done' })
   },
