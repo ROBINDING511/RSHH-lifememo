@@ -268,7 +268,7 @@ Page({
       const mgr = plugin.getRecordRecognitionManager()
       this._native = mgr
       mgr.onRecognize = (res) => { if (res && res.result) this.setData({ voiceText: res.result }) }
-      mgr.onStop = (res) => { this.setData({ listening: false }); this.applyNodes((res && res.result) || this.data.voiceText) }
+      mgr.onStop = (res) => { this.setData({ listening: false }); this.applyNodes((res && res.result) || this.data.voiceText, res && res.tempFilePath) }
       mgr.onError = () => { this.setData({ listening: false }); wx.showToast({ title: '没听清，按住再说一次', icon: 'none' }) }
       mgr.start({ lang: 'zh_CN', duration: 60000 })
       return
@@ -288,9 +288,56 @@ Page({
         let text = this.data.voiceText
         if (this.asr) { const t = await this.asr.finish(1200).catch(() => ''); if (t && t.length > text.length) text = t; this.asr.close() }
         this.setData({ listening: false })
-        this.applyNodes(text)
+        this.applyNodes(text, wavPath)
       }
     })
+  },
+  // 大模型听懂多个节点→自动填好（去重/合并反复），带年月日
+  async applyNodes (text, wavPath) {
+    if ((!text || !text.trim()) && wavPath) {
+      wx.showLoading({ title: '正在听懂您的节点…', mask: true })
+      try {
+        const up = await wx.cloud.uploadFile({ cloudPath: 'tmp_asr/nodes_' + Date.now() + '.wav', filePath: wavPath })
+        const r = (await wx.cloud.callFunction({ name: 'transcribe', data: { fileID: up.fileID } })).result || {}
+        if (r.ok && r.text) text = r.text
+        wx.cloud.deleteFile({ fileList: [up.fileID] }).catch(() => {})
+      } catch (e) {}
+      wx.hideLoading()
+    }
+    this.setData({ voiceText: text })
+    if (!text || !text.trim()) return wx.showToast({ title: '没听清，按住再说一次', icon: 'none' })
+    const by = life.getBirthYear()
+    wx.showLoading({ title: '正在听懂您的节点…', mask: true })
+    let nodes = []
+    try {
+      const r = (await wx.cloud.callFunction({ name: 'analyze', data: { action: 'milestones', text } })).result || {}
+      nodes = r.nodes || []
+    } catch (e) {}
+    wx.hideLoading()
+    if (!nodes.length) {
+      const ms = life.parseMilestoneFromText(text)
+      if (ms && ms.name) nodes = [{ name: ms.name, year: by ? by + ms.age : null }]
+    }
+    if (!nodes.length) return wx.showToast({ title: '没听懂节点，试试"2011年7月毕业"', icon: 'none', duration: 2600 })
+    let added = 0
+    const seen = {}
+    nodes.forEach((n) => {
+      const year = parseInt(n.year, 10)
+      const name = String(n.name || '').trim().slice(0, 8)
+      if (!name || !isFinite(year)) return
+      const age = by != null ? year - by : null
+      if (age != null && (age < 0 || age > 120)) return
+      const key = name + '@' + year
+      if (seen[key]) return
+      seen[key] = 1
+      const date = n.year + '年' + (n.month ? n.month + '月' : '') + (n.day ? n.day + '日' : '')
+      life.addMilestone(name, age, year, date)
+      added++
+    })
+    this.setData({ milestones: life.getMilestones() })
+    this.syncDraft()
+    wx.showToast({ title: added ? '听懂了，填好' + added + '个节点' : '这些节点已经有了', icon: 'none', duration: 2400 })
+    if (added && by == null) setTimeout(() => wx.showToast({ title: '方便的话在"关于我"填出生年月，岁数会自动算', icon: 'none', duration: 2600 }), 2500)
   },
   onNodeEnd () { if (!this.data.listening) return; if (this._native) this._native.stop(); else this.recorder.stop() },
   onUnload () { if (this.asr) this.asr.close(); if (this.recorder.recording) this.recorder.stop() }

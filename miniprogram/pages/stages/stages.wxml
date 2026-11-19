@@ -51,7 +51,10 @@
         <text class="voice-text" wx:if="{{voiceText}}">{{voiceText}}</text>
         <view class="ms-list">
           <view wx:for="{{milestones}}" wx:key="id" class="ms-row">
-            <text class="ms-age">{{item.age != null ? item.age + '岁' : item.year + '年'}}</text>
+            <view class="ms-when">
+              <text class="ms-date">{{item.date || (item.year + '年')}}</text>
+              <text class="ms-age" wx:if="{{item.age != null}}">{{item.age}}岁</text>
+            </view>
             <text class="ms-name">{{item.name}}</text>
             <view class="ms-del" hover-class="btn-hover" hover-stay-time="80" data-id="{{item.id}}" bindtap="removeMs">×</view>
           </view>

@@ -128,10 +128,12 @@ function parseStagesFromText (text) {
 // 小旗只标"用户自己加的节点"，默认阶段边界不插旗（避免少年13/晚年60都挂旗）
 function getMilestones () {
   return getStages().filter((s) => s.flag && (s.fromYear != null || s.from > 0))
-    .map((s) => ({ id: s.key, name: s.name, age: s.from != null && s.from > 0 ? s.from : null, year: s.fromYear }))
+    .map((s) => ({ id: s.key, name: s.name, age: s.from != null && s.from > 0 ? s.from : null, year: s.fromYear, date: getDates()[s.name] || null }))
 }
 function setMilestones (m) { /* 节点即海边界，直接改海即可，此处保留空实现兼容 */ }
-function addMilestone (name, age, year) {
+function getDates () { try { return wx.getStorageSync('lifeMilestoneDates') || {} } catch (e) { return {} } }
+function setDates (d) { try { wx.setStorageSync('lifeMilestoneDates', d) } catch (e) {} }
+function addMilestone (name, age, year, date) {
   const by = getBirthYear()
   const nm = String(name).slice(0, 8)
   let y = year != null && isFinite(Number(year)) ? Number(year) : null
@@ -148,6 +150,7 @@ function addMilestone (name, age, year) {
     raw[i].toYear = y - 1
     raw.splice(i + 1, 0, { name: nm, toYear: oldTo, flag: true })
     setStages(raw)
+    if (date) { const d = getDates(); d[nm] = date; setDates(d) }
     return getMilestones()
   }
   // 仅岁数且无生日：旧岁数模式兜底
@@ -160,6 +163,7 @@ function addMilestone (name, age, year) {
   list[i].to = a - 1
   list.splice(i + 1, 0, { name: nm, to: oldTo, flag: true })
   setStages(list)
+  if (date) { const d = getDates(); d[nm] = date; setDates(d) }
   return getMilestones()
 }
 function removeMilestone (id) {
@@ -170,6 +174,7 @@ function removeMilestone (id) {
   const list = stages.map((s) => yearMode ? ({ name: s.name, toYear: s.toYear, flag: s.flag }) : ({ name: s.name, to: s.to, flag: s.flag }))
   if (yearMode) list[i - 1].toYear = list[i].toYear
   else list[i - 1].to = list[i].to        // 合并进前一片海
+  const d = getDates(); delete d[list[i].name]; setDates(d)
   list.splice(i, 1)
   setStages(list)
   return getMilestones()

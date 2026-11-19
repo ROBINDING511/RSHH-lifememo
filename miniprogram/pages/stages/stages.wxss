@@ -56,3 +56,6 @@
 .trash-lid { width: 44rpx; height: 8rpx; border-radius: 4rpx; background: var(--c-text-soft); position: relative; }
 .trash-lid::after { content: ''; position: absolute; left: 16rpx; top: -6rpx; width: 12rpx; height: 6rpx; border-radius: 3rpx 3rpx 0 0; background: var(--c-text-soft); }
 .trash-body { width: 36rpx; height: 40rpx; border-radius: 0 0 8rpx 8rpx; background: var(--c-text-soft); }
+
+.ms-when { display: flex; flex-direction: column; gap: 2rpx; flex-shrink: 0; }
+.ms-date { font-size: var(--fs-sm); color: var(--c-primary); font-weight: 700; }
