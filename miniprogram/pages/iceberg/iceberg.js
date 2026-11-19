@@ -23,7 +23,7 @@ Page({
     b: null, icons: ICONS, iconFile: '', showIconMenu: false, loadFailed: false,
     viewCount: 0, playing: false, familyMode: false,
     // v2.0 阅读
-    view: 'clean', big: false, page: 0, pages: [], sentences: [], doubts: [],
+    view: 'clean', page: 0, pages: [], sentences: [], doubts: [],
     confirmExpand: '', fixText: '', fixing: false,
     doubtSheet: null, doubtInput: '',
     cur: 0, dur: 0
@@ -117,7 +117,6 @@ Page({
     this.setData({ pages, segs, pageCount: pages.length })
   },
   setView (e) { this.setData({ view: e.currentTarget.dataset.v }) },
-  toggleBig () { this.setData({ big: !this.data.big }) },
   prevPage () { if (this.data.page > 0) this.setData({ page: this.data.page - 1 }) },
   nextPage () { if (this.data.page < this.data.pageCount - 1) this.setData({ page: this.data.page + 1 }) },
   onBookTouchStart (e) { this._bx = e.touches[0].clientX },

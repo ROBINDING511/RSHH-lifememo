@@ -17,21 +17,20 @@
   </view>
 
   <view class="berg-body card">
-    <!-- A10 三视图 + 大字 -->
+    <!-- A10 三视图 -->
     <view class="view-tabs">
       <view class="view-tab {{view === 'clean' ? 'on' : ''}}" hover-class="btn-hover" hover-stay-time="80" data-v="clean" bindtap="setView">整理稿</view>
       <view class="view-tab {{view === 'raw' ? 'on' : ''}}" hover-class="btn-hover" hover-stay-time="80" data-v="raw" bindtap="setView">逐字</view>
       <view class="view-tab {{view === 'doubt' ? 'on' : ''}}" hover-class="btn-hover" hover-stay-time="80" data-v="doubt" bindtap="setView">疑点标注</view>
-      <view class="view-tab {{big ? 'on' : ''}}" hover-class="btn-hover" hover-stay-time="80" bindtap="toggleBig">大字</view>
     </view>
 
     <!-- 逐字视图（一键还原逐字永远可用） -->
-    <view wx:if="{{view === 'raw'}}" class="berg-text {{big ? 'big' : ''}}">
+    <view wx:if="{{view === 'raw'}}" class="berg-text">
       <text>{{b.rawText || b.text}}</text>
     </view>
 
     <!-- 整理稿 / 疑点标注：E 翻书 -->
-    <view wx:else class="book {{big ? 'big' : ''}}" bindtouchstart="onBookTouchStart" bindtouchend="onBookTouchEnd">
+    <view wx:else class="book" bindtouchstart="onBookTouchStart" bindtouchend="onBookTouchEnd">
       <view class="book-page">
         <view wx:for="{{pages[page]}}" wx:key="*this" wx:for-item="si" class="sent-block">
           <view class="sent-text" data-i="{{si}}" bindtap="playSentence">
