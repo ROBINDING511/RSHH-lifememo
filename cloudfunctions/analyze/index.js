@@ -47,6 +47,17 @@ exports.main = async (event) => {
   const blanks = (event && event.blanks) || []
   if (!text) return { four: '', title: '', timeOptions: [], zoneOptions: [] }
 
+  // 人生节点批量提取：一次说多个年份+事件，反复/重复的合并
+  if (event.action === 'milestones') {
+    const prompt = `从这段话里提取所有人生节点(年份+事件名2-8字)。同一件事反复说/改口的合并为一条(以最后清楚的为准)；只说年份没事件名的忽略。只输出JSON{"nodes":[{"name":"毕业","year":2011}]}，最多8条；没有则{"nodes":[]}。话：${text}`
+    try {
+      const r = await chat([{ role: 'user', content: prompt }])
+      const m = String(r.choices[0].message.content).match(/\{[\s\S]*\}/)
+      const j = JSON.parse(m ? m[0] : '{}')
+      return { nodes: Array.isArray(j.nodes) ? j.nodes.slice(0, 8) : [] }
+    } catch (e) { return { nodes: [] } }
+  }
+
   // 引导对话提取（称呼/出生年/重要事件/事件时间）
   if (event.onboard) {
     const P = {

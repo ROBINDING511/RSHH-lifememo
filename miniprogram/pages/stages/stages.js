@@ -6,7 +6,6 @@ const { createRecorder } = require('../../utils/recorder')
 Page({
   data: {
     stages: [],
-    profileMode: 'year', profileBirthday: '', profileAge: '', profileYear: '',
     milestones: life.getMilestones(), msName: '', msAge: '',
     inviteCode: '', bindCode: '', feedQ: '',
     polishStyle: 'light',
@@ -92,7 +91,6 @@ Page({
     }
   },
   toggleNick () { this.setData({ showNick: !this.data.showNick, showAge: false }) },
-  toggleAge () { this.setData({ showAge: !this.data.showAge, showNick: false }) },
   fmtAge (p) {
     if (!p) return ''
     if (p.mode === 'birthday' && p.birthday) return p.birthday
@@ -108,11 +106,8 @@ Page({
     wx.showToast({ title: `好了，${n}`, icon: 'none' })
   },
   // 声音克隆=菜单子功能：默认关闭；主动点开才弹同意框
-  openClone () {
-    if (this.data.cloneConsent) {
-      this.setData({ showClonePanel: !this.data.showClonePanel })
-      return
-    }
+  toggleCloneSwitch () {
+    if (this.data.cloneConsent) { this.closeClone(); return }   // 再点=关闭
     wx.showModal({
       title: '克隆您的声音，需要您同意',
       content: '用您的录音做一个"您的声音"，只存您自己的云空间、随时可删；不同意完全不影响记录回忆。',
@@ -181,19 +176,12 @@ Page({
   syncDraft () { this.setData({ stages: life.buildStages(this._draft) }) },
 
   // ---- 个人资料 ----
-  setMode (e) { this.setData({ profileMode: e.currentTarget.dataset.m }) },
-  onBirthdayPick (e) { this.setData({ profileBirthday: e.detail.value }) },
-  onAgeInput (e) { this.setData({ profileAge: e.detail.value }) },
-  onYearInput (e) { this.setData({ profileYear: e.detail.value }) },
-  saveProfile () {
-    const m = this.data.profileMode
-    const p = { mode: m }
-    if (m === 'birthday') { if (!this.data.profileBirthday) return wx.showToast({ title: '先选生日', icon: 'none' }); p.birthday = this.data.profileBirthday }
-    else if (m === 'age') { if (!this.data.profileAge) return wx.showToast({ title: '填个年龄', icon: 'none' }); p.age = Number(this.data.profileAge) }
-    else { if (!this.data.profileYear) return wx.showToast({ title: '填个年份', icon: 'none' }); p.year = Number(this.data.profileYear) }
-    life.setProfile(p)
-    this.setData({ ageDisplay: this.fmtAge(life.getProfile()), showAge: false })   // 记好后显示在菜单上
-    wx.showToast({ title: '记好了', icon: 'none' })
+  onBirthdayPick (e) {
+    const b = e.detail.value
+    if (!b) return
+    life.setProfile(Object.assign({}, life.getProfile() || {}, { mode: 'birthday', birthday: b }))
+    this.setData({ profileBirthday: b, ageDisplay: this.fmtAge(life.getProfile()) })
+    wx.showToast({ title: '记好了，' + b, icon: 'none' })
   },
 
   // ---- 海：改名 / 改边界 / 增删片数 ----
@@ -270,7 +258,7 @@ Page({
   },
 
   // ---- 语音：按住跟杭航说 ----
-  onVoiceStart () {
+  onNodeStart () {
     if (this.data.listening) return
     this.setData({ listening: true, voiceText: '' })
     const cfg = api.getAsrConfig()
@@ -288,25 +276,46 @@ Page({
         let text = this.data.voiceText
         if (this.asr) { const t = await this.asr.finish(1200).catch(() => ''); if (t && t.length > text.length) text = t; this.asr.close() }
         this.setData({ listening: false })
-        const list = life.parseStagesFromText(text)
-        if (list) {
-          life.setStages(list)
-          this._draft = life.getStages().map((s) => ({ name: s.name, to: s.to, flag: s.flag }))
-          this.syncDraft()
-          this.setData({ voiceText: text })
-          wx.showToast({ title: '按你说的设好了', icon: 'none', duration: 2200 })
-        } else {
-          const ms = life.parseMilestoneFromText(text)
-          if (ms && ms.name) {
-            this.setData({ milestones: life.addMilestone(ms.name, ms.age), voiceText: text })
-            wx.showToast({ title: '记下节点：' + ms.age + '岁 ' + ms.name, icon: 'none', duration: 2400 })
-          } else {
-            wx.showToast({ title: '没听清，试试说"童年到18岁"或"30岁孩子出生"', icon: 'none', duration: 2600 })
-          }
-        }
+        this.applyNodes(text)
       }
     })
   },
-  onVoiceEnd () { if (this.data.listening) this.recorder.stop() },
+  // 大模型听懂多个节点→自动填好（去重/合并反复）
+  async applyNodes (text) {
+    this.setData({ voiceText: text })
+    if (!text || !text.trim()) return wx.showToast({ title: '没听清，按住再说一次', icon: 'none' })
+    const by = life.getBirthYear()
+    if (!by) return wx.showToast({ title: '先在"关于我"填出生年月，才能换算成岁', icon: 'none', duration: 2600 })
+    wx.showLoading({ title: '正在听懂您的节点…', mask: true })
+    let nodes = []
+    try {
+      const r = (await wx.cloud.callFunction({ name: 'analyze', data: { action: 'milestones', text } })).result || {}
+      nodes = r.nodes || []
+    } catch (e) {}
+    wx.hideLoading()
+    if (!nodes.length) {
+      const ms = life.parseMilestoneFromText(text)
+      if (ms && ms.name) nodes = [{ name: ms.name, year: by + ms.age }]
+    }
+    if (!nodes.length) return wx.showToast({ title: '没听懂节点，试试"2011年毕业"', icon: 'none', duration: 2600 })
+    let added = 0
+    const seen = {}
+    nodes.forEach((n) => {
+      const year = parseInt(n.year, 10)
+      const name = String(n.name || '').trim().slice(0, 8)
+      if (!name || !isFinite(year)) return
+      const age = year - by
+      if (age < 0 || age > 120) return
+      const key = name + '@' + age
+      if (seen[key]) return
+      seen[key] = 1
+      life.addMilestone(name, age)
+      added++
+    })
+    this.setData({ milestones: life.getMilestones() })
+    this.syncDraft()
+    wx.showToast({ title: added ? '听懂了，填好' + added + '个节点' : '这些节点已经有了', icon: 'none', duration: 2400 })
+  },
+  onNodeEnd () { if (this.data.listening) this.recorder.stop() },
   onUnload () { if (this.asr) this.asr.close(); if (this.recorder.recording) this.recorder.stop() }
 })

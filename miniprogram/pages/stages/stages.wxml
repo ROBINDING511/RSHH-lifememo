@@ -1,14 +1,8 @@
-<!--pages/stages/stages.wxml — 杭航主菜单（一级菜单 + 二级菜单）-->
+<!--pages/stages/stages.wxml — 杭航主菜单：关于我 / 我的海 / AI+ / 家人共建 + 回收站图标-->
 <view class="page wash-bg">
   <view class="head">
     <text class="title">杭航</text>
-    <text class="sub">小鲸鱼的主菜单 · 点一级展开二级</text>
-  </view>
-
-  <!-- 鲸鱼菜单快捷按钮：删除的记忆（5天内可找回） -->
-  <view class="hub-row">
-    <view class="hub-pill" hover-class="btn-hover" hover-stay-time="80" bindtap="goRecycle">删除的记忆</view>
-    <view class="hub-pill" hover-class="btn-hover" hover-stay-time="80" bindtap="openClone">声音克隆</view>
+    <text class="sub">小船的主菜单 · 点一级展开二级</text>
   </view>
 
   <!-- 搜索框：搜全部回忆 -->
@@ -24,9 +18,8 @@
     <view class="search-empty" wx:if="{{!searchResults.length}}">没找到相关回忆</view>
   </view>
 
-  <!-- 一级：我的海 -->
   <view wx:if="{{!searchQ}}">
-  <!-- 一级：关于我（称呼/年纪，记好后直接显示） -->
+  <!-- 一级：关于我 -->
   <view class="menu-group">
     <view class="menu-l1" hover-class="btn-hover" hover-stay-time="80" data-k="about" bindtap="toggleMenu">
       <text class="menu-l1-t">关于我</text>
@@ -38,23 +31,14 @@
         <input class="field" type="nickname" value="{{nickname}}" placeholder="点一下可填微信昵称，或自己写" bindinput="onNick" />
         <view class="prof-save" hover-class="btn-hover" hover-stay-time="80" bindtap="saveNick">记好了</view>
       </view>
-      <view class="menu-link" hover-class="btn-hover" hover-stay-time="80" bindtap="toggleAge">你的年纪{{ageDisplay ? '：' + ageDisplay : ''}}</view>
-      <view class="card" wx:if="{{showAge}}">
-        <view class="mode-tabs">
-          <view class="tab {{profileMode==='birthday'?'on':''}}" hover-class="btn-hover" hover-stay-time="80" bindtap="setMode" data-m="birthday">生日</view>
-          <view class="tab {{profileMode==='age'?'on':''}}" hover-class="btn-hover" hover-stay-time="80" bindtap="setMode" data-m="age">年龄</view>
-          <view class="tab {{profileMode==='year'?'on':''}}" hover-class="btn-hover" hover-stay-time="80" bindtap="setMode" data-m="year">出生年份</view>
-        </view>
-        <picker wx:if="{{profileMode==='birthday'}}" mode="date" value="{{profileBirthday||'1960-01-01'}}" start="1900-01-01" end="2020-12-31" bindchange="onBirthdayPick">
-          <view class="prof-input">{{profileBirthday||'点这里选生日'}}</view>
-        </picker>
-        <input wx:elif="{{profileMode==='age'}}" class="prof-input" type="number" value="{{profileAge}}" placeholder="比如 68" bindinput="onAgeInput" />
-        <input wx:else class="prof-input" type="number" value="{{profileYear}}" placeholder="比如 1958" bindinput="onYearInput" />
-        <view class="prof-save" hover-class="btn-hover" hover-stay-time="80" bindtap="saveProfile">记好了</view>
-      </view>
+      <!-- 出生年月：点按直接进滚轮（年/月/日），可不选；一旦确认即完整 -->
+      <picker mode="date" value="{{profileBirthday || '1960-01-01'}}" start="1900-01-01" end="2020-12-31" bindchange="onBirthdayPick">
+        <view class="menu-link">出生年月{{profileBirthday ? '：' + profileBirthday : '（点一下滚轮选）'}}</view>
+      </picker>
     </view>
   </view>
 
+  <!-- 一级：我的海 -->
   <view class="menu-group">
     <view class="menu-l1" hover-class="btn-hover" hover-stay-time="80" data-k="sea" bindtap="toggleMenu">
       <text class="menu-l1-t">我的海</text>
@@ -63,54 +47,57 @@
     <view class="menu-l2" wx:if="{{openMenu === 'sea'}}">
       <view class="card">
         <text class="prof-title">人生节点＝海的开端</text>
-        <text class="ms-invite">每个转折点开启一片新的海；删掉节点，两片海合并。</text>
+        <text class="ms-invite">按住下面，一次性把您的节点都说出来（年份+事），我听懂后自动填好；每个节点开启一片新海。</text>
+        <view class="voice-hold {{listening ? 'on' : ''}}"
+          bindtouchstart="onNodeStart" catchtouchend="onNodeEnd" catchtouchcancel="onNodeEnd">
+          <text>{{listening ? '松开，我听懂就自动填好' : '按住，说你的人生节点'}}</text>
+        </view>
+        <text class="voice-eg">比如："2008年和我老婆相识，2011年毕业，2017年9月22号加入阿里巴巴"</text>
+        <text class="voice-text" wx:if="{{voiceText}}">{{voiceText}}</text>
         <view class="ms-list">
           <view wx:for="{{milestones}}" wx:key="id" class="ms-row">
             <text class="ms-age">{{item.age}}岁</text>
             <text class="ms-name">{{item.name}}</text>
             <view class="ms-del" hover-class="btn-hover" hover-stay-time="80" data-id="{{item.id}}" bindtap="removeMs">×</view>
           </view>
-          <view wx:if="{{!milestones.length}}" class="ms-empty">还没有节点，加一个试试</view>
-        </view>
-        <view class="ms-add">
-          <input class="ms-input ms-name-input" value="{{msName}}" placeholder="比如 孩子出生" bindinput="onMsName" />
-          <input class="ms-input ms-age-input" type="number" value="{{msAge}}" placeholder="几岁" bindinput="onMsAge" />
-          <view class="ms-add-btn" hover-class="btn-hover" hover-stay-time="80" bindtap="addMs">添加</view>
+          <view wx:if="{{!milestones.length}}" class="ms-empty">还没有节点，按住说一段试试</view>
         </view>
       </view>
-
-      <view class="voice-hold {{listening?'on':''}}"
-        bindtouchstart="onVoiceStart" catchtouchend="onVoiceEnd" catchtouchcancel="onVoiceEnd">
-        <text>{{listening ? '松开，我听懂就设好' : '按住跟杭航说你的划分'}}</text>
-      </view>
-      <text class="voice-eg">比如："童年到18岁，青年到40岁"</text>
-      <text class="voice-text" wx:if="{{voiceText}}">{{voiceText}}</text>
-
-      <view class="btns">
-        <view class="btn-reset" hover-class="btn-hover" hover-stay-time="80" bindtap="resetDefault">恢复默认</view>
-        <view class="btn-save" hover-class="btn-hover" hover-stay-time="80" bindtap="saveAll">保存</view>
-      </view>
+      <view class="menu-link" hover-class="btn-hover" hover-stay-time="80" bindtap="goTimeline">时间轴（按年翻一生）</view>
+      <view class="menu-link" hover-class="btn-hover" hover-stay-time="80" bindtap="exportBook">导出回忆录（按年文稿+原声）</view>
     </view>
   </view>
 
-  <!-- 一级：回忆梳理 -->
+  <!-- 一级：AI+（AI 识别的风格 / 声音克隆） -->
   <view class="menu-group">
-    <view class="menu-l1" hover-class="btn-hover" hover-stay-time="80" data-k="recall" bindtap="toggleMenu">
-      <text class="menu-l1-t">回忆梳理</text>
-      <text class="menu-l1-x">{{openMenu === 'recall' ? '收起' : '展开'}}</text>
+    <view class="menu-l1" hover-class="btn-hover" hover-stay-time="80" data-k="ai" bindtap="toggleMenu">
+      <text class="menu-l1-t">AI+</text>
+      <text class="menu-l1-x">{{openMenu === 'ai' ? '收起' : '展开'}}</text>
     </view>
-    <view class="menu-l2" wx:if="{{openMenu === 'recall'}}">
+    <view class="menu-l2" wx:if="{{openMenu === 'ai'}}">
       <view class="card">
-        <text class="prof-title">AI 文字梳理风格</text>
-        <text class="ms-invite">鲸鱼帮您顺文字时按您选的来；原话和原声永远保留，随时可还原。</text>
+        <text class="prof-title">AI 识别的风格</text>
+        <text class="ms-invite">帮您顺文字时按您选的来；原话和原声永远保留。</text>
         <view class="style-row">
           <view class="style-opt {{polishStyle === 'verbatim' ? 'on' : ''}}" hover-class="btn-hover" hover-stay-time="80" data-s="verbatim" bindtap="setStyle">忠实原文</view>
           <view class="style-opt {{polishStyle === 'light' ? 'on' : ''}}" hover-class="btn-hover" hover-stay-time="80" data-s="light" bindtap="setStyle">轻度优化·尽量保留原话</view>
           <view class="style-opt {{polishStyle === 'written' ? 'on' : ''}}" hover-class="btn-hover" hover-stay-time="80" data-s="written" bindtap="setStyle">口语顺成书面语</view>
         </view>
       </view>
-      <view class="menu-link" hover-class="btn-hover" hover-stay-time="80" bindtap="goTimeline">时间轴（按年翻一生）</view>
-      <view class="menu-link" hover-class="btn-hover" hover-stay-time="80" bindtap="exportBook">导出回忆录（按年文稿+原声）</view>
+      <view class="menu-link clone-row">
+        <text>声音克隆</text>
+        <view class="clone-switch {{cloneConsent ? 'on' : ''}}" hover-class="btn-hover" hover-stay-time="80" catchtap="toggleCloneSwitch">
+          <view class="clone-knob"></view>
+        </view>
+      </view>
+      <view class="card" wx:if="{{cloneConsent}}">
+        <text class="prof-title">妈妈的声音（克隆）</text>
+        <text class="ms-invite">{{voiceState==='frozen' ? '已固化：不再自动克隆；删除后会重新克隆。' : voiceState==='review' ? '克隆好了，回海洋听听像不像。' : '正在收集您的声音，自动克隆中…'}}</text>
+        <view class="ms-add" wx:if="{{voiceSampleUrl}}">
+          <view class="ms-add-btn" style="flex:1" hover-class="btn-hover" hover-stay-time="80" bindtap="playVoiceSample">试听克隆声音</view>
+          <view class="ms-add-btn" style="flex:1;background:var(--c-danger-soft);color:var(--c-danger)" hover-class="btn-hover" hover-stay-time="80" bindtap="deleteVoice">删除声音</view>
+        </view>
+      </view>
     </view>
   </view>
 
@@ -141,29 +128,12 @@
       </view>
     </view>
   </view>
-
-  <!-- 一级：声音 -->
-  <view class="menu-group">
-    <view class="menu-l1" hover-class="btn-hover" hover-stay-time="80" data-k="sound" bindtap="toggleMenu">
-      <text class="menu-l1-t">声音</text>
-      <text class="menu-l1-x">{{openMenu === 'sound' ? '收起' : '展开'}}</text>
-    </view>
-    <view class="menu-l2" wx:if="{{openMenu === 'sound'}}">
-      <view class="menu-link" hover-class="btn-hover" hover-stay-time="80" bindtap="openClone">声音克隆（{{cloneConsent ? '已开启' : '未开启'}}）</view>
-      <view class="card" wx:if="{{cloneConsent && showClonePanel}}">
-        <text class="prof-title">妈妈的声音（克隆）</text>
-        <text class="ms-invite">{{voiceState==='frozen' ? '已固化：不再自动克隆；删除后会重新克隆。' : voiceState==='review' ? '克隆好了，回海洋听听像不像。' : '正在收集您的声音，自动克隆中…'}}</text>
-        <view class="ms-add" wx:if="{{voiceSampleUrl}}">
-          <view class="ms-add-btn" style="flex:1" hover-class="btn-hover" hover-stay-time="80" bindtap="playVoiceSample">试听克隆声音</view>
-          <view class="ms-add-btn" style="flex:1;background:var(--c-danger-soft);color:var(--c-danger)" hover-class="btn-hover" hover-stay-time="80" bindtap="deleteVoice">删除声音</view>
-        </view>
-        <view class="ms-add">
-          <view class="ms-add-btn" style="flex:1;background:var(--c-soft);color:var(--c-text-2)" hover-class="btn-hover" hover-stay-time="80" bindtap="closeClone">关闭克隆</view>
-        </view>
-      </view>
-    </view>
   </view>
 
+  <!-- 回收站图标：一级菜单右下角 → 删除的记忆 -->
+  <view class="recycle-fab" hover-class="btn-hover" hover-stay-time="80" bindtap="goRecycle" aria-label="删除的记忆">
+    <view class="trash-lid"></view>
+    <view class="trash-body"></view>
   </view>
-  <view class="safe-bottom"></view>
+  <view style="height:160rpx"></view>
 </view>

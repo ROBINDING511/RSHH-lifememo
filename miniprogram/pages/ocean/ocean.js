@@ -32,7 +32,6 @@ Page({
     liveBig: false, liveExpanded: false, liveFollow: true, liveTail: '',
     previewStatus: '', previewEmotion: false,
     // 生日引导：鲸鱼气泡+回答建议（称呼在杭航菜单设置）
-    birthSkipped: false, birthOther: false, birthOtherVal: '', birthIdx: 40,
     bbLeft: 24, bbTop: 200, bbTail: 180, boatLeft: 160, boatTop: 420,
     bubbleShow: false, bubbleText: '', stageLabels: [], topHint: '',
     birthYears: (() => { const a = []; for (let y = 2010; y >= 1920; y--) a.push(y + '年'); return a })()
@@ -497,15 +496,6 @@ Page({
     wx.navigateTo({ url: '/pages/stages/stages' })
   },
   // 生日引导：点建议年份 / 滚轮选 / 跳过
-  onBirthPick (e) {
-    this.setData({ birthIdx: Number(e.detail.value) })
-    const y = 2010 - Number(e.detail.value)
-    const p = life.getProfile() || {}
-    life.setProfile(Object.assign({}, p, { mode: 'year', year: y }))
-    this.setData({ birthYear: y })
-    ui.toast(`记下了，${y}年`, 2000)
-  },
-  skipBirth () { this.setData({ birthSkipped: true }) },
   onBergTap (e) {
     const id = e.currentTarget.dataset.id
     if (id) wx.navigateTo({ url: `/pages/iceberg/iceberg?id=${id}` })

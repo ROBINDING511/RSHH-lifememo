@@ -29,15 +29,6 @@
     style="left:{{boatLeft}}px;top:{{boatTop}}px"
     bindtap="onBoatTap" bindlongpress="onBoatLongPress" hover-class="boat-hover" hover-stay-time="80">
     <image class="boat-img" src="/assets/boat.png" mode="widthFix" />
-    <!-- 小船上的气泡：生日引导+回答建议 -->
-    <view class="birth-bubble" wx:if="{{!birthYear && !birthSkipped && !recording && !preview}}" catchtap="noop">
-      <text class="wb-q">请问您出生于哪一年？</text>
-      <picker mode="selector" range="{{birthYears}}" value="{{birthIdx}}" bindchange="onBirthPick">
-        <view class="wb-field">点一下，滚轮选出生年份</view>
-      </picker>
-      <view class="wb-later" catchtap="skipBirth">稍后再说</view>
-      <view class="wb-tail"></view>
-    </view>
   </view>
 
 
@@ -86,7 +77,7 @@
   </view>
 
   <!-- 帆船飘出的小提示：亮20秒→无人点静默60秒→换下一条 -->
-  <view class="boat-bubble" wx:if="{{bubbleShow && (birthYear || birthSkipped) && !recording && !preview}}"
+  <view class="boat-bubble" wx:if="{{bubbleShow && !recording && !preview}}"
     style="left:{{bbLeft}}px;top:{{bbTop}}px" bindtap="onBubbleTap">
     <text class="bb-text">{{bubbleText}}</text>
     <view class="bb-tail" style="left:{{bbTail}}px"></view>

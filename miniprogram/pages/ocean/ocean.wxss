@@ -22,9 +22,6 @@
 .boat-drift.paused { animation-play-state: paused; }
 .boat-hover { opacity: .85; }
 /* 鲸鱼口中的气泡：生日引导+回答建议（随鲸鱼移动） */
-.birth-bubble { position: absolute; left: 50%; bottom: 100%; transform: translateX(-85%); width: 400rpx; margin-bottom: 16rpx; background: var(--c-surface); border-radius: var(--r-card); padding: 20rpx 24rpx; box-shadow: 0 6rpx 18rpx rgba(2,2,31,.28); pointer-events: auto; }
-.wb-q { display: block; font-size: var(--fs-lg); font-weight: 700; color: var(--c-text); line-height: 1.6; }
-.wb-tail { position: absolute; left: 85%; bottom: -14rpx; transform: translateX(-50%); width: 0; height: 0; border-left: 14rpx solid transparent; border-right: 14rpx solid transparent; border-top: 16rpx solid rgba(253,252,249,.97); }
 
 
 /* ============ 空态提示（深色胶囊白字，全渐变达标）============ */
@@ -143,10 +140,6 @@
 .ocean-page { position: relative; width: 100vw; height: 100vh; overflow: hidden; background: var(--n-bg); }
 .record-main { color: var(--n-on-greet); }
 .live-hint { color: var(--c-text-soft); }
-.birth-bubble { background: var(--c-surface); color: var(--c-text); }
-.wb-q { color: var(--c-text); }
-.wb-field { margin-top: 16rpx; min-height: 88rpx; display: flex; align-items: center; justify-content: center; background: var(--c-surface-2); border: 2rpx solid var(--c-line); border-radius: 24rpx; color: var(--c-accent); font-size: var(--fs-md); }
-.wb-later { margin-top: 12rpx; text-align: center; color: var(--c-text-faint); font-size: var(--fs-xs); }
 /* 帆船气泡：问候/提示由船"说"出 */
 .boat-bubble { position: absolute; width: 300rpx; background: rgba(255,252,246,.94); border-radius: 28rpx; padding: 12rpx 20rpx; box-shadow: 0 4rpx 14rpx rgba(2,2,31,.25); pointer-events: auto; z-index: 25; }
 
