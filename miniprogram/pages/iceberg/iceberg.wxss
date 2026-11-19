@@ -133,3 +133,4 @@
 .cand-tag { font-size: var(--fs-xs); color: var(--c-text-2); }
 .doubt-keep { min-height: 88rpx; display: flex; align-items: center; justify-content: center; border-radius: var(--radius-md); background: var(--c-card); border: 2rpx solid var(--hairline); color: var(--c-text); font-size: var(--fs-md); margin-bottom: 16rpx; }
 @media (prefers-reduced-motion: reduce) { .book-page, .detail-enter { animation: none !important; transition: none !important; } }
+.book { background: var(--c-surface); border-radius: var(--r-card); padding: 40rpx 32rpx; font-size: var(--fs-xxl); line-height: 1.9; color: var(--c-text); min-height: 50vh; box-shadow: 0 6rpx 20rpx var(--c-shadow); }
