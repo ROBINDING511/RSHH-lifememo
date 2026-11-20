@@ -470,12 +470,17 @@ Page({
       }
       if (err) {
         const em = (err && (err.errMsg || err.message)) || ''
-        if (/auth|permission|deny|authorize/i.test(em)) return this.guideOpenSetting()
+        console.error('[rec]', em)
+        if (/privacy/i.test(em)) { this.setData({ recording: false }); return ui.toast('需先同意隐私指引，同意后重新按住', 2600) }
+        if (/auth|deny|authorize/i.test(em)) return this.guideOpenSetting()
+        if (/is recording|busy/i.test(em) && !this._recRetry) { this._recRetry = true; this.recorder.stop(); setTimeout(() => { this._recRetry = false; this.startRecording('hold') }, 300); return }
+        if (!wavPath && !this._recFallback) { this._recFallback = true; this.setData({ asrHint: 'offline', recording: false }); setTimeout(() => this.startRecording('hold', this._appendBase, 'mp3'), 300); return }
         if (wavPath && durationMs >= 800) {
-          draft.save({ wavPath, text: this.data.transcript, reason: '录音中断' })
-          this.setData({ drafts: draft.list(), transcript: '' })
-          ui.toast('录音中断了，已经帮您存下来', 2600)
-        } else ui.toast('录音中断了，再说一次')
+          const full = this.data.transcript || ''
+          this.setData({ transcript: '' })
+          this.openPreview(wavPath, full)
+          ui.toast('录音中断了，已打开接着说', 2600)
+        } else ui.toast('录音中断：' + (em || '未知').slice(0, 40), 3000)
         return
       }
       if (durationMs < 800) { this.setData({ transcript: '', liveTail: '' }); return ui.toast('太短了，多说几句') }
