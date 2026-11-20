@@ -5,10 +5,6 @@ Component({
     attached () {
       if (wx.onNeedPrivacyAuthorization) {
         wx.onNeedPrivacyAuthorization((resolve) => {
-          // 已同意过首屏隐私卡 → 静默放行，不再二次弹
-          let agreed = false
-          try { agreed = !!wx.getStorageSync('privacyAgreed') } catch (e) {}
-          if (agreed) { resolve({ event: 'agree', buttonId: 'privacy-agree-btn' }); return }
           this._resolve = resolve
           this.setData({ show: true })
         })
