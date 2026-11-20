@@ -171,6 +171,14 @@
         </view>
       </view>
 
+      <view class="year-choice" wx:if="{{preview.yearChoices.length >= 2 && !preview.yearResolved}}">
+        <text class="yc-label">听到两个年份，定哪个？</text>
+        <view class="yc-btns">
+          <view class="yc-btn" hover-class="btn-hover" hover-stay-time="80" data-v="{{preview.yearChoices[0]}}" bindtap="pickYearChoice">定{{preview.yearChoices[0]}}年</view>
+          <view class="yc-btn" hover-class="btn-hover" hover-stay-time="80" data-v="{{preview.yearChoices[1]}}" bindtap="pickYearChoice">定{{preview.yearChoices[1]}}年</view>
+          <view class="yc-btn" hover-class="btn-hover" hover-stay-time="80" data-v="both" bindtap="pickYearChoice">两个都留</view>
+        </view>
+      </view>
       <text class="time-hint" wx:if="{{preview.timeLabel}}">听到 {{preview.timeLabel}}，落在</text>
       <view class="meta-cell" hover-class="cell-hover" hover-stay-time="80" bindtap="pickZoneSheet">
         <text class="meta-label">哪片海</text>

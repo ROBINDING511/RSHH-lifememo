@@ -114,10 +114,10 @@ async function analyzeOnboard (step, text) {
   return res.result || {}
 }
 
-async function analyzeMemory (text, blanks) {
+async function analyzeMemory (text, blanks, people) {
   const res = await wx.cloud.callFunction({
     name: 'analyze',
-    data: { text, blanks: blanks || [] }
+    data: { text, blanks: blanks || [], people: people || [] }
   })
   return res.result
 }

@@ -74,6 +74,8 @@ exports.main = async (event) => {
   }
   // A3/A4：留白话题禁提；只读已发生转写，零新增（A5）
   const blankLine = blanks.length ? `\n【禁提话题（本人已跳过，绝不提起/追问）】：${blanks.join('、')}` : ''
+  const people = (event && event.people) || []
+  const peopleLine = people.length ? `\n【熟人名字（转写/整理优先用这些写法）】：${people.join('、')}` : ''
 
   const prompt = `你是一个温柔的记忆整理助手。用户（一位母亲）刚说了一段自己的人生回忆。
 请分析这段话，严格按 JSON 输出，不要输出任何其他文字：
@@ -86,7 +88,7 @@ exports.main = async (event) => {
 }
 newSea 规则：仅当用户在这段话里明确请求"把这段经历变成一片新的海洋/新的海/单独一片海/值得成为一片海"时才填 {"name":"事件名2-8字(如阿里巴巴生涯/加入阿里巴巴)","year":2017,"month":6,"day":8}；year/month/day 取用户提到的该经历开始日期(没提到的月/日为null)；没有这种请求则 newSea 为 null。
 
-${blankLine}
+${blankLine}${peopleLine}
 回忆内容：
 ${text.slice(0, 1200)}`
 

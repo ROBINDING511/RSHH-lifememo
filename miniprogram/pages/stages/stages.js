@@ -10,7 +10,7 @@ Page({
     inviteCode: '', bindCode: '', feedQ: '',
     polishStyle: 'light',
     openMenu: '', cloneConsent: false, showClonePanel: false, nickname: '',
-    showNick: false, showAge: false, ageDisplay: '',
+    showNick: false, showAge: false, ageDisplay: '', showPeople: false, peopleList: [], personInput: '',
     searchQ: '', searchResults: [],
     voiceState: '', voiceSampleUrl: '',
     listening: false, voiceText: ''
@@ -26,7 +26,7 @@ Page({
     this.recorder = createRecorder()
     this.refreshVoice()
     this.loadAll()
-    this.setData({ polishStyle: wx.getStorageSync('polishStyle') || 'light', cloneConsent: wx.getStorageSync('cloneConsent') === '1', nickname: life.getNickname(), ageDisplay: this.fmtAge(life.getProfile()) })
+    this.setData({ polishStyle: wx.getStorageSync('polishStyle') || 'light', cloneConsent: wx.getStorageSync('cloneConsent') === '1', nickname: life.getNickname(), ageDisplay: this.fmtAge(life.getProfile()), peopleList: life.getKnownPeople() })
   },
   onNick (e) { this.setData({ nickname: e.detail.value }) },
   // 搜索全部回忆
@@ -90,7 +90,15 @@ Page({
       wx.showToast({ title: '导出没成功，再试一次', icon: 'none' })
     }
   },
-  toggleNick () { this.setData({ showNick: !this.data.showNick, showAge: false }) },
+  toggleNick () { this.setData({ showNick: !this.data.showNick, showAge: false, showPeople: false }) },
+  togglePeople () { this.setData({ showPeople: !this.data.showPeople, showNick: false }) },
+  onPersonInput (e) { this.setData({ personInput: e.detail.value }) },
+  addPerson () {
+    const n = (this.data.personInput || '').trim()
+    if (!n) return
+    this.setData({ peopleList: life.addKnownPerson(n), personInput: '' })
+  },
+  removePerson (e) { this.setData({ peopleList: life.removeKnownPerson(e.currentTarget.dataset.n) }) },
   fmtAge (p) {
     if (!p) return ''
     if (p.mode === 'birthday' && p.birthday) return p.birthday
@@ -102,7 +110,8 @@ Page({
     const n = (this.data.nickname || '').trim()
     if (!n) return wx.showToast({ title: '先写个称呼', icon: 'none' })
     life.setNickname(n)
-    this.setData({ nickname: n, showNick: false })   // 记好后收起编辑，直接显示在菜单上
+    life.addKnownPerson(n)
+    this.setData({ nickname: n, showNick: false, peopleList: life.getKnownPeople() })   // 记好后收起编辑，直接显示在菜单上
     wx.showToast({ title: `好了，${n}`, icon: 'none' })
   },
   // 声音克隆=菜单子功能：默认关闭；主动点开才弹同意框

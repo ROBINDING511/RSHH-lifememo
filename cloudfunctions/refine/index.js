@@ -81,7 +81,8 @@ exports.main = async (event) => {
 
   const blanks = event.blanks || []
   const blankLine = blanks.length ? `禁提话题：${blanks.join('、')}。` : ''
-  const ctx = `已知冰山标题（不重复追问）：${(event.knownTitles || []).join('、') || '无'}。${blankLine}`
+  const peopleLine = ((event && event.people) || []).length ? `熟人名字（优先用这些写法）：${event.people.join('、')}。` : ''
+  const ctx = `已知冰山标题（不重复追问）：${(event.knownTitles || []).join('、') || '无'}。${blankLine}${peopleLine}`
   const linesText = lines.map((l) => `[${l.n}] ${l.text}`).join('\n')
   const sentenceCount = rawText.split(/[。！？!?；;]/).filter(Boolean).length
   const short = sentenceCount < 3 || rawText.length < 40

@@ -29,6 +29,20 @@
         <input class="field" type="nickname" value="{{nickname}}" placeholder="点一下可填微信昵称，或自己写" bindinput="onNick" />
         <view class="prof-save" hover-class="btn-hover" hover-stay-time="80" bindtap="saveNick">记好了</view>
       </view>
+      <view class="menu-link" hover-class="btn-hover" hover-stay-time="80" bindtap="togglePeople">熟人名字{{peopleList.length ? '：' + peopleList.join('、') : ''}}</view>
+      <view class="card" wx:if="{{showPeople}}">
+        <text class="ms-invite">常提到的人名写在这里，识别和整理会优先用这些写法。</text>
+        <view class="ms-add">
+          <input class="ms-input ms-name-input" value="{{personInput}}" placeholder="如 建国 / 秀兰" bindinput="onPersonInput" />
+          <view class="ms-add-btn" hover-class="btn-hover" hover-stay-time="80" bindtap="addPerson">添加</view>
+        </view>
+        <view class="people-chips">
+          <view class="people-chip" wx:for="{{peopleList}}" wx:key="*this">
+            <text>{{item}}</text>
+            <view class="ms-del" hover-class="btn-hover" hover-stay-time="80" data-n="{{item}}" bindtap="removePerson">×</view>
+          </view>
+        </view>
+      </view>
       <!-- 出生年月：点按直接进滚轮（年/月/日），可不选；一旦确认即完整 -->
       <picker mode="date" value="{{profileBirthday || '1960-01-01'}}" start="1900-01-01" end="2020-12-31" bindchange="onBirthdayPick">
         <view class="menu-link">出生年月{{profileBirthday ? '：' + profileBirthday : '（点一下滚轮选）'}}</view>

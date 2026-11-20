@@ -79,6 +79,9 @@ function stageByKey (key) { return getStages().find((s) => s.key === key) || nul
 // ---- 个人资料：生日 / 年龄 / 出生年 三选一 ----
 function getProfile () { try { return wx.getStorageSync('lifeProfile') || null } catch (e) { return null } }
 function setProfile (p) { try { wx.setStorageSync('lifeProfile', p) } catch (e) {} }
+function getKnownPeople () { try { return wx.getStorageSync('knownPeople') || [] } catch (e) { return [] } }
+function addKnownPerson (n) { const l = getKnownPeople(); if (n && !l.includes(n)) { l.push(n); try { wx.setStorageSync('knownPeople', l) } catch (e) {} } return l }
+function removeKnownPerson (n) { const l = getKnownPeople().filter((x) => x !== n); try { wx.setStorageSync('knownPeople', l) } catch (e) {} return l }
 function getNickname () { const p = getProfile(); return (p && p.nickname) || '' }
 function setNickname (n) { const p = getProfile() || {}; p.nickname = n; setProfile(p) }
 function getBirthYear () {
@@ -191,7 +194,7 @@ function parseMilestoneFromText (text) {
 module.exports = {
   DEFAULT_STAGES, getStages, setStages, resetStages, buildStages,
   stageOfAge, stageOfYear, stageByKey,
-  getProfile, setProfile, getNickname, setNickname, getBirthYear,
+  getProfile, setProfile, getNickname, setNickname, getBirthYear, getKnownPeople, addKnownPerson, removeKnownPerson,
   parseAge, eventYear, parseStagesFromText,
   getMilestones, setMilestones, addMilestone, removeMilestone, parseMilestoneFromText
 }

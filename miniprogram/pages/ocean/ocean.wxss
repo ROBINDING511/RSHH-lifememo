@@ -162,3 +162,8 @@
   box-shadow: 60rpx 40rpx 0 0 #EFE6D8, 150rpx 90rpx 0 -1rpx rgba(239,230,216,.7), 260rpx 50rpx 0 0 #EFE6D8, 340rpx 120rpx 0 -1rpx rgba(239,230,216,.6), 430rpx 60rpx 0 0 #EFE6D8, 520rpx 100rpx 0 -1rpx rgba(239,230,216,.7), 610rpx 40rpx 0 0 #EFE6D8, 90rpx 150rpx 0 -1rpx rgba(239,230,216,.6), 240rpx 180rpx 0 0 #EFE6D8, 400rpx 160rpx 0 -1rpx rgba(239,230,216,.6), 560rpx 190rpx 0 0 #EFE6D8, 680rpx 150rpx 0 -1rpx rgba(239,230,216,.7); }
 
 .live-offline { display: block; margin-top: 8rpx; font-size: var(--fs-xs); color: var(--c-text-soft); }
+
+.year-choice { margin-top: 16rpx; }
+.yc-label { display: block; font-size: var(--fs-xs); color: var(--c-text-soft); margin-bottom: 8rpx; }
+.yc-btns { display: flex; gap: 12rpx; }
+.yc-btn { flex: 1; min-height: 72rpx; display: flex; align-items: center; justify-content: center; border-radius: 999rpx; background: var(--c-primary-soft); color: var(--c-primary); font-size: var(--fs-sm); font-weight: 500; }

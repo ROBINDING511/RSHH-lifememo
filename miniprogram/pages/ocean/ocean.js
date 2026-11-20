@@ -523,6 +523,26 @@ Page({
   onBoatTap () {
     wx.navigateTo({ url: '/pages/stages/stages' })
   },
+  // A2 年份双说：定A/定B/两个都留
+  pickYearChoice (e) {
+    const v = e.currentTarget.dataset.v
+    const stages = life.getStages()
+    const by = this.data.birthYear
+    const upd = { 'preview.yearResolved': true }
+    if (v === 'both') {
+      const ys = this.data.preview.yearChoices
+      upd['preview._bothYears'] = ys.join('/')
+      upd['preview.timeLabel'] = ys.join('/') + '年'
+      if (by) upd['preview.zoneIndex'] = stages.findIndex((x) => x.key === life.stageOfYear(ys[0], by).key)
+    } else {
+      const y = Number(v)
+      upd['preview._autoYear'] = y
+      upd['preview._bothYears'] = null
+      upd['preview.timeLabel'] = y + '年' + (by ? ' · ' + (y - by) + '岁' : '')
+      if (by) upd['preview.zoneIndex'] = stages.findIndex((x) => x.key === life.stageOfYear(y, by).key)
+    }
+    this.setData(upd)
+  },
   // 生日引导：点建议年份 / 滚轮选 / 跳过
   onBergTap (e) {
     const id = e.currentTarget.dataset.id
@@ -626,6 +646,9 @@ Page({
     const ym = text.match(/((?:19|20)\d{2})\s*年/)
     const eventYear = (ym && Number(ym[1]) !== by) ? Number(ym[1]) : null
     const out = {}
+    // A2 年份双说：给出 定A/定B/两个都留
+    const ys = [...new Set((text.match(/(?:19|20)\d{2}(?=\s*年)/g) || []).map(Number).filter((y) => y !== by))]
+    if (ys.length >= 2) { out['preview.yearChoices'] = ys.slice(0, 2); out['preview.yearResolved'] = false }
     if (age != null) {
       out['preview.zoneIndex'] = stages.findIndex((x) => x.key === life.stageOfAge(age).key)
       if (by) {
@@ -669,7 +692,7 @@ Page({
     if (!p || p.wavPath !== wavPath) return
     let r = null
     if (finalText.replace(/\s/g, '').length >= 2) {
-      try { r = await api.analyzeMemory(finalText, (p.blanks || []).map((b) => b.topic)) }
+      try { r = await api.analyzeMemory(finalText, (p.blanks || []).map((b) => b.topic), life.getKnownPeople()) }
       catch (e) { console.warn(e); this.setData({ previewStatus: 'failed' }) }
     }
     p = this.data.preview
@@ -757,7 +780,7 @@ Page({
   },
 
   // B1/B2：发布后后台跑证据链 refine，落 sentences/doubts/versions/blanks；失败不阻塞
-  runRefine (id, rawText, blanks) {
+  runRefine (id, rawText, blanks, people) {
     let lines = (this.asr && this.asr.getLines) ? this.asr.getLines() : []
     if (!lines.length) {
       const segs = String(rawText || '').split(/(?<=[。！？!?；;])/).filter(Boolean)
@@ -767,7 +790,7 @@ Page({
     const knownTitles = (this._icebergs || []).map((b) => b.title).filter(Boolean)
     wx.cloud.callFunction({
       name: 'refine',
-      data: { lines, birthYear: this.data.birthYear, stageKeys: life.getStages().map((s) => s.key), knownTitles, blanks: (blanks || []).map((b) => b.topic), style: wx.getStorageSync('polishStyle') || 'light' }
+      data: { lines, birthYear: this.data.birthYear, stageKeys: life.getStages().map((s) => s.key), knownTitles, blanks: (blanks || []).map((b) => b.topic), style: wx.getStorageSync('polishStyle') || 'light', people: people || life.getKnownPeople() }
     }).then((r) => {
       const res = (r && r.result) || {}
       return wx.cloud.database().collection('icebergs').doc(id).update({
@@ -915,7 +938,7 @@ Page({
     const text = (p.text || '').trim() || '（这段只留了声音）'
     const payload = {
       text, audioPath: p.wavPath, photos: p.photos,
-      timeValue: p._autoYear ? String(p._autoYear) : (p.zoneOptions[p.zoneIndex] || '说不清了'),
+      timeValue: p._bothYears || (p._autoYear ? String(p._autoYear) : (p.zoneOptions[p.zoneIndex] || '说不清了')),
       zoneName: p.zoneOptions[p.zoneIndex] || '晚年',
       title: p._four || text.slice(0, 4)
     }
