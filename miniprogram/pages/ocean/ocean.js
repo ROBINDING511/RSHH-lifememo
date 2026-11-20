@@ -71,7 +71,6 @@ Page({
   onPrivacyAgree () {
     try { wx.setStorageSync('privacyAgreed', Date.now()) } catch (e) {}
     this.setData({ showPrivacy: false })
-    if (wx.requirePrivacyAuthorize) wx.requirePrivacyAuthorize({ success: () => {}, fail: () => {} })
     wx.authorize({ scope: 'scope.record' }).catch(() => {}).then(() => this.boot())
   },
   onPrivacyRefuse () {
