@@ -92,7 +92,7 @@
     <view class="record-btn {{locked ? 'record-lock' : (recording ? (cancelArmed ? 'record-cancel' : (lockArmed ? 'record-lock' : 'record-on')) : '')}}"
       hover-class="record-hover" hover-stay-time="80"
       bindtouchstart="onHoldStart" bindtouchmove="onHoldMove"
-      catchtouchend="onHoldEnd" catchtouchcancel="onHoldEnd">
+      bindtouchend="onHoldEnd" bindtouchcancel="onHoldEnd">
       <text class="record-main">{{locked ? '点一下 结束' : (recording ? (cancelArmed ? '松开 取消' : (lockArmed ? '松开 免按住' : '松开 发送')) : '按住 说话')}}</text>
     </view>
 
@@ -104,7 +104,7 @@
     <view class="live-card {{cancelArmed ? 'live-cancel' : ''}}">
       <view class="live-status">
         <view class="live-dot"></view>
-        <text class="live-state">{{cancelArmed ? '松开手指，取消' : '正在听，松手发送'}}</text>
+        <text class="live-state">{{cancelArmed ? '松开手指，取消' : (locked ? '免按住中 · 点按钮结束' : '正在听，松手发送')}}</text>
         <text class="live-timer">{{elapsed}}s</text>
       </view>
       <text class="live-asr" wx:if="{{asrHint === 'connecting'}}">正在连线，字马上就来</text>

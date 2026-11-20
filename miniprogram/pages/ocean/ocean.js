@@ -382,7 +382,7 @@ Page({
   },
   onHoldEnd () {
     if (this._lockTap) { this._lockTap = false; return }   // 锁定态的"点一下结束"已在 touchstart 处理
-    if (!this.data.recording) return
+    if (!this.data.recording) { if (this._recActive) this.finishRecording(); return }   // 兜底：状态漏收也停
     const cancel = this.data.cancelArmed, lock = this.data.lockArmed
     if (cancel) { this.saveDraftAndStop(); return }
     if (lock) { this.setData({ locked: true, cancelArmed: false, lockArmed: false }); return }   // 右滑固定：换色+松手继续录
@@ -516,7 +516,8 @@ Page({
   onSceneTouchStart () { this._seaTouching = true; if (!this.data.boatPaused) this.setData({ boatPaused: true }) },
   onSceneTouchEnd () {
     this._seaTouching = false
-    if (this.data.recording && this._holdSource === 'whale') return this.finishRecording()
+    // 页面级兜底：无论按钮自身 touchend 是否漏发，松手必停
+    if (this.data.recording && (this._holdSource === 'whale' || this._holdSource === 'button')) return this.finishRecording()
     if (!this.data.recording && this.data.boatPaused) this.setData({ boatPaused: false })
   },
   onBoatTap () {
