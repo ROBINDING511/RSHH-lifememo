@@ -163,3 +163,10 @@
 .yc-label { display: block; font-size: var(--fs-xs); color: var(--c-text-soft); margin-bottom: 8rpx; }
 .yc-btns { display: flex; gap: 12rpx; }
 .yc-btn { flex: 1; min-height: 72rpx; display: flex; align-items: center; justify-content: center; border-radius: 999rpx; background: var(--c-primary-soft); color: var(--c-primary); font-size: var(--fs-sm); font-weight: 500; }
+
+.pv-mask { position: fixed; left: 0; top: 0; right: 0; bottom: 0; background: rgba(3,6,53,.72); z-index: 98; display: flex; align-items: center; justify-content: center; }
+.pv-card { width: 580rpx; background: var(--c-surface); border-radius: var(--r-card); padding: 44rpx 40rpx; }
+.pv-title { display: block; font-size: var(--fs-xl); font-weight: 700; color: var(--c-text); }
+.pv-body { display: block; margin-top: 20rpx; font-size: var(--fs-md); line-height: 1.9; color: var(--c-text-soft); }
+.pv-agree { margin-top: 32rpx; min-height: 96rpx; display: flex; align-items: center; justify-content: center; background: var(--c-primary); color: var(--c-on-primary); border-radius: 999rpx; font-size: var(--fs-md); font-weight: 700; }
+.pv-refuse { margin-top: 16rpx; min-height: 72rpx; display: flex; align-items: center; justify-content: center; color: var(--c-text-soft); font-size: var(--fs-sm); }

@@ -65,12 +65,19 @@ Page({
   },
   // 首启两步授权：先隐私指引弹窗，同意后系统麦克风确认，再进正式界面
   firstLaunchFlow () {
-    const afterPrivacy = () => {
-      wx.authorize({ scope: 'scope.record' }).catch(() => {}).then(() => this.boot())
-    }
-    if (wx.requirePrivacyAuthorize) {
-      wx.requirePrivacyAuthorize({ success: afterPrivacy, fail: () => { this.boot(); ui.toast('未同意隐私指引；按住说话时可再次同意', 2600) } })
-    } else afterPrivacy()
+    // 第一屏先出自家隐私说明卡（不依赖后台声明是否已配），同意后再系统麦克风确认
+    this.setData({ showPrivacy: true })
+  },
+  onPrivacyAgree () {
+    try { wx.setStorageSync('privacyAgreed', Date.now()) } catch (e) {}
+    this.setData({ showPrivacy: false })
+    if (wx.requirePrivacyAuthorize) wx.requirePrivacyAuthorize({ success: () => {}, fail: () => {} })
+    wx.authorize({ scope: 'scope.record' }).catch(() => {}).then(() => this.boot())
+  },
+  onPrivacyRefuse () {
+    this.setData({ showPrivacy: false })
+    this.boot()
+    ui.toast('未同意隐私指引；按住说话时可再次同意', 2600)
   },
   boot () {
     // 视角(pan+zoom)=用户自己的：返回时不碰 movable-view 内部状态，仅重建数据；
