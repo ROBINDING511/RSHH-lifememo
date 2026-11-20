@@ -1,5 +1,6 @@
 // pages/stages/stages.js — 人生之海规划：片数/名字/边界可调 + 语音 + 个人资料 + 人生节点
 const life = require('../../utils/life')
+const draft = require('../../utils/draft')
 const api = require('../../utils/api')
 const { createRecorder } = require('../../utils/recorder')
 
@@ -147,6 +148,11 @@ Page({
     wx.setStorageSync('polishStyle', s)
     this.setData({ polishStyle: s })
     wx.showToast({ title: '梳理风格已记下', icon: 'none' })
+  },
+  openDraft () {
+    const d = draft.list()[0]
+    if (!d) return
+    wx.navigateTo({ url: '/pages/ocean/ocean?draft=' + d.at })
   },
   goTimeline () { wx.navigateTo({ url: '/pages/timeline/timeline' }) },
   goRecycle () { wx.navigateTo({ url: '/pages/recycle/recycle' }) },

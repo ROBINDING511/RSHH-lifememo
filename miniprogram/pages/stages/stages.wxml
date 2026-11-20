@@ -75,6 +75,7 @@
           <view wx:if="{{!milestones.length}}" class="ms-empty">按住上面，一次说几个节点</view>
         </view>
       </view>
+      <view class="menu-link" wx:if="{{drafts.length}}" hover-class="btn-hover" hover-stay-time="80" bindtap="openDraft">未完成的草稿：{{drafts.length}}段（点开继续）</view>
       <view class="menu-link" hover-class="btn-hover" hover-stay-time="80" bindtap="goTimeline">时间轴（按年翻一生）</view>
       <view class="menu-link" hover-class="btn-hover" hover-stay-time="80" bindtap="exportBook">导出回忆录（按年文稿+原声）</view>
     </view>

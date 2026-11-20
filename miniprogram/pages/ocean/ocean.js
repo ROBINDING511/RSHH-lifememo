@@ -48,6 +48,7 @@ Page({
       familyOwner: wx.getStorageSync('familyOwner') || null,
     })
     if (query && query.edit) this.loadForEdit(query.edit)
+    if (query && query.draft) this.loadDraft(query.draft)
     wx.authorize({ scope: 'scope.record' }).catch(() => {})   // 进页即申请麦克风，不等按住
     const th = getApp().globalData.topHint
     if (th) { getApp().globalData.topHint = ''; this.showTopHint(th) }
@@ -235,6 +236,12 @@ Page({
     } catch (e) { ui.toast('没打开这段回忆') }
   },
 
+  loadDraft (at) {
+    const d = draft.list().find((x) => String(x.at) === String(at))
+    if (!d) return
+    draft.remove(d.at)
+    this.openPreview(d.wavPath || '', d.text || '')
+  },
   // ==================== 实时识别 ====================
   async preheatAsr () {
     if (this.asr && (this.asr.isReady || this.asr.state === 'connecting')) return

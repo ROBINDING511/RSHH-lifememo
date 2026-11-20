@@ -36,13 +36,6 @@
   </view>
 
 
-  <!-- ============ 草稿找回（说过的话绝不丢） ============ -->
-  <view class="draft-bar" wx:if="{{drafts.length && !recording && !preview}}"
-    style="top: {{capsuleBottom + 16}}px;">
-    <view class="draft-text">有 {{drafts.length}} 段话没存好</view>
-    <view class="draft-btn" hover-class="btn-hover" hover-stay-time="80" bindtap="recoverDraft">找回来</view>
-  </view>
-
   <!-- ============ 空态提示（深色胶囊白字，压在任何水色上都看得清） ============ -->
 
   <!-- 那年今日：托起一座旧冰山 -->
