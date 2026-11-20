@@ -408,10 +408,11 @@ Page({
   },
   onContinueEnd () { if (this.data.recording) this.finishRecording() },
 
-  async startRecording (mode, appendBase) {
+  async startRecording (mode, appendBase, fmt) {
     if (this.data.recording) return
     if (this.data.preview && appendBase == null) return   // 复核卡开着只允许续录
     this._appendBase = appendBase != null ? appendBase : null
+    this._recFallback = fmt === 'mp3'
     this.setData({ recording: true, recordMode: mode, transcript: this._appendBase || '', liveTail: '', elapsed: 0, countdown: 0, cancelArmed: false, asrHint: '' })
     if (this.asr) this.asr.reset()   // 清空上一段残留字：新录音只含本次内容
     this._recActive = true   // 同步置位：快速点按的 touchend 也能停住（recorder.recording 是异步 onStart 才真）
@@ -431,14 +432,14 @@ Page({
     } else {
       this.ensureAsr()
       this.recorder.start({
-        onFrame: (buf) => { if (this.asr) this.asr.sendFrame(buf); else this._frameBuf.push(buf) },
+        onFrame: (buf) => { if (this._recFallback) return; if (this.asr) this.asr.sendFrame(buf); else this._frameBuf.push(buf) },
         onTick: (s) => this.setData({ elapsed: s }),
         onCountdown: (left) => {
           this.setData({ countdown: left })
           if (left <= 3 && wx.vibrateShort) wx.vibrateShort({ type: 'light' })
         },
         onStop: (w, d, e) => this.handleRecordStop(w, d, e)
-      })
+      }, fmt)
     }
   },
   nativePlugin () { try { return requirePlugin('WechatSI') } catch (e) { return null } },

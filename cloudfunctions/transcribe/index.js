@@ -137,7 +137,38 @@ function transcribePcm (pcm, context) {
   })
 }
 
+// 文件转写（mp3/wav 通用）：百炼 qwen3-asr-flash 兼容接口，key 取 secrets（不入代码）
+async function getKey () {
+  const r = await db.collection('secrets').doc('voiceclone').get().catch(() => null)
+  return (r && r.data && r.data.key) || process.env.DASHSCOPE_API_KEY || ''
+}
+function transcribeFile (buf, name) {
+  return new Promise(async (resolve, reject) => {
+    const key = await getKey()
+    if (!key) return reject(new Error('no key'))
+    const boundary = '----rh' + Date.now()
+    const head = Buffer.from('--' + boundary + '\r\nContent-Disposition: form-data; name="model"\r\n\r\nqwen3-asr-flash\r\n--' + boundary + '\r\nContent-Disposition: form-data; name="file"; filename="' + name + '"\r\nContent-Type: application/octet-stream\r\n\r\n')
+    const tail = Buffer.from('\r\n--' + boundary + '--\r\n')
+    const body = Buffer.concat([head, buf, tail])
+    const req = require('https').request({ host: 'dashscope.aliyuncs.com', path: '/compatible-mode/v1/audio/transcriptions', method: 'POST', headers: { Authorization: 'Bearer ' + key, 'Content-Type': 'multipart/form-data; boundary=' + boundary, 'Content-Length': body.length } }, (res) => {
+      let d = ''
+      res.on('data', (c) => { d += c })
+      res.on('end', () => { try { const j = JSON.parse(d); resolve(j.text || '') } catch (e) { reject(new Error(d.slice(0, 120))) } })
+    })
+    req.on('error', reject)
+    req.setTimeout(50000, () => { req.destroy(); reject(new Error('timeout')) })
+    req.write(body); req.end()
+  })
+}
+
 exports.main = async (event, context) => {
+  if (event && event.mode === 'file' && event.fileID) {
+    try {
+      const dl = await cloud.downloadFile({ fileID: event.fileID })
+      const text = await transcribeFile(dl.fileContent, (event.fileID.endsWith('.mp3') ? 'a.mp3' : 'a.wav'))
+      return { ok: !!text, text }
+    } catch (e) { return { ok: false, error: String(e.message || e).slice(0, 160) } }
+  }
   const key = API_KEY()
   if (!key) return { ok: false, error: 'missing DASHSCOPE_API_KEY' }
   let pcm

@@ -65,7 +65,7 @@ function createRecorder () {
 
   return {
     // 返回 Promise，授权失败会 reject
-    async start (hooks) {
+    async start (hooks, fmt) {
       state.onFrame = hooks.onFrame || null
       state.onTick = hooks.onTick || null
       state.onCountdown = hooks.onCountdown || null
@@ -77,7 +77,7 @@ function createRecorder () {
 
       const setting = {
         duration: MAX_SECONDS * 1000, // 到点自动停，像微信语音
-        format: 'PCM',
+        format: fmt || 'PCM',
         sampleRate: 16000,
         numberOfChannels: 1,
         frameSize: 4 // ~128ms 一帧，实时性够
