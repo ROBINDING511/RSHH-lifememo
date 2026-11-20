@@ -82,7 +82,7 @@ function createRecorder () {
         numberOfChannels: 1,
         frameSize: 4 // ~128ms 一帧，实时性够
       }
-      rm.start(setting)
+      try { rm.start(setting) } catch (e) { if (state.onStop) state.onStop('', 0, { errMsg: 'start throw: ' + (e && e.message || e) }); return }
 
       // 每秒回传已说时长（常驻显示）
       state.tickTimer = setInterval(() => {
