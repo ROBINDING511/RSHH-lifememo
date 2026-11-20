@@ -107,6 +107,15 @@ function lerpHex (h1, h2, t) {
   return '#' + [0, 1, 2].map((i) => lerp(a[i], b[i], t).toString(16).padStart(2, '0')).join('')
 }
 // 雪山素材=用户定稿SVG的真实云slab（含纹理/颗粒）；今天=红，随天数沉淀到深蓝
+// seeded rng（同背景生成器 mjs）：每座山宽/高/形态稳定随机
+function mulberry (a) {
+  return function () {
+    a |= 0; a = (a + 0x6D2B79F5) | 0
+    let t = Math.imul(a ^ (a >>> 15), 1 | a)
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296
+  }
+}
 // 颜色模型：最新=橙；今天=红，随更新内容增多红→蓝漂移；昨天=蓝，逐日加深
 function slabColor (createdAt, newest, todayList, dayStart) {
   const c = createdAt || 0

@@ -110,6 +110,7 @@
       <text class="live-asr" wx:if="{{asrHint === 'connecting'}}">正在连线，字马上就来</text>
       <text class="live-asr live-asr-warn" wx:elif="{{asrHint === 'offline'}}">字暂时不出来，别急，松手会自动整理好</text>
       <text class="live-text">{{liveTail || transcript || '您慢慢说，字马上出来…'}}</text>
+      <text class="live-offline" wx:if="{{asrHint === 'offline'}}">识别连线不上也没关系，松手后整段自动出字</text>
       <view class="live-countdown" wx:if="{{countdown > 0}}">
         <text class="live-countdown-num">{{countdown}}</text>
         <text class="live-countdown-label">秒后自动结束</text>
