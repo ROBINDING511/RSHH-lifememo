@@ -69,6 +69,8 @@ Page({
     this.setData({ showPrivacy: true })
   },
   onPrivacyAgree () {
+    if (this._privacyDone) return
+    this._privacyDone = true
     try { wx.setStorageSync('privacyAgreed', Date.now()) } catch (e) {}
     this.setData({ showPrivacy: false })
     wx.authorize({ scope: 'scope.record' }).catch(() => {}).then(() => this.boot())

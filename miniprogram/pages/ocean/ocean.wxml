@@ -29,7 +29,7 @@
     <view class="pv-card">
       <text class="pv-title">使用前请知悉</text>
       <text class="pv-body">为了把您说的话变成回忆，我们需要：麦克风（录音）、云存储（保存文字与声音）。声音克隆默认关闭，需您单独同意。我们不会把您的回忆用于任何其他用途。</text>
-      <button id="pv-agree-btn" class="pv-agree" open-type="agreePrivacyAuthorization" bindagreeprivacyauthorization="onPrivacyAgree">同意，开始使用</button>
+      <button id="pv-agree-btn" class="pv-agree" open-type="agreePrivacyAuthorization" bindagreeprivacyauthorization="onPrivacyAgree" bindtap="onPrivacyAgree">同意，开始使用</button>
       <view class="pv-refuse" hover-class="btn-hover" hover-stay-time="80" bindtap="onPrivacyRefuse">不同意</view>
     </view>
   </view>
