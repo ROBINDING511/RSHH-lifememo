@@ -49,7 +49,6 @@ Page({
     })
     if (query && query.edit) this.loadForEdit(query.edit)
     if (query && query.draft) this.loadDraft(query.draft)
-    wx.authorize({ scope: 'scope.record' }).catch(() => {})   // 进页即申请麦克风，不等按住
     const th = getApp().globalData.topHint
     if (th) { getApp().globalData.topHint = ''; this.showTopHint(th) }
     this.scheduleBubble(20000)
@@ -58,8 +57,22 @@ Page({
   onShow () {
     if (this.data.firstLaunch) {
       this.setData({ firstLaunch: false })
-      getApp().globalData.firstLaunch = false   // 清全局；首屏也要刷新出山/船
+      getApp().globalData.firstLaunch = false
+      this.firstLaunchFlow()   // 首屏：隐私指引 → 麦克风确认 → 正式操作
+      return
     }
+    this.boot()
+  },
+  // 首启两步授权：先隐私指引弹窗，同意后系统麦克风确认，再进正式界面
+  firstLaunchFlow () {
+    const afterPrivacy = () => {
+      wx.authorize({ scope: 'scope.record' }).catch(() => {}).then(() => this.boot())
+    }
+    if (wx.requirePrivacyAuthorize) {
+      wx.requirePrivacyAuthorize({ success: afterPrivacy, fail: () => { this.boot(); ui.toast('未同意隐私指引；按住说话时可再次同意', 2600) } })
+    } else afterPrivacy()
+  },
+  boot () {
     // 视角(pan+zoom)=用户自己的：返回时不碰 movable-view 内部状态，仅重建数据；
     // 只有首次/重启才设定视角（onLoad 从 globalData 恢复）。
     if (!this._worldInited) {
