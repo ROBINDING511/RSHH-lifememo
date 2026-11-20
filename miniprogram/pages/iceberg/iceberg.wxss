@@ -1,17 +1,19 @@
 /* pages/iceberg/iceberg.wxss — 冰山详情（温暖水彩 · 适老化） */
 .page { padding: 24rpx 32rpx 220rpx; }
 .berg-head { margin-bottom: 24rpx; }
-.berg-head-row { display: flex; align-items: center; gap: 24rpx; }
+.berg-head-row { display: flex; align-items: center; gap: 20rpx; }
+.berg-title-input { flex: 1; min-width: 0; font-size: var(--fs-xl); font-weight: 600; color: var(--c-text); line-height: 1.5; border-bottom: 2rpx dashed var(--c-line); padding-bottom: 4rpx; }
+.sea-badge { display: flex; align-items: center; gap: 10rpx; flex-shrink: 0; padding: 12rpx 22rpx; border-radius: 999rpx; background: var(--c-primary-soft); color: var(--c-primary); font-size: var(--fs-sm); font-weight: 500; }
+.sea-glyph { width: 28rpx; height: 16rpx; border-radius: 0 0 28rpx 28rpx; background: var(--c-primary); opacity: .7; }
+.sea-arrow { color: var(--c-text-faint); }
 .berg-icon { width: 96rpx; height: 132rpx; flex-shrink: 0; }
-.berg-titles { flex: 1; min-width: 0; }
-.berg-title { display: block; font-size: var(--fs-xl); font-weight: 600; color: var(--c-text); line-height: 1.5; }
 .berg-meta { display: block; font-size: var(--fs-sm); color: var(--c-text-2); margin-top: 12rpx; }
 
 /* ============ 正文 ============ */
-.berg-body { margin-bottom: 24rpx; }
+.berg-body { margin-bottom: 24rpx; display: flex; flex-direction: column; min-height: 62vh; }
 .berg-text {
-  display: block; font-size: var(--fs-lg); line-height: 1.95;
-  color: var(--c-text); letter-spacing: 1rpx;
+  flex: 1; display: block; font-size: var(--fs-xxl); line-height: 1.9;
+  color: var(--c-text); letter-spacing: 1rpx; padding: 40rpx 32rpx;
   white-space: pre-wrap; word-break: break-word;
 }
 
@@ -60,14 +62,14 @@
   display: flex; flex-direction: column; gap: 16rpx;
   background: rgba(253, 252, 249, 0.96);
   border-radius: var(--radius-lg); padding: 20rpx;
-  box-shadow: 0 -4rpx 24rpx rgba(31, 100, 120, 0.12);
+  box-shadow: 0 -4rpx 24rpx rgba(9, 8, 86, 0.12);
 }
 .actions-row { display: flex; gap: 16rpx; }
 .actions .btn-primary { width: 100%; height: 96rpx; line-height: 1; }
 .actions .btn-ghost { height: 88rpx; line-height: 1; }
 
 /* ============ 标记选择 ============ */
-.icon-mask { position: fixed; left: 0; right: 0; top: 0; bottom: 0; background: rgba(23, 80, 95, 0.5); display: flex; align-items: flex-end; }
+.icon-mask { position: fixed; left: 0; right: 0; top: 0; bottom: 0; background: rgba(9, 8, 86, 0.5); display: flex; align-items: flex-end; }
 .icon-sheet {
   width: 100%; background: var(--c-card);
   border-radius: var(--radius-xl) var(--radius-xl) 0 0;
@@ -101,3 +103,39 @@
 .fail-title { font-size: var(--fs-xl); color: var(--c-text); font-weight: 500; }
 .fail-sub { font-size: var(--fs-sm); color: var(--c-text-2); margin-top: 16rpx; text-align: center; }
 .fail-btn { width: 100%; margin-top: 24rpx; }
+/* ============ v2.0 阅读：三视图/翻书/大字/句级确认/红字/进度 ============ */
+.book-page { display: flex; flex-direction: column; gap: 28rpx; }
+.sent-block { display: flex; flex-direction: column; gap: 12rpx; }
+.sent-text { font-size: var(--fs-lg); line-height: 1.9; color: var(--c-text); }
+.doubt-word { color: var(--c-danger); text-decoration: underline; text-underline-offset: 6rpx; padding: 4rpx 2rpx; }
+.sent-confirm { display: flex; gap: 16rpx; }
+.sent-yes, .sent-no { min-height: 88rpx; padding: 0 32rpx; display: flex; align-items: center; justify-content: center; border-radius: var(--radius-md); font-size: var(--fs-md); }
+.sent-yes { background: var(--c-soft); color: var(--c-text-2); }
+.sent-yes.on { background: var(--c-primary-soft); color: var(--c-primary); }
+.sent-no { background: var(--c-soft); color: var(--c-text-2); }
+.sent-fix { display: flex; flex-direction: column; gap: 12rpx; padding: 20rpx; background: var(--c-soft); border-radius: var(--radius-md); }
+.fix-input { min-height: 88rpx; background: var(--c-card); border: 2rpx solid var(--hairline); border-radius: var(--radius-md); padding: 0 20rpx; font-size: var(--fs-md); }
+.fix-hold { min-height: 88rpx; display: flex; align-items: center; justify-content: center; border-radius: var(--radius-md); background: var(--c-card); border: 2rpx solid var(--hairline); color: var(--c-primary); font-size: var(--fs-md); }
+.fix-hold.on { background: var(--c-primary); color: #fff; }
+.fix-ok { min-height: 88rpx; display: flex; align-items: center; justify-content: center; border-radius: var(--radius-md); background: var(--c-primary); color: #fff; font-size: var(--fs-md); }
+.book-nav { display: flex; align-items: center; justify-content: space-between; margin-top: 28rpx; gap: 16rpx; }
+.book-btn { min-height: 88rpx; padding: 0 32rpx; display: flex; align-items: center; justify-content: center; border-radius: var(--radius-md); background: var(--c-soft); color: var(--c-text); font-size: var(--fs-md); }
+.book-btn.dis { opacity: .4; }
+.book-pageno { font-size: var(--fs-md); color: var(--c-text-2); }
+.progress-row { display: flex; align-items: center; gap: 16rpx; margin-top: 16rpx; }
+.progress { flex: 1; margin: 0; }
+.progress-time { font-size: var(--fs-xs); color: var(--c-text-2); }
+.doubt-ctx { display: block; margin: 16rpx 0; font-size: var(--fs-md); line-height: 1.8; color: var(--c-text); }
+.doubt-play { align-self: flex-start; padding: 10rpx 28rpx; border-radius: 28rpx; background: var(--c-primary-soft); color: var(--c-primary); font-size: var(--fs-sm); margin-bottom: 16rpx; }
+.doubt-cands { display: flex; flex-direction: column; gap: 12rpx; margin-bottom: 16rpx; }
+.doubt-cand { min-height: 88rpx; display: flex; align-items: center; justify-content: space-between; padding: 0 24rpx; border-radius: var(--radius-md); background: var(--c-soft); color: var(--c-text); font-size: var(--fs-md); }
+.cand-tag { font-size: var(--fs-xs); color: var(--c-text-2); }
+.doubt-keep { min-height: 88rpx; display: flex; align-items: center; justify-content: center; border-radius: var(--radius-md); background: var(--c-card); border: 2rpx solid var(--hairline); color: var(--c-text); font-size: var(--fs-md); margin-bottom: 16rpx; }
+@media (prefers-reduced-motion: reduce) { .book-page, .detail-enter { animation: none !important; transition: none !important; } }
+.book { flex: 1; background: var(--c-surface); border-radius: var(--r-card); padding: 40rpx 32rpx; font-size: var(--fs-xxl); line-height: 1.9; color: var(--c-text); }
+
+.model-switch { align-self: flex-end; display: flex; align-items: center; gap: 10rpx; margin-top: auto; padding: 12rpx 24rpx; border-radius: 999rpx; background: var(--c-surface-2); color: var(--c-text-soft); font-size: var(--fs-xs); }
+.ms-cur { color: var(--c-primary); font-weight: 700; font-size: var(--fs-sm); }
+.ms-arrow { color: var(--c-text-faint); }
+.ms-label { color: var(--c-text-soft); }
+.sea-name { color: var(--c-primary); }

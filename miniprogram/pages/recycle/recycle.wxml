@@ -1,40 +1,35 @@
-<!--pages/recycle/recycle.wxml — 云朵回收站
-    适老化要点：
-    - "落回海面"按钮放大到 ≥96rpx 高、整块可点，恢复是安全操作不弹确认
-    - 恢复中给明确文字与动效，完成后告知去了哪
-    - 空态文案温柔，不让妈妈误以为东西丢了
--->
+<!--pages/recycle/recycle.wxml — 删除的记忆：编辑(回编辑卡可存为冰山) / 删除(彻底清除)-->
 <view class="page wash-bg">
   <view class="head">
-    <text class="title">云朵里的回忆</text>
-    <text class="sub">化成云的冰山都在这里，5 天后会完全飘散</text>
+    <text class="title">删除的记忆</text>
+    <text class="sub">在这里放 5 天；编辑后可重新变成冰山，删除则彻底清除</text>
   </view>
 
   <view wx:if="{{!items.length && !loading}}" class="empty">
-    <image class="empty-img" src="/images/misc/cloud.png" mode="aspectFit" />
-    <text class="empty-title">天上现在没有云</text>
+    <text class="empty-title">这里空空的</text>
     <text class="empty-sub">您说的每一座冰山，都好好漂在海面上</text>
     <button class="btn-primary empty-btn" hover-class="btn-hover" hover-stay-time="80"
       bindtap="goOcean">回海洋看看</button>
   </view>
 
   <scroll-view scroll-y class="list" wx:if="{{items.length}}" enhanced show-scrollbar="{{false}}">
-    <view class="cloud-card {{raining === item._id ? 'raining' : ''}}"
+    <view class="cloud-card enter" style="animation-delay:{{(index > 5 ? 5 : index) * 50}}ms"
       wx:for="{{items}}" wx:key="_id">
       <view class="cloud-top">
-        <image class="cloud-img" src="/images/misc/cloud.png" mode="aspectFit" />
         <view class="cloud-info">
           <text class="cloud-title">{{item.title || '一段回忆'}}</text>
-          <text class="cloud-meta">{{item.zoneName}}之海 · {{item.daysLeft}}天后飘散</text>
+          <text class="cloud-meta">{{item.zoneName}}之海 · {{item.daysLeft}}天后清除</text>
         </view>
       </view>
-      <button class="rain-btn" hover-class="rain-hover" hover-stay-time="80"
-        data-id="{{item._id}}" bindtap="rain" disabled="{{raining === item._id}}">
-        {{raining === item._id ? '正在落回…' : '落回海面'}}
-      </button>
+      <view class="cloud-btns">
+        <button class="btn-ghost flex1" hover-class="btn-hover" hover-stay-time="80"
+          data-id="{{item._id}}" bindtap="editCloud">编辑</button>
+        <button class="btn-danger-ghost flex1" hover-class="btn-hover" hover-stay-time="80"
+          data-id="{{item._id}}" bindtap="purgeCloud">删除</button>
+      </view>
     </view>
     <view class="list-tip">
-      <text>点"落回海面"，赶在飘散前把冰山留在海里</text>
+      <text>点"编辑"回到卡片，可直接存为冰山</text>
     </view>
   </scroll-view>
 </view>

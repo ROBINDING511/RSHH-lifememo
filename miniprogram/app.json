@@ -15,10 +15,10 @@
     }
   ],
   "window": {
-    "navigationBarBackgroundColor": "#F7F3EA",
+    "navigationBarBackgroundColor": "#FBF7EF",
     "navigationBarTextStyle": "black",
     "navigationBarTitleText": "人生海海",
-    "backgroundColor": "#F5F2EA"
+    "backgroundColor": "#FBF7EF"
   },
   "permission": {
     "scope.record": {

@@ -36,6 +36,7 @@ function createRecorder () {
 
   rm.onStart(() => {
     state.recording = true
+    // 快速点按：touchend 早于 onStart 到达时已请求停止 → 立即补停，绝不留"按一下一直录"
     if (state.stopRequested) { state.stopRequested = false; rm.stop() }
   })
 

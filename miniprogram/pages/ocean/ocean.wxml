@@ -5,55 +5,36 @@
     适老化：录音主入口=底部大按钮（点一下开始/说完了再点）；长按鲸鱼=副入口；
     关键信息原生 view/text；空态提示深色胶囊白字；冰山视觉虽小但热区 ≥88rpx。
 -->
-<view class="page" bindtouchend="onSceneTouchEnd">
+<view class="page-ocean ocean-page" bindtouchend="onSceneTouchEnd">
 
-  <!-- ============ 插画海面场景 ============ -->
-  <view class="scene" bindtouchstart="onSceneTouchStart">
-    <view class="bg-gradient"></view>
-    <image class="bg-art {{bgLoaded ? 'show' : ''}}" src="/images/ocean/sea_bg.jpg"
-      mode="aspectFill" bindload="onBgLoad" />
-    <view class="caustic c1"></view>
-    <view class="caustic c2"></view>
-
-    <!-- 整片海向四面八方扩展：2D 可拖世界，拖动如滚地球（海面纹理随世界滚过+各阶段海色晕染） -->
-    <movable-area class="sea-area">
-      <movable-view class="sea-world" direction="all" inertia damping="{{40}}" friction="{{2}}"
-        out-of-bounds="{{false}}" disabled="{{movableDisabled}}" bindchange="onSeaChange"
-        scale="{{true}}" scale-min="0.6" scale-max="2.5" scale-value="{{seaScale}}" bindscale="onSeaScale"
-        style="width:{{worldWidth}}px;height:{{worldHeight}}px" x="{{movX}}" y="{{movY}}">
-        <image class="sea-texture" src="/images/ocean/sea_bg.jpg" mode="scaleToFill"
-          style="width:{{worldWidth+120}}px;height:{{worldHeight+120}}px" />
-        <view class="sea-glow"></view>
-        <view class="sea-tint" style="background:{{tintGradient}}"></view>
-        <text wx:for="{{stages}}" wx:key="key" class="stage-label"
-          style="left:{{item.cx}}px;top:{{item.cy}}px">{{item.name}}之海</text>
-        <view wx:for="{{bergs}}" wx:key="id" class="berg"
-          style="left:{{item.left}}px;top:{{item.top}}px;width:{{item.width}}px;opacity:{{item.opacity}};animation:{{item.anim}}"
-          data-id="{{item.id}}" data-i="{{index}}" bindtap="onBergTap"
-          bindlongpress="onBergDragStart" bindtouchmove="onBergDragMove" bindtouchend="onBergDragEnd"
-          hover-class="berg-hover" hover-stay-time="80">
-          <image class="berg-img" src="/images/ocean/berg.png" mode="widthFix" />
-          <view class="berg-flag" wx:if="{{item.flag}}"></view>
-        </view>
-        <!-- 自定义人生节点：小旗标记 -->
-        <view wx:for="{{milestones}}" wx:key="id" class="ms-marker" style="left:{{item.left}}px;top:{{item.top}}px">
-          <view class="ms-flag"></view>
-          <text class="ms-label">{{item.name}}·{{item.age}}岁</text>
-        </view>
-      </movable-view>
-    </movable-area>
-    <!-- 球面曲率暗角：滚动如滚地球的边缘收暗 -->
-    <view class="sea-curve"></view>
-
-    <!-- 鲸鱼杭航：屏幕层游弋（始终可见）+ 自然微动；长按说话副入口 -->
-    <view class="whale-layer">
-      <view class="cruise {{whalePaused || recording ? 'paused' : ''}}">
-        <view class="whalebox" bindtap="onWhaleTap" bindlongpress="onWhaleLongPress" hover-class="whale-hover" hover-stay-time="80">
-          <image class="wf wf-straight" src="/images/ocean/whale.png" mode="aspectFit" />
-        </view>
+  <!-- 横向滚轴：整片海+天空+雪山一起滚过=驶入另一片海；左=年轻 右=老年 -->
+  <movable-area class="sea-area" bindtouchstart="onSceneTouchStart">
+    <movable-view class="sea-world" direction="horizontal" inertia damping="{{40}}" friction="{{2}}"
+      out-of-bounds="{{false}}" disabled="{{movableDisabled}}" bindchange="onSeaChange"
+      style="width:{{worldWidth}}px;height:{{worldHeight}}px" x="{{movX}}" y="{{movY}}">
+      <!-- 主背景随世界一起滚动（用户定稿夜海） -->
+      <image class="world-bg" src="/images/ocean/night-sea-bg.jpg" mode="scaleToFill"
+        style="width:{{worldWidth}}px;height:{{worldHeight}}px" />
+      <text wx:for="{{stageLabels}}" wx:key="name" class="sea-label" style="left:{{item.left}}px">{{item.name}}之海</text>
+      <view wx:for="{{mountains}}" wx:key="id" class="mtn"
+        style="left:{{item.left}}px;bottom:{{item.bottom}}px;width:{{item.width}}px;animation-delay:{{item.delay}}s"
+        data-id="{{item.id}}" bindtap="onBergTap" hover-class="mtn-hover" hover-stay-time="80">
+        <image class="mtn-img" src="{{item.src}}" mode="scaleToFill" style="height:{{item.height}}px" />
       </view>
-    </view>
+    </movable-view>
+  </movable-area>
+
+  <!-- 固定天空：月亮+星不随海滚走，永远在海上 -->
+  <view class="sky-stars"></view>
+  <view class="sky-moon"></view>
+
+  <!-- 小船=杭航：固定视口层、夹在画面内不撞边；山间海上飘；长按说话副入口 -->
+  <view class="boat-drift {{boatPaused || recording ? 'paused' : ''}}"
+    style="left:{{boatLeft}}px;top:{{boatTop}}px"
+    bindtap="onBoatTap" bindlongpress="onBoatLongPress" hover-class="boat-hover" hover-stay-time="80">
+    <image class="boat-img" src="/assets/boat.png" mode="widthFix" />
   </view>
+
 
   <!-- ============ 草稿找回（说过的话绝不丢） ============ -->
   <view class="draft-bar" wx:if="{{drafts.length && !recording && !preview}}"
@@ -63,14 +44,6 @@
   </view>
 
   <!-- ============ 空态提示（深色胶囊白字，压在任何水色上都看得清） ============ -->
-  <view class="empty-hint" wx:if="{{icebergCount === 0 && !recording && !preview && !drafts.length}}">
-    <view class="hint-card">
-      <text class="hint-title">{{prompt || '想说什么，就说给杭航听'}}</text>
-      <text class="hint-sub">按住下面的青色按钮，说说看</text>
-      <view class="hint-next" hover-class="btn-hover" hover-stay-time="80" bindtap="nextPrompt">换一个问题</view>
-    </view>
-    <view class="hint-arrow"></view>
-  </view>
 
   <!-- 那年今日：托起一座旧冰山 -->
   <view class="today-bar" wx:if="{{todayMemory && !recording && !preview}}"
@@ -86,11 +59,6 @@
     <text>杭航想听/抱抱了 {{familyReactCount}} 次</text>
   </view>
 
-  <!-- 右上角声音开关（录音时自动静音） -->
-  <view class="sound-btn" wx:if="{{!preview}}" style="top: {{capsuleBottom + 16}}px;"
-    hover-class="btn-hover" hover-stay-time="80" bindtap="toggleAmbient">
-    <text>{{ambientOn && !recording ? '🔊' : '🔇'}}</text>
-  </view>
 
   <!-- 杭航请妈妈试听克隆声音：像→固化；不像→继续克隆 -->
   <view class="voice-review" wx:if="{{voiceReview && !recording && !preview}}">
@@ -105,14 +73,29 @@
     </view>
   </view>
 
+
+
+  <!-- 顶端略小提示（删除回执等） -->
+  <view class="top-hint" wx:if="{{topHint}}" style="top:{{capsuleBottom + 12}}px">
+    <text>{{topHint}}</text>
+  </view>
+
+  <!-- 帆船飘出的小提示：亮20秒→无人点静默60秒→换下一条 -->
+  <view class="boat-bubble" wx:if="{{bubbleShow && !recording && !preview}}"
+    style="left:{{bbLeft}}px;top:{{bbTop}}px" bindtap="onBubbleTap">
+    <text class="bb-text">{{bubbleText}}</text>
+    <view class="bb-tail" style="left:{{bbTail}}px"></view>
+  </view>
+
   <!-- ============ 底部操作区（拇指区） ============ -->
   <view class="dock safe-bottom" wx:if="{{!preview}}">
-    <view class="record-btn {{recording ? (cancelArmed ? 'record-cancel' : 'record-on') : ''}}"
+    <view class="record-btn {{locked ? 'record-lock' : (recording ? (cancelArmed ? 'record-cancel' : (lockArmed ? 'record-lock' : 'record-on')) : '')}}"
       hover-class="record-hover" hover-stay-time="80"
       bindtouchstart="onHoldStart" bindtouchmove="onHoldMove"
-      catchtouchend="onHoldEnd" catchtouchcancel="onHoldEnd">
-      <text class="record-main">{{recording ? (cancelArmed ? '松开 取消' : '松开 发送') : '按住 说话'}}</text>
+      bindtouchend="onHoldEnd" bindtouchcancel="onHoldEnd">
+      <text class="record-main">{{locked ? '点一下 结束' : (recording ? (cancelArmed ? '松开 取消' : (lockArmed ? '松开 免按住' : '松开 发送')) : '按住 说话')}}</text>
     </view>
+
   </view>
 
   <!-- ============ 实时转写面板（微信式：按住即弹 0 延迟，边说边出字）============
@@ -121,39 +104,63 @@
     <view class="live-card {{cancelArmed ? 'live-cancel' : ''}}">
       <view class="live-status">
         <view class="live-dot"></view>
-        <text class="live-state">{{cancelArmed ? '松开手指，取消' : '正在听，松手发送'}}</text>
+        <text class="live-state">{{cancelArmed ? '松开手指，取消' : (locked ? '免按住中 · 点按钮结束' : '正在听，松手发送')}}</text>
         <text class="live-timer">{{elapsed}}s</text>
       </view>
       <text class="live-asr" wx:if="{{asrHint === 'connecting'}}">正在连线，字马上就来</text>
       <text class="live-asr live-asr-warn" wx:elif="{{asrHint === 'offline'}}">字暂时不出来，别急，松手会自动整理好</text>
-      <scroll-view scroll-y class="live-scroll" scroll-into-view="t-end">
-        <text class="live-text">{{transcript || '您慢慢说，字马上出来…'}}</text>
-        <text id="t-end"></text>
-      </scroll-view>
+      <text class="live-text">{{liveTail || transcript || '您慢慢说，字马上出来…'}}</text>
+      <text class="live-offline" wx:if="{{asrHint === 'offline'}}">识别连线不上也没关系，松手后整段自动出字</text>
       <view class="live-countdown" wx:if="{{countdown > 0}}">
         <text class="live-countdown-num">{{countdown}}</text>
         <text class="live-countdown-label">秒后自动结束</text>
       </view>
-      <text class="live-hint">{{cancelArmed ? '松开即取消，话会存进草稿' : '上滑取消 · 松手发送'}}</text>
+      <text class="live-hint">{{cancelArmed ? '松开即取消，话会存进草稿' : (locked ? '免按住中 · 点按钮结束' : (lockArmed ? '松开后继续录，不用一直按' : '上滑取消 · 右滑免按住 · 松手发送'))}}</text>
     </view>
   </view>
 
   <!-- ============ 发布卡片 ============ -->
   <view class="preview-mask" wx:if="{{preview}}">
-    <view class="preview-card safe-bottom">
+    <view class="preview-card safe-bottom {{sheetSettle ? 'sheet-settle' : ''}}" style="transform: translateY({{sheetDy}}px)">
+      <view class="sheet-grip" catchtouchstart="onSheetStart" catchtouchmove="onSheetMove"
+        catchtouchend="onSheetEnd" catchtouchcancel="onSheetEnd">
+        <view class="sheet-grip-bar"></view>
+      </view>
+      <view class="sheet-close-x" catchtap="discardToCloud">×</view>
       <textarea class="preview-text" value="{{preview.text}}" maxlength="2000"
         auto-height cursor-spacing="120" show-confirm-bar="{{false}}"
         bindinput="onPreviewInput"
         placeholder="这一刻的想法…（有错字可以直接改）"></textarea>
 
-      <!-- 润色可回退：默认逐字，AI 小标题可选 -->
-      <view class="polish-row">
-        <view class="polish-toggle {{preview.showTitle ? 'on' : ''}}" hover-class="btn-hover" hover-stay-time="80" bindtap="toggleTitle">AI 小标题·{{preview.showTitle ? '开' : '关'}}</view>
-        <view class="polish-revert" hover-class="btn-hover" hover-stay-time="80" bindtap="revertRaw">还原逐字</view>
+      <!-- A9 状态条：说人话，不出现 AI/模型/生成 -->
+      <view class="refine-status refine-loading" wx:if="{{previewStatus === 'pending'}}">
+        <text>正在理解您说的</text>
+        <view class="dots"><view class="dot"></view><view class="dot"></view><view class="dot"></view></view>
+      </view>
+      <text class="refine-status" wx:elif="{{previewStatus === 'done'}}">顺好了，看看像不像您说的</text>
+      <text class="refine-status" wx:elif="{{previewStatus === 'failed'}}">这次没顺成，您的原话一个字没少</text>
+
+      <!-- A8 情绪保护：不追问不整理，可歇一歇 -->
+      <view class="emotion-box" wx:if="{{previewEmotion}}">
+        <text class="emotion-text">这段对您很重，咱们先不整理它。想缓缓就歇一歇，想跟家里人说说也好。</text>
+        <view class="emotion-rest" hover-class="btn-hover" hover-stay-time="80" bindtap="restNow">先歇一歇</view>
       </view>
 
+
       <!-- 照片：微信式九宫格，裸 + 添加，无多余解释文案 -->
-      <view class="photo-grid">
+      <view class="attach-row">
+        <view class="photo-add" wx:if="{{preview.photos.length < 9}}"
+          hover-class="btn-hover" hover-stay-time="80" bindtap="addPhoto">
+          <text class="photo-add-plus">＋</text>
+          <text class="photo-add-label">添加图片</text>
+        </view>
+        <view class="voice-check" wx:if="{{preview.wavPath}}"
+          hover-class="btn-hover" hover-stay-time="80" bindtap="playPreviewVoice">
+          <view class="vc-btn {{previewVoicePlaying ? 'vc-on' : ''}}"></view>
+          <text class="vc-text">{{previewVoicePlaying ? '正在播放，点停' : '听听我自己的声音'}}</text>
+        </view>
+      </view>
+      <view class="photo-grid" wx:if="{{preview.photos.length}}">
         <view class="photo-cell" wx:for="{{preview.photos}}" wx:key="*this">
           <image src="{{item}}" mode="aspectFill" class="photo-img"
             data-i="{{index}}" bindtap="previewDraftPhoto" />
@@ -162,25 +169,13 @@
             <text class="photo-del-x">×</text>
           </view>
         </view>
-        <view class="photo-add" wx:if="{{preview.photos.length < 9}}"
-          hover-class="btn-hover" hover-stay-time="80" bindtap="addPhoto">
-          <text class="photo-add-plus">＋</text>
-        </view>
       </view>
 
-      <!-- 微信式 cell：什么时候 / 哪片海，点开选择（有真实预设可选） -->
-      <!-- 什么时候 == 哪片海：只选一次；听到的年份/岁数仅作只读提示 -->
       <text class="time-hint" wx:if="{{preview.timeLabel}}">听到 {{preview.timeLabel}}，落在</text>
       <view class="meta-cell" hover-class="cell-hover" hover-stay-time="80" bindtap="pickZoneSheet">
         <text class="meta-label">哪片海</text>
         <text class="meta-value">{{preview.zoneOptions[preview.zoneIndex]}}之海</text>
         <text class="meta-arrow">›</text>
-      </view>
-
-      <view class="voice-check" wx:if="{{preview.wavPath}}"
-        hover-class="btn-hover" hover-stay-time="80" bindtap="playPreviewVoice">
-        <view class="vc-btn {{previewVoicePlaying ? 'vc-on' : ''}}"></view>
-        <text class="vc-text">{{previewVoicePlaying ? '正在播放，点这里停' : '听听我自己的声音'}}</text>
       </view>
 
       <view class="continue-hold" hover-class="btn-hover" hover-stay-time="80"
@@ -189,11 +184,11 @@
       </view>
 
       <view class="preview-actions">
-        <button class="btn-ghost btn-danger-ghost flex1" hover-class="btn-hover"
-          hover-stay-time="80" bindtap="discardPreview">不要了</button>
+        <button class="btn-ghost flex1" hover-class="btn-hover"
+          hover-stay-time="80" bindtap="saveDraftNow">存草稿</button>
         <button class="btn-primary flex1" hover-class="btn-hover"
           hover-stay-time="80" loading="{{publishing}}" disabled="{{publishing}}"
-          bindtap="publish">变成冰山</button>
+          bindtouchstart="tapHaptic" bindtap="publish">变成冰山</button>
       </view>
     </view>
   </view>

@@ -36,7 +36,7 @@ const { toBase64 } = require('./base64')
 // ===== 实测调优参数（2026-11-16，详见文件头）=====
 // VAD 灵敏度：0.2 实测 TTFT 最优（0.5→570ms / 0.3→500ms / 0.2→290~360ms / 0.1→490ms 反弹）
 const VAD_THRESHOLD = 0.2
-// 检测到静音多久算一句话说完。调小 → 出字更快，但妈妈说话中间换气会被误判断句
+// A11：静音只用于"断句"(server VAD)，绝不结束录音；长辈长停顿>3s 不被切断，只有松手/60s上限才结束。调小→出字快但换气误断句
 const VAD_SILENCE_MS = 600
 // 语音前置填充：回溯包含开口前的一点音频，避免吃掉第一个字
 const VAD_PREFIX_MS = 300
@@ -108,6 +108,7 @@ class AsrStream {
     for (const id of this.order) this.retired.add(id)
     this.items = new Map()
     this.order = []
+    this._segStart = Date.now()   // B1 句级时间戳基准（录音段起点）
     this.pending = []
     this.pendingBytes = 0
     this.reconnects = 0
@@ -130,6 +131,21 @@ class AsrStream {
       out += it.done ? (it.transcript || (it.text + it.stash)) : (it.text + it.stash)
     }
     return out.trim()
+  }
+
+  /** B1 行号化转写 + 句级时间戳（墙钟估算，estimated:true；realtime 无精确音频时间字段） */
+  getLines (seg) {
+    const start = this._segStart || Date.now()
+    return this.order.map((id, i) => {
+      const it = this.items.get(id) || {}
+      return {
+        n: i,
+        t: it.t0 ? +(((it.t0 - start) / 1000).toFixed(2)) : null,
+        seg: seg || '初录',
+        text: (it.done ? (it.transcript || (it.text + it.stash)) : (it.text + it.stash)).trim(),
+        estimated: true
+      }
+    }).filter((l) => l.text)
   }
 
   /** 建连 + 下发会话配置。resolve(true)=实时流可用；resolve(false)=不可用，上层走兜底 */
@@ -305,7 +321,7 @@ class AsrStream {
     if (this.retired && this.retired.has(id)) return null
     let it = this.items.get(id)
     if (!it) {
-      it = { text: '', stash: '', done: false, transcript: '' }
+      it = { text: '', stash: '', done: false, transcript: '', t0: Date.now() }
       this.items.set(id, it)
       this.order.push(id)
     }
