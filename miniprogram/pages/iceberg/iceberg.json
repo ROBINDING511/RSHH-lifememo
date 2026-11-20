@@ -1,3 +1,6 @@
 {
-  "navigationBarTitleText": "一座冰山"
+  "navigationBarTitleText": "一座冰山",
+  "usingComponents": {
+    "privacy-popup": "/components/privacy-popup/privacy-popup"
+  }
 }

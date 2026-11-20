@@ -24,16 +24,20 @@ exports.main = async (event) => {
     await ensureCols()
     if (a === 'invite') {
       const code = String(Math.floor(100000 + Math.random() * 900000))
-      await db.collection('family_invites').add({ data: { code, owner: OPENID, createdAt: Date.now() } })
+      await db.collection('family_invites').add({ data: { code, owner: OPENID, createdAt: Date.now(), expiresAt: Date.now() + 24 * 3600 * 1000, used: false } })
       return { ok: true, code }
     }
     if (a === 'bind') {
       const r = await db.collection('family_invites').where({ code: String(event.code) }).limit(1).get()
       if (!r.data.length) return { ok: false, error: '邀请码不对' }
-      const owner = r.data[0].owner
+      const inv = r.data[0]
+      if (inv.used) return { ok: false, error: '邀请码已用过' }
+      if (inv.expiresAt && inv.expiresAt < Date.now()) return { ok: false, error: '邀请码过期，请让妈妈重新生成' }
+      const owner = inv.owner
       if (owner === OPENID) return { ok: false, error: '不能绑定自己' }
       const exist = await db.collection('family_binds').where({ child: OPENID, owner }).count()
       if (!exist.total) await db.collection('family_binds').add({ data: { child: OPENID, owner, createdAt: Date.now() } })
+      await db.collection('family_invites').doc(inv._id).update({ data: { used: true } })
       return { ok: true, owner }
     }
     if (a === 'list') {
@@ -54,6 +58,7 @@ exports.main = async (event) => {
       if (!doc || !doc.data) return { ok: false, error: '不存在' }
       const owner = await boundOwner(OPENID)
       if (owner !== doc.data._openid) return { ok: false, error: '未绑定' }
+      if (!['want', 'hug'].includes(event.type)) return { ok: false, error: '未知反应' }
       await db.collection('family_reactions').add({ data: { owner, iceberg: event.id, child: OPENID, type: event.type, createdAt: Date.now() } })
       return { ok: true }
     }
@@ -68,6 +73,8 @@ exports.main = async (event) => {
       return { ok: true, data: r.data }
     }
     if (a === 'useQuestion') {
+      const q = await db.collection('family_questions').doc(event.id).get().catch(() => null)
+      if (!q || !q.data || q.data.owner !== OPENID) return { ok: false, error: '无权' }
       await db.collection('family_questions').doc(event.id).update({ data: { used: true } })
       return { ok: true }
     }

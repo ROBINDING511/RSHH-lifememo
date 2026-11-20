@@ -1,3 +1,6 @@
 {
-  "navigationBarTitleText": "删除的记忆"
+  "navigationBarTitleText": "删除的记忆",
+  "usingComponents": {
+    "privacy-popup": "/components/privacy-popup/privacy-popup"
+  }
 }

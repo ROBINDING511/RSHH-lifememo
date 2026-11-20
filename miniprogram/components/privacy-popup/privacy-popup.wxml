@@ -1,0 +1,8 @@
+<view class="pp-mask" wx:if="{{show}}">
+  <view class="pp-card">
+    <text class="pp-title">使用前请知悉</text>
+    <text class="pp-body">为了帮您把说的话变成回忆，我们需要用到麦克风（录音）与云存储（保存文字和声音）。声音克隆默认关闭，需您单独同意。详见《用户隐私保护指引》。</text>
+    <button id="privacy-agree-btn" class="pp-agree" open-type="agreePrivacyAuthorization" bindagreeprivacyauthorization="onAgree">同意</button>
+    <button class="pp-refuse" hover-class="btn-hover" hover-stay-time="80" bindtap="onRefuse">不同意</button>
+  </view>
+</view>

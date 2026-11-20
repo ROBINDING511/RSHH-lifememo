@@ -147,3 +147,4 @@
   </view>
   <view style="height:160rpx"></view>
 </view>
+<privacy-popup />

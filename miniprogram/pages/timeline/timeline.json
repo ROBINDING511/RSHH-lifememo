@@ -1,3 +1,6 @@
 {
-  "navigationBarTitleText": "时间轴"
+  "navigationBarTitleText": "时间轴",
+  "usingComponents": {
+    "privacy-popup": "/components/privacy-popup/privacy-popup"
+  }
 }

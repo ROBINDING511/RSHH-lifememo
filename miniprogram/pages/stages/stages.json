@@ -1,3 +1,6 @@
 {
-  "navigationBarTitleText": "杭航"
+  "navigationBarTitleText": "杭航",
+  "usingComponents": {
+    "privacy-popup": "/components/privacy-popup/privacy-popup"
+  }
 }

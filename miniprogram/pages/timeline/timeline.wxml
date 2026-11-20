@@ -43,3 +43,4 @@
     </view>
   </scroll-view>
 </view>
+<privacy-popup />

@@ -152,3 +152,4 @@
   <button class="btn-ghost fail-btn" hover-class="btn-hover" hover-stay-time="80"
     bindtap="goBack">回到海洋</button>
 </view>
+<privacy-popup />
