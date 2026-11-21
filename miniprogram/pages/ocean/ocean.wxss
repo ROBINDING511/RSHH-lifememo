@@ -8,7 +8,6 @@
 
 /* ============ 场景层 ============ */
 /* ============ 夜海主背景(用户定稿SVG·干净海) + 横向滚轴(无缩放) ============ */
-.night-bg { position: absolute; left: 0; top: 0; width: 100%; height: 100%; }
 .sea-area { position: absolute; left: 0; top: 0; width: 100%; height: 100%; }
 .sea-world { position: relative; }
 /* 雪山=记忆：用户定稿SVG的真实云slab贴图（含纹理），按天数换红→蓝素材 */

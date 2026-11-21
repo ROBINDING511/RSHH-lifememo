@@ -6,7 +6,6 @@
 .sea-badge { display: flex; align-items: center; gap: 10rpx; flex-shrink: 0; padding: 12rpx 22rpx; border-radius: 999rpx; background: var(--c-primary-soft); color: var(--c-primary); font-size: var(--fs-sm); font-weight: 500; }
 .sea-glyph { width: 28rpx; height: 16rpx; border-radius: 0 0 28rpx 28rpx; background: var(--c-primary); opacity: .7; }
 .sea-arrow { color: var(--c-text-faint); }
-.berg-icon { width: 96rpx; height: 132rpx; flex-shrink: 0; }
 .berg-meta { display: block; font-size: var(--fs-sm); color: var(--c-text-2); margin-top: 12rpx; }
 
 /* ============ 正文 ============ */

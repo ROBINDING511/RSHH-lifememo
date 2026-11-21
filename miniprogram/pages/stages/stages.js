@@ -100,6 +100,14 @@ Page({
     this.setData({ peopleList: life.addKnownPerson(n), personInput: '' })
   },
   removePerson (e) { this.setData({ peopleList: life.removeKnownPerson(e.currentTarget.dataset.n) }) },
+  renameMs (e) {
+    const id = e.currentTarget.dataset.id
+    const name = (e.detail.value || '').trim()
+    if (!name) return
+    life.renameMilestone(id, name)
+    this.setData({ milestones: life.getMilestones() })
+    this.syncDraft()
+  },
   fmtAge (p) {
     if (!p) return ''
     if (p.mode === 'birthday' && p.birthday) return p.birthday
@@ -201,42 +209,8 @@ Page({
   },
 
   // ---- 海：改名 / 改边界 / 增删片数 ----
-  resetDefault () {
-    life.resetStages()
-    this._draft = life.getStages().map((s) => ({ name: s.name, to: s.to, flag: s.flag }))
-    this.syncDraft()
-    wx.showToast({ title: '恢复默认了', icon: 'none' })
-  },
-  saveAll () {
-    if (wx.vibrateShort) wx.vibrateShort({ type: 'light' })
-    life.setStages(this._draft)
-    wx.showToast({ title: '保存好了', icon: 'none' })
-    setTimeout(() => wx.navigateBack(), 900)
-  },
 
   // ---- 人生节点 ----
-  onMsName (e) { this.setData({ msName: e.detail.value }) },
-  onMsAge (e) { this.setData({ msAge: e.detail.value }) },
-  addMs () {
-    const name = (this.data.msName || '').trim()
-    const raw = String(this.data.msAge || '').trim()
-    if (!name) return wx.showToast({ title: '写个节点名字', icon: 'none' })
-    let age = NaN
-    const ym = raw.match(/^(19|20)\d{2}/)                      // 支持 2017 / 2017.6.8 / 2017-6-8
-    if (ym) {
-      const by = life.getBirthYear()
-      if (!by) return wx.showToast({ title: '先在"关于我"填出生年份，才能换算几岁', icon: 'none', duration: 2600 })
-      age = parseInt(ym[0], 10) - by
-    } else {
-      age = parseInt(raw, 10)
-    }
-    if (!isFinite(age) || age < 0 || age > 120) return wx.showToast({ title: '填几岁，或填年份如2017', icon: 'none' })
-    const ms = life.addMilestone(name, age)   // 加节点 = 开启一片新海
-    this._draft = life.getStages().map((s) => ({ name: s.name, to: s.to, flag: s.flag }))
-    this.setData({ milestones: ms, msName: '', msAge: '' })
-    this.syncDraft()
-    wx.showToast({ title: '记下了，多了一片海', icon: 'none' })
-  },
   removeMs (e) {
     const ms = life.removeMilestone(e.currentTarget.dataset.id)   // 删节点 = 合并海
     this._draft = life.getStages().map((s) => ({ name: s.name, to: s.to, flag: s.flag }))

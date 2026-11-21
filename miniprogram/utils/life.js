@@ -169,6 +169,20 @@ function addMilestone (name, age, year, date) {
   if (date) { const d = getDates(); d[nm] = date; setDates(d) }
   return getMilestones()
 }
+function renameMilestone (id, name) {
+  const nm = String(name).slice(0, 8)
+  const stages = getStages()
+  const i = stages.findIndex((x) => x.key === id)
+  if (i < 0) return getMilestones()
+  const yearMode = stages[i].toYear !== undefined
+  const list = stages.map((x) => yearMode ? ({ name: x.name, toYear: x.toYear, flag: x.flag }) : ({ name: x.name, to: x.to, flag: x.flag }))
+  const old = list[i].name
+  list[i].name = nm
+  setStages(list)
+  const d = getDates()
+  if (d[old]) { d[nm] = d[old]; delete d[old]; setDates(d) }
+  return getMilestones()
+}
 function removeMilestone (id) {
   const stages = getStages()
   const i = stages.findIndex((s) => s.key === id)
@@ -196,5 +210,5 @@ module.exports = {
   stageOfAge, stageOfYear, stageByKey,
   getProfile, setProfile, getNickname, setNickname, getBirthYear, getKnownPeople, addKnownPerson, removeKnownPerson,
   parseAge, eventYear, parseStagesFromText,
-  getMilestones, setMilestones, addMilestone, removeMilestone, parseMilestoneFromText
+  getMilestones, setMilestones, addMilestone, removeMilestone, renameMilestone, parseMilestoneFromText
 }

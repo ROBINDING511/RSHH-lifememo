@@ -287,7 +287,7 @@ Page({
     asr.on('sentence', (t) => this.flushTranscript(t, true))
     asr.on('ready', () => this.flushFrameBuf())
     asr.on('error', (e) => {
-      if (this.data.recording) this.setData({ asrHint: 'offline' })
+      if (this.data.recording) { this.setData({ asrHint: 'offline' }); this.retryAsrDuringRecording() }
       console.warn('[asr] error:', e && e.message)
     })
   },
@@ -375,6 +375,11 @@ Page({
     }
   },
 
+  retryAsrDuringRecording () {
+    if (!this.data.recording || this._asrRetried) return
+    this._asrRetried = true
+    setTimeout(() => { this._asrRetried = false; if (this.data.recording) this.ensureAsr() }, 600)
+  },
   flushFrameBuf () {
     const buf = this._frameBuf || []
     this._frameBuf = []
@@ -551,7 +556,7 @@ Page({
   onSceneTouchEnd () {
     this._seaTouching = false
     // 页面级兜底：无论按钮自身 touchend 是否漏发，松手必停
-    if (this.data.recording && (this._holdSource === 'whale' || this._holdSource === 'button')) return this.finishRecording()
+    if (this.data.recording && !this.data.locked && (this._holdSource === 'whale' || this._holdSource === 'button')) return this.finishRecording()
     if (!this.data.recording && this.data.boatPaused) this.setData({ boatPaused: false })
   },
   onBoatTap () {
@@ -638,14 +643,6 @@ Page({
 
 
   // ==================== 草稿 / 复核 / 发布 ====================
-  recoverDraft () {
-    const list = draft.list()
-    if (!list.length) return this.setData({ drafts: [] })
-    const d = list[0]
-    draft.remove(d.at)
-    this.setData({ drafts: draft.list() })
-    this.openPreview(d.wavPath || '', d.text || '')
-  },
 
   openPreview (wavPath, text, opts) {
     const hasText = text && text.replace(/\s/g, '').length >= 2
@@ -951,7 +948,6 @@ Page({
   },
   // 按压轻震（无超调回弹）
   tapHaptic () { if (wx.vibrateShort) wx.vibrateShort({ type: 'light' }) },
-  noop () {},
 
   // 存草稿：点了就存，不弹窗
   saveDraftNow (silent) {

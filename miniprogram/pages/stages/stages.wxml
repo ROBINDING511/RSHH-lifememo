@@ -69,7 +69,7 @@
               <text class="ms-date">{{item.date || (item.year + '年')}}</text>
               <text class="ms-age" wx:if="{{item.age != null}}">{{item.age}}岁</text>
             </view>
-            <text class="ms-name">{{item.name}}</text>
+            <input class="ms-name ms-name-input2" value="{{item.name}}" data-id="{{item.id}}" bindblur="renameMs" />
             <view class="ms-del" hover-class="btn-hover" hover-stay-time="80" data-id="{{item.id}}" bindtap="removeMs">×</view>
           </view>
           <view wx:if="{{!milestones.length}}" class="ms-empty">按住上面，一次说几个节点</view>
@@ -96,9 +96,9 @@
           <view class="style-opt {{polishStyle === 'written' ? 'on' : ''}}" hover-class="btn-hover" hover-stay-time="80" data-s="written" bindtap="setStyle">口语顺成书面语</view>
         </view>
       </view>
-      <view class="menu-link clone-row">
+      <view class="menu-link clone-row" hover-class="btn-hover" hover-stay-time="80" bindtap="toggleCloneSwitch">
         <text>声音克隆</text>
-        <view class="clone-switch {{cloneConsent ? 'on' : ''}}" hover-class="btn-hover" hover-stay-time="80" catchtap="toggleCloneSwitch">
+        <view class="clone-switch {{cloneConsent ? 'on' : ''}}">
           <view class="clone-knob"></view>
         </view>
       </view>
