@@ -6,7 +6,7 @@ const ROOT = path.join(__dirname, '..', '..', 'miniprogram')
 const PAGES = ['pages/ocean/ocean', 'pages/iceberg/iceberg', 'pages/timeline/timeline', 'pages/recycle/recycle', 'pages/stages/stages', 'packageGuide/pages/guide/guide']
 const COMPARE_RE = /(===|!==|==|!=)\s*$/
 
-const appWxss = fs.readFileSync(path.join(ROOT, 'app.wxss'), 'utf8') + (fs.existsSync(path.join(ROOT, 'theme-night-ocean.wxss')) ? fs.readFileSync(path.join(ROOT, 'theme-night-ocean.wxss'), 'utf8') : '')
+const appWxss = fs.readFileSync(path.join(ROOT, 'app.wxss'), 'utf8') + (fs.existsSync(path.join(ROOT, 'theme-night-ocean.wxss')) ? fs.readFileSync(path.join(ROOT, 'theme-night-ocean.wxss'), 'utf8') : '' + (fs.existsSync(path.join(ROOT, 'theme-sleep.wxss')) ? fs.readFileSync(path.join(ROOT, 'theme-sleep.wxss'), 'utf8') : ''))
 const appClasses = new Set([...appWxss.matchAll(/\.([A-Za-z][\w-]*)/g)].map((m) => m[1]))
 
 let total = 0

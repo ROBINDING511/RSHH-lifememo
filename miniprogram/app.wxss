@@ -1,3 +1,4 @@
+@import "theme-sleep.wxss";
 /* app.wxss — 夜海主题 v2（drop-in handoff）+ 旧类名映射
  * 三分区: A 头图夜色(仅海洋背景) / B 问候奶油黄 / C 交流暖白干净。
  * 页面旧类名(.card/.btn-primary/...)在此映射到夜海造型，整站换肤。
@@ -48,6 +49,32 @@ page {
 }
 
 page {
+  /* 睡眠风格映射：旧 --c-* → Apple 暗面 */
+  --c-bg: var(--s-page);
+  --c-surface: var(--s-card);
+  --c-surface-2: var(--s-raised);
+  --c-soft: var(--s-raised);
+  --c-card: var(--s-card);
+  --c-text: var(--s-ink);
+  --c-text-2: var(--s-muted);
+  --c-text-soft: var(--s-muted);
+  --c-text-faint: var(--s-faint);
+  --c-muted: var(--s-faint);
+  --c-primary: var(--s-accent);
+  --c-on-primary: var(--s-on-accent);
+  --c-primary-soft: rgba(253,218,172,.12);
+  --c-primary-deep: #E8C79A;
+  --c-accent: var(--st-rem);
+  --c-accent-soft: rgba(9,168,241,.14);
+  --c-danger: var(--st-awake);
+  --c-danger-soft: rgba(247,103,85,.14);
+  --c-on-danger: var(--s-on-accent);
+  --c-line: var(--s-line);
+  --hairline: var(--s-line);
+  --c-shadow: rgba(0,0,0,.4);
+  --n-bg: var(--s-page);
+  --n-greet: var(--s-accent);
+  --n-on-greet: var(--s-on-accent);
   /* 旧圆角名 → 夜海造型 */
   --radius-md: 24rpx;
   --radius-lg: 44rpx 44rpx 12rpx 12rpx;

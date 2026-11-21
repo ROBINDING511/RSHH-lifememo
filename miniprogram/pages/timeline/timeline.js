@@ -7,8 +7,14 @@ const UNKNOWN_LABEL = '记不清的'
 
 Page({
   data: {
+    tab: 'timeline',
     years: [], // [{year, items: [{id, title, icon, label}]}]
     total: 0
+  },
+  onTab (e) {
+    const t = e.currentTarget.dataset.t
+    if (t === this.data.tab) return
+    wx.redirectTo({ url: { home: '/pages/home/home', ocean: '/pages/ocean/ocean', timeline: '/pages/timeline/timeline', me: '/pages/stages/stages' }[t] })
   },
 
   onShow () { this.load() },

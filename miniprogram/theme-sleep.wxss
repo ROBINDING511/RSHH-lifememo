@@ -1,0 +1,141 @@
+/* finesse · register=h5 · morph=app-shell · design-language=apple · apple-mode=app
+ * A=night-ocean+stage-ladder · B=system-type · C=stacked-cards · D=feedback · E=clean-dark-surface
+ * 人生海海 · 苹果健康-睡眠风格 (Apple Health · Sleep, dark)
+ * 色板锚定夜海定稿 c4 / style_spec; 布局/材质/字阶 = Apple Health 睡眠页语法。
+ * 干净暗面: 无颗粒/无 vignette/无玻璃滥 blur; 统一圆角; 发丝分隔; 按压反馈; 减少动态。
+ * 适老: 正文>=34rpx / 大数字>=96rpx / 触控>=88rpx / 行高1.6+ / AA。
+ * 用法: app.wxss @import 本文件; 页面根 class="sleep-page"; 组件类见下。 */
+
+page {
+  /* 表面 (夜海夜色 = Apple 暗面层级) */
+  --s-page:    #030635;   /* 页底: 夜空 */
+  --s-card:    #090856;   /* 卡片: 前景紫 */
+  --s-raised:  #140466;   /* 卡内 inset / 按压 */
+  --s-line:    rgba(244,215,178,0.10);  /* 发丝分隔 */
+  /* 文字 */
+  --s-ink:     #F4D7B2;   /* 主文字: 奶油 */
+  --s-muted:   rgba(244,215,178,0.72);
+  --s-faint:   rgba(244,215,178,0.45);
+  --s-hero:    #FDDAAC;   /* 大数字/选中: 帆奶油 */
+  /* 睡眠阶段色梯 (Apple Sleep 四阶段 → 夜海色板) */
+  --st-awake:  #F76755;   /* 清醒 = 暖红 */
+  --st-rem:    #09A8F1;   /* REM = 青 */
+  --st-core:   #0A7AE1;   /* 核心 = 大蓝 */
+  --st-deep:   #616094;   /* 深睡 = 紫灰 */
+  /* 行动/状态 */
+  --s-accent:  #FDDAAC;
+  --s-on-accent:#090856;
+  --s-good:    #09A8F1;
+  --s-warn:    #F76755;
+  /* 造型: Apple 统一连续圆角(非云 slab) */
+  --r-card: 32rpx;
+  --r-inset: 20rpx;
+  --r-pill: 999rpx;
+  /* 字阶 (system stack, 适老上浮) */
+  --fs-cap: 28rpx; --fs-body: 34rpx; --fs-title: 40rpx; --fs-hero: 96rpx;
+  --lh: 1.6;
+  --touch: 88rpx;
+  --sp-1: 8rpx; --sp-2: 16rpx; --sp-3: 24rpx; --sp-4: 32rpx; --sp-5: 48rpx;
+  --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang SC", "Helvetica Neue", sans-serif;
+}
+
+.sleep-page {
+  min-height: 100vh; background: var(--s-page);
+  color: var(--s-ink); font-family: var(--font);
+  font-size: var(--fs-body); line-height: var(--lh);
+  padding-bottom: calc(120rpx + env(safe-area-inset-bottom));
+}
+
+/* 头部: 大标题 + 日期 (Apple 健康页头) */
+.sleep-head { padding: var(--sp-4) var(--sp-4) var(--sp-2); }
+.sleep-head .t { font-size: var(--fs-title); font-weight: 700; letter-spacing: 0; color: var(--s-ink); }
+.sleep-head .d { font-size: var(--fs-cap); color: var(--s-muted); margin-top: var(--sp-1); }
+
+/* 卡片: 统一圆角暗面 + 发丝边 */
+.s-card {
+  background: var(--s-card); border-radius: var(--r-card);
+  border: 2rpx solid var(--s-line);
+  margin: var(--sp-3) var(--sp-3); padding: var(--sp-4);
+}
+.s-card .h { font-size: var(--fs-body); font-weight: 600; color: var(--s-muted); margin-bottom: var(--sp-3); }
+.s-inset { background: var(--s-raised); border-radius: var(--r-inset); padding: var(--sp-3); }
+
+/* 评分卡: 大数字 + 环 */
+.score-wrap { display: flex; align-items: center; gap: var(--sp-4); }
+.score-num { font-size: var(--fs-hero); font-weight: 700; line-height: 1.05; color: var(--s-hero); letter-spacing: -0.02em; }
+.score-sub { font-size: var(--fs-cap); color: var(--s-muted); margin-top: var(--sp-1); }
+/* 评分环: conic-gradient + radial mask (小程序 webview 支持; 无 svg 依赖) */
+.score-ring {
+  width: 160rpx; height: 160rpx; flex: 0 0 auto; border-radius: 50%;
+  background: conic-gradient(var(--s-hero) calc(var(--p, 0) * 1%), rgba(244,215,178,0.15) 0);
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 12rpx), #000 calc(100% - 11rpx));
+  mask: radial-gradient(farthest-side, transparent calc(100% - 12rpx), #000 calc(100% - 11rpx));
+}
+
+/* 阶段堆叠柱 (周视图): 每列 flex column, 段高=占比% (value->height) */
+.stage-chart { display: flex; align-items: flex-end; gap: var(--sp-2); height: 320rpx; }
+.stage-col { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column-reverse; height: 100%; border-radius: 12rpx; overflow: hidden; }
+.stage-seg { width: 100%; }
+.stage-seg.deep { background: var(--st-deep); }
+.stage-seg.core { background: var(--st-core); }
+.stage-seg.rem  { background: var(--st-rem); }
+.stage-seg.awake{ background: var(--st-awake); }
+.stage-x { display: flex; gap: var(--sp-2); margin-top: var(--sp-2); }
+.stage-x text, .stage-x .x { flex: 1 1 0; min-width: 0; text-align: center; font-size: var(--fs-cap); color: var(--s-faint); }
+
+/* 图例: 点 + 名 + 时长 (行高>=touch 可点) */
+.legend { margin-top: var(--sp-3); }
+.legend-row { display: flex; align-items: center; min-height: var(--touch); gap: var(--sp-2); border-top: 2rpx solid var(--s-line); }
+.legend-row:first-child { border-top: none; }
+.dot { width: 20rpx; height: 20rpx; border-radius: 50%; flex: 0 0 auto; }
+.dot.deep { background: var(--st-deep); } .dot.core { background: var(--st-core); }
+.dot.rem { background: var(--st-rem); } .dot.awake { background: var(--st-awake); }
+.legend-row .n { flex: 1 1 0; min-width: 0; font-size: var(--fs-body); color: var(--s-ink); }
+.legend-row .v { font-size: var(--fs-body); color: var(--s-muted); font-variant-numeric: tabular-nums; }
+
+/* 趋势柱 (时长): 单色青 + 均线 */
+.trend-chart { display: flex; align-items: flex-end; gap: var(--sp-2); height: 240rpx; position: relative; }
+.trend-col { flex: 1 1 0; min-width: 0; background: var(--st-core); border-radius: 10rpx 10rpx 4rpx 4rpx; }
+.trend-avg { position: absolute; left: 0; right: 0; border-top: 2rpx dashed var(--s-faint); }
+
+/* 列表行 (就寝/醒来/目标): 发丝分隔 + chevron + >=touch */
+.s-row { display: flex; align-items: center; min-height: var(--touch); gap: var(--sp-2); border-top: 2rpx solid var(--s-line); }
+.s-row:first-child { border-top: none; }
+.s-row .k { flex: 1 1 0; min-width: 0; font-size: var(--fs-body); color: var(--s-ink); }
+.s-row .v { font-size: var(--fs-body); color: var(--s-muted); font-variant-numeric: tabular-nums; }
+.s-row .chev { color: var(--s-faint); font-size: var(--fs-body); }
+.s-row:active { background: var(--s-raised); }
+
+/* 按钮: pill, 奶油底墨字 / 描边 */
+.s-btn {
+  min-height: var(--touch); display: flex; align-items: center; justify-content: center;
+  padding: 0 var(--sp-5); border: none; border-radius: var(--r-pill);
+  background: var(--s-accent); color: var(--s-on-accent);
+  font-size: var(--fs-body); font-weight: 600; font-family: var(--font); line-height: 1.4;
+  transition: transform .12s ease, opacity .12s ease;
+}
+.s-btn::after { border: none; }
+.s-btn:active { transform: scale(.97); opacity: .9; }
+.s-btn--ghost { background: transparent; color: var(--s-ink); border: 2rpx solid var(--s-line); }
+.s-btn--block { width: 100%; }
+
+/* 底部 TabBar (Apple 健康: 摘要/共享/浏览 → 摘要/睡眠/我的) */
+.s-tabbar {
+  position: fixed; left: 0; right: 0; bottom: 0;
+  display: flex; background: rgba(3,6,53,0.92);
+  border-top: 2rpx solid var(--s-line);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+@supports (backdrop-filter: blur(1px)) { .s-tabbar { backdrop-filter: blur(20px); } }
+.s-tab { flex: 1 1 0; min-height: var(--touch); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4rpx; color: var(--s-faint); font-size: var(--fs-cap); }
+.s-tab.active { color: var(--s-hero); }
+.s-tab:active { opacity: .7; }
+
+/* 空态插画 (可选, 夜海定稿) */
+.s-empty-img { width: 100%; border-radius: var(--r-inset); display: block; }
+
+@media (prefers-reduced-motion: reduce) {
+  .s-btn, .s-row, .s-tab { transition: none !important; animation: none !important; }
+}
+@media (prefers-reduced-transparency: reduce) { .s-tabbar { backdrop-filter: none; background: var(--s-page); } }
+@media (prefers-contrast: more) { .s-card { border-color: var(--s-muted); } }

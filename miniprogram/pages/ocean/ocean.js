@@ -11,6 +11,7 @@ const ui = require('../../utils/ui')
 
 Page({
   data: {
+    tab: 'ocean',
     capsuleBottom: 88,
     // 场景
     worldWidth: 0, worldHeight: 0, movX: 0, movY: 0, seaScale: 1,
@@ -37,6 +38,11 @@ Page({
     birthYears: (() => { const a = []; for (let y = 2010; y >= 1920; y--) a.push(y + '年'); return a })()
   },
 
+  onTab (e) {
+    const t = e.currentTarget.dataset.t
+    if (t === this.data.tab) return
+    wx.redirectTo({ url: { home: '/pages/home/home', ocean: '/pages/ocean/ocean', timeline: '/pages/timeline/timeline', me: '/pages/stages/stages' }[t] })
+  },
   onLoad (query) {
     this.asr = null
     this.previewAudio = null

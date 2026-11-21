@@ -1,5 +1,6 @@
 {
   "pages": [
+    "pages/home/home",
     "pages/ocean/ocean",
     "pages/iceberg/iceberg",
     "pages/timeline/timeline",
@@ -15,10 +16,10 @@
     }
   ],
   "window": {
-    "navigationBarBackgroundColor": "#FBF7EF",
-    "navigationBarTextStyle": "black",
+    "navigationBarBackgroundColor": "#030635",
+    "navigationBarTextStyle": "white",
     "navigationBarTitleText": "人生海海",
-    "backgroundColor": "#FBF7EF"
+    "backgroundColor": "#030635"
   },
   "permission": {
     "scope.record": {

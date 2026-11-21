@@ -1,0 +1,59 @@
+<!--pages/home/home.wxml — 苹果健康·睡眠语法摘要页-->
+<view class="sleep-page">
+  <view class="sleep-head">
+    <view class="t">人生海海</view>
+    <view class="d">{{date}} · 你的回忆摘要</view>
+  </view>
+
+  <view class="s-card">
+    <view class="score-wrap">
+      <view style="flex:1 1 0;min-width:0;">
+        <view class="score-num">{{weekTotal}}</view>
+        <view class="score-sub">本周记录 · 目标 {{goal}} 段</view>
+      </view>
+      <view class="score-ring" style="--p:{{score}};" role="img" aria-label="本周目标完成 {{score}}%"></view>
+    </view>
+  </view>
+
+  <view class="s-card">
+    <view class="h">今日记录时段</view>
+    <view class="stage-chart">
+      <view class="stage-col" wx:for="{{stage}}" wx:key="d" style="height:{{item.colH}};">
+        <view class="stage-seg {{seg.k}}" wx:for="{{item.segs}}" wx:for-item="seg" wx:key="k" style="height:{{seg.h}};"></view>
+      </view>
+    </view>
+    <view class="stage-x"><text class="x" wx:for="{{stage}}" wx:key="d">{{item.d}}</text></view>
+    <view class="legend">
+      <view class="legend-row" wx:for="{{legend}}" wx:key="k">
+        <view class="dot {{item.k}}"></view><view class="n">{{item.n}}</view><view class="v">{{item.v}}</view>
+      </view>
+    </view>
+  </view>
+
+  <view class="s-card">
+    <view class="h">记录趋势 · 近7日</view>
+    <view class="trend-chart">
+      <view class="trend-avg" style="top:{{avgTop}};"></view>
+      <view class="trend-col" wx:for="{{trend}}" wx:key="d" style="height:{{item.h}};"></view>
+    </view>
+    <view class="stage-x"><text class="x" wx:for="{{trend}}" wx:key="d">{{item.d}}</text></view>
+  </view>
+
+  <view class="s-card">
+    <view class="s-row" bindtap="openRecent"><view class="k">最近一座山</view><view class="v">{{recent.title || '还没有'}}</view><view class="chev">›</view></view>
+    <view class="s-row" bindtap="goMe"><view class="k">人生节点</view><view class="v">{{nodes}} 个</view><view class="chev">›</view></view>
+    <view class="s-row" bindtap="goMe"><view class="k">未完成草稿</view><view class="v">{{drafts}} 段</view><view class="chev">›</view></view>
+  </view>
+
+  <view class="s-card">
+    <button class="s-btn s-btn--block" bindtap="goOcean">去海上按住说话</button>
+    <button class="s-btn s-btn--ghost s-btn--block" style="margin-top:16rpx;" bindtap="goMe">杭航菜单</button>
+  </view>
+
+  <view class="s-tabbar">
+    <view class="s-tab active" data-t="home" bindtap="onTab">摘要</view>
+    <view class="s-tab" data-t="ocean" bindtap="onTab">海洋</view>
+    <view class="s-tab" data-t="timeline" bindtap="onTab">时间轴</view>
+    <view class="s-tab" data-t="me" bindtap="onTab">杭航</view>
+  </view>
+</view>

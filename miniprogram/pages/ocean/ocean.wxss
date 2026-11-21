@@ -170,3 +170,27 @@
 .pv-agree { margin-top: 32rpx; min-height: 96rpx; display: flex; align-items: center; justify-content: center; background: var(--c-primary); color: var(--c-on-primary); border-radius: 999rpx; font-size: var(--fs-md); font-weight: 700; padding: 0; }
 .pv-agree::after { border: none; }
 .pv-refuse { margin-top: 16rpx; min-height: 72rpx; display: flex; align-items: center; justify-content: center; color: var(--c-text-soft); font-size: var(--fs-sm); }
+
+/* ===== 苹果健康·睡眠风格覆盖 ===== */
+.dock { padding-bottom: calc(env(safe-area-inset-bottom) + 150rpx); }
+.record-btn { background: var(--s-accent); border-radius: var(--r-pill); box-shadow: 0 6rpx 20rpx rgba(0,0,0,.4); }
+.record-main { color: var(--s-on-accent); font-weight: 600; }
+.record-btn.record-on { background: var(--s-hero); }
+.record-btn.record-lock { background: var(--st-rem); }
+.record-btn.record-lock .record-main { color: #030635; }
+.record-btn.record-cancel { background: var(--st-awake); }
+.record-btn.record-cancel .record-main { color: #030635; }
+.live-mask { bottom: calc(env(safe-area-inset-bottom) + 280rpx); }
+.live-card { background: var(--s-card); border: 2rpx solid var(--s-line); border-radius: var(--r-card); box-shadow: 0 8rpx 24rpx rgba(0,0,0,.4); }
+.live-card.live-cancel { background: var(--s-raised); border-color: var(--st-awake); }
+.live-state, .live-timer { color: var(--s-muted); }
+.live-text { color: var(--s-ink); }
+.live-hint, .live-offline, .live-asr { color: var(--s-faint); }
+.boat-bubble { background: var(--s-card); border: 2rpx solid var(--s-line); border-radius: var(--r-inset); box-shadow: 0 6rpx 18rpx rgba(0,0,0,.4); }
+.bb-text { color: var(--s-ink); }
+.bb-tail { border-top-color: var(--s-card); }
+.top-hint { background: var(--s-card); border: 2rpx solid var(--s-line); }
+.top-hint text { color: var(--s-ink); }
+.preview-mask { background: rgba(3,6,53,.6); }
+.preview-card { border-radius: var(--r-card) var(--r-card) 0 0; border-top: 2rpx solid var(--s-line); }
+.sea-label { color: var(--s-faint); }

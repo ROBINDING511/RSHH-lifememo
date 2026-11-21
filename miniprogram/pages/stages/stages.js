@@ -6,6 +6,7 @@ const { createRecorder } = require('../../utils/recorder')
 
 Page({
   data: {
+    tab: 'me',
     stages: [],
     milestones: life.getMilestones(), msName: '', msAge: '',
     inviteCode: '', bindCode: '', feedQ: '',
@@ -15,6 +16,11 @@ Page({
     searchQ: '', searchResults: [],
     voiceState: '', voiceSampleUrl: '',
     listening: false, voiceText: ''
+  },
+  onTab (e) {
+    const t = e.currentTarget.dataset.t
+    if (t === this.data.tab) return
+    wx.redirectTo({ url: { home: '/pages/home/home', ocean: '/pages/ocean/ocean', timeline: '/pages/timeline/timeline', me: '/pages/stages/stages' }[t] })
   },
   onLoad () {
     const p = life.getProfile() || {}

@@ -42,5 +42,11 @@
         bindtap="goOcean">回到海洋去说话</button>
     </view>
   </scroll-view>
+  <view class="s-tabbar">
+    <view class="s-tab " data-t="home" bindtap="onTab">摘要</view>
+    <view class="s-tab " data-t="ocean" bindtap="onTab">海洋</view>
+    <view class="s-tab active" data-t="timeline" bindtap="onTab">时间轴</view>
+    <view class="s-tab " data-t="me" bindtap="onTab">杭航</view>
+  </view>
 </view>
 <privacy-popup />
