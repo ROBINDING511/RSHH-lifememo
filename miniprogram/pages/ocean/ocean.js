@@ -430,7 +430,11 @@ Page({
   },
   onContinueStart () {
     const p = this.data.preview
-    if (p) { this.tapHaptic(); this.startRecording('hold', p.text || '') }
+    if (!p) return
+    this.tapHaptic()
+    this._continueSnap = p          // 收起编辑卡，回到正常录音界面
+    this.setData({ preview: null })
+    this.startRecording('hold', p.rawText || p.text || '')
   },
   onContinueEnd () { if (this.data.recording) this.finishRecording() },
 
@@ -747,7 +751,8 @@ Page({
   },
 
   appendToPreview (wavPath, fullText) {
-    const p = this.data.preview
+    let p = this.data.preview
+    if (!p && this._continueSnap) { p = this._continueSnap; this._continueSnap = null; this.setData({ preview: p }) }
     if (!p) return
     this.setData({
       recording: false, recordMode: '',
