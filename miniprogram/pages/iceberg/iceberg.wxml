@@ -21,20 +21,15 @@
 
   <view class="berg-body card">
 
-    <!-- 逐字视图（一键还原逐字永远可用） -->
-    <view wx:if="{{view === 'raw'}}" class="berg-text">
-      <text>{{b.rawText || b.text}}</text>
-    </view>
-
-    <!-- 整理稿 / 疑点标注：E 翻书 -->
-    <view wx:else class="book" bindtouchstart="onBookTouchStart" bindtouchend="onBookTouchEnd">
+    <!-- 整理稿翻书（逐字/风格切换在 AI+） -->
+    <view class="book" bindtouchstart="onBookTouchStart" bindtouchend="onBookTouchEnd">
       <view class="book-page">
         <view wx:for="{{pages[page]}}" wx:key="*this" wx:for-item="si" class="sent-block">
           <view class="sent-text" data-i="{{si}}" bindtap="playSentence">
             <text wx:for="{{segs[si]}}" wx:key="index" wx:for-item="sg"
               class="{{sg.red ? 'doubt-word' : ''}}" data-id="{{sg.red}}" bindtap="openDoubt">{{sg.t}}</text>
           </view>
-          <view class="sent-confirm" wx:if="{{view === 'clean'}}">
+          <view class="sent-confirm">
             <view class="sent-yes {{sentences[si].state === 'yes' ? 'on' : ''}}" hover-class="btn-hover" hover-stay-time="80" data-id="{{sentences[si].id}}" bindtap="confirmYes">像我说的</view>
             <view class="sent-no" hover-class="btn-hover" hover-stay-time="80" data-id="{{sentences[si].id}}" bindtap="confirmNo">不像</view>
           </view>
@@ -52,12 +47,6 @@
       </view>
     </view>
     <text class="sentence-hint" wx:if="{{b.audioFileID}}">点某一句，听那一句的原声</text>
-    <!-- 右下角：切换识别模型（整理稿 ⇄ 逐字） -->
-    <view class="model-switch" hover-class="btn-hover" hover-stay-time="80" bindtap="toggleView">
-      <text class="ms-label">切换识别</text>
-      <text class="ms-cur">{{view === 'raw' ? '逐字' : '整理稿'}}</text>
-      <text class="ms-arrow">⇄</text>
-    </view>
 
     <!-- 家人视角：反应回流 -->
     <view class="react-row" wx:if="{{familyMode}}">

@@ -23,7 +23,7 @@ Page({
     b: null, icons: ICONS, iconFile: '', showIconMenu: false, loadFailed: false,
     viewCount: 0, playing: false, familyMode: false,
     // v2.0 阅读
-    view: 'clean', page: 0, pages: [], sentences: [], doubts: [],
+    page: 0, pages: [], sentences: [], doubts: [],
     confirmExpand: '', fixText: '', fixing: false,
     doubtSheet: null, doubtInput: '',
     cur: 0, dur: 0
@@ -88,6 +88,7 @@ Page({
       }
       b.photos = (b.photos || []).map((p) => urlMap[p] || p)
       b.audioURL = b.audioFileID ? (urlMap[b.audioFileID] || b.audioFileID) : ''
+      if (b.audioFileID) wx.cloud.downloadFile({ fileID: b.audioFileID }).then((r) => { this._audioLocal = r.tempFilePath }).catch(() => {})
       const icon = ICONS.find((i) => i.key === b.icon)
       // 旧冰山无 sentences → 走 splitSentences，不迁移不报错
       const sentences = (b.sentences && b.sentences.length)
@@ -136,7 +137,6 @@ Page({
     })
     this.setData({ pages, segs, pageCount: pages.length })
   },
-  toggleView () { this.setData({ view: this.data.view === 'raw' ? 'clean' : 'raw', page: 0 }) },
   prevPage () { if (this.data.page > 0) this.setData({ page: this.data.page - 1 }) },
   nextPage () { if (this.data.page < this.data.pageCount - 1) this.setData({ page: this.data.page + 1 }) },
   onBookTouchStart (e) { this._bx = e.touches[0].clientX },
@@ -252,8 +252,9 @@ Page({
     this.audio.onCanplay(() => {
       this._dur = this.audio.duration || 0
       this.setData({ dur: Math.round(this._dur) })
-      if (this._seekSec != null) { this.audio.seek(this._seekSec); this._seekSec = null; this.audio.play(); this.setData({ playing: true }) }
-      else if (this._seekFrac != null) { this.audio.seek(this._seekFrac * this._dur); this._seekFrac = null; this.audio.play(); this.setData({ playing: true }) }
+      if (this._seekSec != null) { this.audio.seek(this._seekSec); this._seekSec = null }
+      else if (this._seekFrac != null) { this.audio.seek(this._seekFrac * this._dur); this._seekFrac = null }
+      if (this._playPending) { this._playPending = false; this.audio.playbackRate = 1; this.audio.play(); this.setData({ playing: true }) }
     })
     this.audio.onTimeUpdate(() => { this.setData({ cur: Math.round(this.audio.currentTime || 0) }) })
     this.audio.onEnded(() => this.setData({ playing: false, cur: 0 }))
@@ -266,7 +267,8 @@ Page({
     if (this.data.playing) { this.audio && this.audio.stop(); this.setData({ playing: false }); return }
     const a = await this.ensureAudio()
     if (!a) return wx.showToast({ title: '这段没有录音', icon: 'none' })
-    if (this._dur) a.seek(0)
+    this._playPending = true
+    if (this._dur) { a.seek(0); a.playbackRate = 1; a.play(); this.setData({ playing: true }); this._playPending = false }
     a.play(); this.setData({ playing: true })
     if (!wx.getStorageSync('L4_listen')) wx.setStorageSync('L4_listen', Date.now())   // A12 首次回听
   },
@@ -278,8 +280,8 @@ Page({
   async _playSeek () {
     const a = await this.ensureAudio()
     if (!a) return wx.showToast({ title: '这段没有录音，无法逐句回听', icon: 'none', duration: 2200 })
-    if (this._dur) { a.seek(this._seekSec); this._seekSec = null; a.play(); this.setData({ playing: true }) }
-    else a.play()
+    this._playPending = true
+    if (this._dur) { a.seek(this._seekSec); this._seekSec = null; a.playbackRate = 1; a.play(); this.setData({ playing: true }); this._playPending = false }
   },
   playSentence (e) { this.playSentenceByIndex(Number(e.currentTarget.dataset.i)) },
   playSentenceByIndex (i) {
@@ -295,8 +297,8 @@ Page({
     this._seekFrac = before / total
     this.ensureAudio().then((a) => {
       if (!a) return wx.showToast({ title: '这段没有录音，无法逐句回听', icon: 'none', duration: 2200 })
-      if (this._dur) { a.seek(this._seekFrac * this._dur); this._seekFrac = null; a.play(); this.setData({ playing: true }) }
-      else a.play()
+      this._playPending = true
+      if (this._dur) { a.seek(this._seekFrac * this._dur); this._seekFrac = null; a.playbackRate = 1; a.play(); this.setData({ playing: true }); this._playPending = false }
     })
   },
   onSeek (e) {
