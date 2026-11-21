@@ -1,0 +1,28 @@
+<view class="lab v{{v}}">
+  <view class="hero">
+    <image class="hero-img" src="/images/ocean/night-sea-bg.jpg" mode="aspectFill" />
+    <view class="mtn m1"></view>
+    <view class="mtn m2"></view>
+    <image class="boat" src="/assets/boat.png" mode="widthFix" />
+    <view class="hero-title">人生海海</view>
+  </view>
+  <view class="greet">
+    <view class="greet-t">晚上好，陈阿姨</view>
+    <view class="greet-b">今天想聊哪一段？按住下面慢慢说，我听着。</view>
+  </view>
+  <view class="rec">按住 说话</view>
+  <view class="card">
+    <view class="card-t">人生节点</view>
+    <view class="node" wx:for="{{nodes}}" wx:key="name">
+      <text class="node-d">{{item.date}}</text>
+      <text class="node-n">{{item.name}}</text>
+    </view>
+    <view class="btn-ghost">按住 聆听人生节点</view>
+  </view>
+  <view class="card">
+    <view class="card-t">AI+</view>
+    <view class="row"><text>声音克隆</text><view class="sw"><view class="knob"></view></view></view>
+    <view class="tags"><text class="tag">忠实原文</text><text class="tag on">轻度优化</text><text class="tag">书面语</text></view>
+  </view>
+  <view class="foot">风格 {{v}} / 20</view>
+</view>

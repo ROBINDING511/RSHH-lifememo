@@ -59,3 +59,9 @@
 .people-chip { display: flex; align-items: center; gap: 8rpx; padding: 8rpx 16rpx; border-radius: 999rpx; background: var(--c-primary-soft); color: var(--c-primary); font-size: var(--fs-sm); }
 
 .ms-name-input2 { flex: 1; min-width: 0; font-size: var(--fs-md); color: var(--c-text); border-bottom: 2rpx dashed var(--c-line); padding: 4rpx 0; }
+
+.sea-name-list { display: flex; flex-direction: column; gap: 12rpx; margin-top: 12rpx; }
+.sea-name-row { display: flex; align-items: center; gap: 12rpx; }
+.sea-dot { width: 20rpx; height: 20rpx; border-radius: 50%; flex-shrink: 0; }
+.sea-name-input { flex: 1; min-width: 0; font-size: var(--fs-md); color: var(--c-text); border-bottom: 2rpx dashed var(--c-line); padding: 4rpx 0; }
+.sea-range { font-size: var(--fs-xs); color: var(--c-text-faint); flex-shrink: 0; }

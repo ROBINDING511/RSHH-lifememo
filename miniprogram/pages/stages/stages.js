@@ -100,6 +100,25 @@ Page({
     this.setData({ peopleList: life.addKnownPerson(n), personInput: '' })
   },
   removePerson (e) { this.setData({ peopleList: life.removeKnownPerson(e.currentTarget.dataset.n) }) },
+  renameSea (e) {
+    const key = e.currentTarget.dataset.key
+    const name = (e.detail.value || '').trim()
+    if (!name) return
+    this._seaRenames = this._seaRenames || {}
+    this._seaRenames[key] = name
+  },
+  saveSeas () {
+    const stages = life.getStages()
+    const ren = this._seaRenames || {}
+    const yearMode = stages.some((x) => x.toYear !== undefined)
+    const list = stages.map((x) => yearMode ? ({ name: ren[x.key] || x.name, toYear: x.toYear, flag: x.flag }) : ({ name: ren[x.key] || x.name, to: x.to, flag: x.flag }))
+    life.setStages(list)
+    const d = life.getDates ? null : null
+    this._seaRenames = {}
+    this.setData({ stages: life.getStages(), milestones: life.getMilestones() })
+    this.syncDraft()
+    wx.showToast({ title: '保存好了', icon: 'none' })
+  },
   renameMs (e) {
     const id = e.currentTarget.dataset.id
     const name = (e.detail.value || '').trim()
