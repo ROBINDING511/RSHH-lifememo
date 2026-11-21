@@ -143,8 +143,13 @@ function layoutMountains (icebergs, H, W, birthYear) {
   }
   const groups = {}
   list.forEach((b) => { const e = eraOf(b); (groups[e] = groups[e] || []).push(b) })
-  const worldWidth = Math.max(W, stages.length * W)
-  const labels = stages.map((x, ei) => ({ left: Math.round(ei * W + W / 2), name: x.name }))
+  // 每片海按山数扩屏（每屏≤5座），避免密挤
+  const spans = stages.map((x, ei) => Math.max(1, Math.ceil(((groups[ei] || []).length) / 5)))
+  const offsets = []
+  let acc = 0
+  spans.forEach((sp) => { offsets.push(acc); acc += sp * W })
+  const worldWidth = Math.max(W, acc)
+  const labels = stages.map((x, ei) => ({ left: Math.round(offsets[ei] + spans[ei] * W / 2), name: x.name }))
   const d0 = new Date(); d0.setHours(0, 0, 0, 0)
   const dayStart = d0.getTime()
   const newest = list.reduce((m, b) => Math.max(m, b.createdAt || 0), 0)
@@ -155,12 +160,15 @@ function layoutMountains (icebergs, H, W, birthYear) {
     g.forEach((b, i) => {
       const rng = mulberry(hash(b._id || String(i)) + 7)
       const len = (b.text || '').length
-      const width = Math.round(80 + rng() * 50)                                       // 更小更分散
-      const height = Math.round((50 + Math.min(130, len * 0.45)) * (0.85 + rng() * 0.4))
-      const variant = Math.floor(rng() * 3)
+      const row = g.length > 4 ? i % 2 : 0                                              // 多时双层景深
+      const scale = row ? 0.72 : 1
+      const width = Math.round((70 + rng() * 100) * scale)                              // 大小差异拉大
+      const height = Math.round((60 + Math.min(140, len * 0.5)) * (0.8 + rng() * 0.5) * scale)
+      const variant = Math.floor(rng() * 6)                                             // 6 种形态(含镜像反倾)
       const slot = (i + 0.5) / g.length
-      const xx = ei * W + slot * (W - width) + (rng() - 0.5) * 16
-      const bottom = Math.round(H * (0.28 + ((i * 0.61 + 0.29) % 1) * 0.36))          // 纵向拉开
+      const ew = spans[ei] * W
+      const xx = offsets[ei] + slot * (ew - width) + (rng() - 0.5) * 24
+      const bottom = Math.round(H * (0.26 + row * 0.17 + ((i * 0.61 + 0.29) % 1) * 0.12))
       mountains.push({
         id: b._id, left: Math.round(xx), width, height, bottom,
         delay: ((i % 5) * 0.8).toFixed(1),
