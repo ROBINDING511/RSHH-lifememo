@@ -104,7 +104,7 @@
       </view>
       <view class="card" wx:if="{{cloneConsent}}">
         <text class="prof-title">妈妈的声音（克隆）</text>
-        <text class="ms-invite">{{voiceState==='frozen' ? '已固化：不再自动克隆；删除后会重新克隆。' : voiceState==='review' ? '克隆好了，回海洋听听像不像。' : '正在收集您的声音，自动克隆中…'}}</text>
+        <text class="ms-invite">{{voiceState==='frozen' ? '已固化：不再自动克隆；删除后会重新克隆。' : voiceState==='review' ? '克隆好了，回海洋听听像不像。' : '已开启，正在收集您的声音（已录 ' + (voiceSamples || 0) + ' 段）。对着海洋多说几段，累计约10秒后即可试听。'}}</text>
         <view class="ms-add" wx:if="{{voiceSampleUrl}}">
           <view class="ms-add-btn" style="flex:1" hover-class="btn-hover" hover-stay-time="80" bindtap="playVoiceSample">试听克隆声音</view>
           <view class="ms-add-btn" style="flex:1;background:var(--c-danger-soft);color:var(--c-danger)" hover-class="btn-hover" hover-stay-time="80" bindtap="deleteVoice">删除声音</view>

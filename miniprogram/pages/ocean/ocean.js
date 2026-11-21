@@ -734,7 +734,12 @@ Page({
     if (!p || p.wavPath !== wavPath) return
     // 听懂"把这段变成一片新的海"→自动开海，并把整段记进这片海
     let newSeaName = null
-    if (r && r.newSea && r.newSea.name) newSeaName = this.applyNewSea(r.newSea)
+    let ns = (r && r.newSea && r.newSea.name) ? r.newSea : null
+    if (!ns && /一片[^，,。]{0,6}海|另外一座海|形成[^，,。]{0,6}海|变成[^，,。]{0,6}海/.test(finalText)) {
+      const ym = finalText.match(/((?:19|20)\d{2})\s*年/)
+      if (ym) ns = { name: (r && r.title ? String(r.title).slice(0, 8) : '新的海'), year: +ym[1] }
+    }
+    if (ns) newSeaName = this.applyNewSea(ns)
     const stages = life.getStages()
     // 默认保留讲述者原话（逐字）；AI 小标题可选、可一键还原
     const upd = { 'preview.rawText': finalText, 'preview.audioOnly': !finalText && !!wavPath, 'preview.zoneOptions': stages.map((s) => s.key), 'preview._aiTitle': (r && r.title) || '', 'preview._four': (r && r.four) || '', 'preview.showTitle': false }

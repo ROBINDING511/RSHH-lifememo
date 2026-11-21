@@ -303,6 +303,7 @@ Page({
       nodes = r.nodes || []
     } catch (e) {}
     wx.hideLoading()
+    if (!nodes.length) nodes = this.localNodes(text)
     if (!nodes.length) {
       const ms = life.parseMilestoneFromText(text)
       if (ms && ms.name) nodes = [{ name: ms.name, year: by ? by + ms.age : null }]
@@ -327,6 +328,19 @@ Page({
     this.syncDraft()
     wx.showToast({ title: added ? '听懂了，填好' + added + '个节点' : '这些节点已经有了', icon: 'none', duration: 2400 })
     if (added && by == null) setTimeout(() => wx.showToast({ title: '方便的话在"关于我"填出生年月，岁数会自动算', icon: 'none', duration: 2600 }), 2500)
+  },
+  // 本地兜底解析：YYYY年(M月D日)?+事件；含'某年是另外一座海'句式
+  localNodes (text) {
+    const out = []
+    const re = /((?:19|20)\d{2})\s*年\s*(?:(\d{1,2})\s*月\s*(?:(\d{1,2})\s*[日号])?)?\s*([^，,。；;]{0,12})/g
+    let m
+    while ((m = re.exec(text))) {
+      const year = +m[1]
+      let name = (m[4] || '').replace(/^(是|的时候|那年|我|我们|和|跟|与)+/, '').trim()
+      if (/^(另外一座海|一片海|新的海|一座海|是)/.test(name) || !name) name = year + '年的海'
+      out.push({ name: name.slice(0, 8), year, month: m[2] ? +m[2] : null, day: m[3] ? +m[3] : null })
+    }
+    return out.slice(0, 8)
   },
   onNodeEnd () { if (!this.data.listening) return; if (this._native) this._native.stop(); else this.recorder.stop() },
   onUnload () { if (this.asr) this.asr.close(); if (this.recorder.recording) this.recorder.stop() }
