@@ -391,7 +391,7 @@ Page({
     // 免按住(锁定)中：点一下=结束
     if (this.data.locked) {
       this._lockTap = true
-      this.setData({ locked: false })
+      this.setData({ locked: false, recording: false, cancelArmed: false, lockArmed: false })   // 立刻收字幕，直达编辑卡
       this.finishRecording()
       return
     }
@@ -415,6 +415,7 @@ Page({
   },
   onHoldEnd () {
     if (this._lockTap) { this._lockTap = false; return }   // 锁定态的"点一下结束"已在 touchstart 处理
+    if (this._stopping) return
     if (!this.data.recording) { if (this._recActive) this.finishRecording(); return }   // 兜底：状态漏收也停
     const cancel = this.data.cancelArmed, lock = this.data.lockArmed
     if (cancel) { this.saveDraftAndStop(); return }
@@ -521,7 +522,7 @@ Page({
 
   },
 
-  finishRecording () { if (!this._recActive) return; if (this._native) this._native.stop(); else this.recorder.stop() },
+  finishRecording () { if (!this._recActive || this._stopping) return; this._stopping = true; if (this._native) this._native.stop(); else this.recorder.stop() },
 
   saveDraftAndStop () {
     if (!this._recActive) return
@@ -560,6 +561,7 @@ Page({
   onSceneTouchEnd () {
     this._seaTouching = false
     // 页面级兜底：无论按钮自身 touchend 是否漏发，松手必停
+    if (this._stopping || this._lockTap) return
     if (this.data.recording && !this.data.locked && (this._holdSource === 'whale' || this._holdSource === 'button')) return this.finishRecording()
     if (!this.data.recording && this.data.boatPaused) this.setData({ boatPaused: false })
   },
