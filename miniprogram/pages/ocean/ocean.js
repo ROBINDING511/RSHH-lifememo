@@ -305,7 +305,7 @@ Page({
   applyTranscript () {
     this._lastTranscriptAt = Date.now()
     if (this._pendingText == null) return
-    const t = this._appendBase != null ? this._appendBase + this._pendingText : this._pendingText
+    const t = this._appendBase != null ? this._appendBase + '\n' + this._pendingText : this._pendingText
     // D 字幕纪律：默认最近 2 行
     const seg = t.split(/(?<=[。！？!?；;])/).filter(Boolean)
     this.setData({ transcript: t, liveTail: seg.slice(-2).join('') })
@@ -443,7 +443,7 @@ Page({
     if (this.data.preview && appendBase == null) return   // 复核卡开着只允许续录
     this._appendBase = appendBase != null ? appendBase : null
     this._recFallback = fmt === 'mp3'
-    this.setData({ recording: true, recordMode: mode, transcript: this._appendBase || '', liveTail: '', elapsed: 0, countdown: 0, cancelArmed: false, asrHint: '' })
+    this.setData({ recording: true, recordMode: mode, transcript: this._appendBase || '', liveTail: '', liveExpanded: this._appendBase != null, elapsed: 0, countdown: 0, cancelArmed: false, asrHint: '' })
     if (this.asr) this.asr.reset()   // 清空上一段残留字：新录音只含本次内容
     this._recActive = true   // 同步置位：快速点按的 touchend 也能停住（recorder.recording 是异步 onStart 才真）
     this._pendingText = null
