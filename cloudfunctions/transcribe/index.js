@@ -7,6 +7,7 @@ const cloud = require('wx-server-sdk')
 const WebSocket = require('ws')
 
 cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV })
+const db = cloud.database()
 
 const API_KEY = () => process.env.DASHSCOPE_API_KEY || ''
 const MODEL = process.env.ASR_MODEL || 'qwen-audio-3.0-realtime-plus'
@@ -146,14 +147,24 @@ function transcribeFile (buf, name) {
   return new Promise(async (resolve, reject) => {
     const key = await getKey()
     if (!key) return reject(new Error('no key'))
-    const boundary = '----rh' + Date.now()
-    const head = Buffer.from('--' + boundary + '\r\nContent-Disposition: form-data; name="model"\r\n\r\nqwen3-asr-flash\r\n--' + boundary + '\r\nContent-Disposition: form-data; name="file"; filename="' + name + '"\r\nContent-Type: application/octet-stream\r\n\r\n')
-    const tail = Buffer.from('\r\n--' + boundary + '--\r\n')
-    const body = Buffer.concat([head, buf, tail])
-    const req = require('https').request({ host: 'dashscope.aliyuncs.com', path: '/compatible-mode/v1/audio/transcriptions', method: 'POST', headers: { Authorization: 'Bearer ' + key, 'Content-Type': 'multipart/form-data; boundary=' + boundary, 'Content-Length': body.length } }, (res) => {
+    // 实测：compatible-mode/audio/transcriptions 对该 key 404；原生 multimodal + base64 可用
+    const mime = name.endsWith('.mp3') ? 'audio/mp3' : 'audio/wav'
+    const body = JSON.stringify({
+      model: 'qwen3-asr-flash',
+      input: { messages: [{ role: 'user', content: [{ audio: 'data:' + mime + ';base64,' + buf.toString('base64') }] }] },
+      parameters: { asr_options: { language: 'zh', enable_itn: true } }
+    })
+    const req = require('https').request({ host: 'dashscope.aliyuncs.com', path: '/api/v1/services/aigc/multimodal-generation/generation', method: 'POST', headers: { Authorization: 'Bearer ' + key, 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(body) } }, (res) => {
       let d = ''
       res.on('data', (c) => { d += c })
-      res.on('end', () => { try { const j = JSON.parse(d); resolve(j.text || '') } catch (e) { reject(new Error(d.slice(0, 120))) } })
+      res.on('end', () => {
+        try {
+          const j = JSON.parse(d)
+          const c = j.output && j.output.choices && j.output.choices[0] && j.output.choices[0].message && j.output.choices[0].message.content
+          const text = Array.isArray(c) ? (c[0] && c[0].text || '') : (typeof c === 'string' ? c : '')
+          resolve(text || '')
+        } catch (e) { reject(new Error(d.slice(0, 120))) }
+      })
     })
     req.on('error', reject)
     req.setTimeout(50000, () => { req.destroy(); reject(new Error('timeout')) })
