@@ -4,8 +4,7 @@
     "pages/iceberg/iceberg",
     "pages/timeline/timeline",
     "pages/recycle/recycle",
-    "pages/stages/stages",
-    "pages/style-lab/style-lab"
+    "pages/stages/stages"
   ],
   "subpackages": [
     {
